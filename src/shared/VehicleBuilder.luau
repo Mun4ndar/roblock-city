@@ -14,6 +14,8 @@
 -- Di dalam Chassis: engsel MotorFL/FR/RL/RR (penggerak) dan attachment
 -- SteerFL/SteerFR (diputar client pengemudi untuk membelokkan roda depan).
 
+local CollectionService = game:GetService("CollectionService")
+
 local VehicleConfig = require(script.Parent.VehicleConfig)
 
 type VehicleDef = VehicleConfig.VehicleDef
@@ -259,6 +261,113 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 				CFrame = CFrame.new(0, y2 + 0.3, zm0 + (zm1 - zm0) * t),
 				Color = DARK,
 			})
+		end
+	end
+
+	-- ------------------------------------------------------------ kendaraan dinas
+	local topY = y2 -- titik tertinggi bodi
+	local boxZ0 = zc1 + 0.15
+	local boxZ1 = back - 0.4
+	local box = b.box
+	if box then
+		topY = y1 + box.height
+		part({
+			Name = "Box",
+			Size = Vector3.new(W - 0.1, box.height, boxZ1 - boxZ0),
+			CFrame = CFrame.new(0, y1 + box.height / 2, (boxZ0 + boxZ1) / 2),
+			Color = box.color,
+		}, true)
+		part({
+			Name = "BoxDoor",
+			Size = Vector3.new(W - 1.6, box.height - 0.8, 0.1),
+			CFrame = CFrame.new(0, y1 + box.height / 2, boxZ1 + 0.03),
+			Color = DARK,
+			Transparency = 0.6,
+		})
+		if b.ladder then
+			for _, sx in { -1, 1 } do
+				part({
+					Name = "LadderRail",
+					Size = Vector3.new(0.25, 0.25, boxZ1 - boxZ0 + 1.5),
+					CFrame = CFrame.new(sx * 1.1, topY + 0.35, (boxZ0 + boxZ1) / 2),
+					Color = RIM,
+					Material = Enum.Material.Metal,
+				})
+			end
+			local rungs = 7
+			for index = 1, rungs do
+				local t = (index - 0.5) / rungs
+				part({
+					Name = "LadderRung",
+					Size = Vector3.new(2.2, 0.18, 0.18),
+					CFrame = CFrame.new(0, topY + 0.35, boxZ0 + (boxZ1 - boxZ0) * t),
+					Color = RIM,
+					Material = Enum.Material.Metal,
+				})
+			end
+		end
+	end
+	if b.band then
+		for _, sx in { -1, 1 } do
+			part({
+				Name = "Band",
+				Size = Vector3.new(0.12, 0.8, L - 1.2),
+				CFrame = CFrame.new(sx * (W / 2 + 0.03), y1 - 0.75, 0),
+				Color = b.band,
+			})
+		end
+	end
+	if b.sideText then
+		-- Tulisan di boks jika ada, kalau tidak di pintu (bodi bawah).
+		local textH = if box then math.min(1.6, box.height - 1.2) else 1
+		local textL = if box then (boxZ1 - boxZ0) * 0.8 else L * 0.36
+		local textY = if box then y1 + box.height * 0.55 else y0 + b.lowerHeight * 0.36
+		local textZ = if box then (boxZ0 + boxZ1) / 2 else (zm0 + zm1) / 2
+		local textX = if box then W / 2 - 0.02 else W / 2 + 0.05
+		for _, sx in { -1, 1 } do
+			local plate = part({
+				Name = "SideText",
+				Size = Vector3.new(0.1, textH, textL),
+				CFrame = CFrame.new(sx * textX, textY, textZ),
+				Transparency = 1,
+			})
+			local gui = Instance.new("SurfaceGui")
+			gui.Face = if sx > 0 then Enum.NormalId.Right else Enum.NormalId.Left
+			gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+			gui.PixelsPerStud = 40
+			gui.LightInfluence = 0.4
+			local label = Instance.new("TextLabel")
+			label.Size = UDim2.fromScale(1, 1)
+			label.BackgroundTransparency = 1
+			label.Font = Enum.Font.FredokaOne
+			label.TextScaled = true
+			label.TextColor3 = def.accent
+			label.Text = b.sideText
+			label.Parent = gui
+			gui.Parent = plate
+		end
+	end
+	local lightBar = b.lightBar
+	if lightBar then
+		local barZ = (zm0 + zm1) / 2
+		local barY = y2 + 0.1
+		part({
+			Name = "LightBarBase",
+			Size = Vector3.new(cabinW * 0.7, 0.2, 1.1),
+			CFrame = CFrame.new(0, barY, barZ),
+			Color = DARK,
+		})
+		for index, sx in { -1, 1 } do
+			local lamp = part({
+				Name = "Beacon",
+				Size = Vector3.new(cabinW * 0.3, 0.5, 0.9),
+				CFrame = CFrame.new(sx * cabinW * 0.18, barY + 0.35, barZ),
+				Color = lightBar[index] or lightBar[1],
+			})
+			lamp:SetAttribute(VehicleConfig.ATTR_BEACON_PHASE, index - 1)
+			if not static then
+				CollectionService:AddTag(lamp, VehicleConfig.TAG_BEACON)
+			end
 		end
 	end
 

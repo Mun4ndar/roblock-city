@@ -21,6 +21,8 @@ local VehicleConfig = require(Shared:WaitForChild("VehicleConfig"))
 
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local EconomyService = require(script.Parent:WaitForChild("EconomyService"))
+local UniformService = require(script.Parent:WaitForChild("UniformService"))
+local VehicleService = require(script.Parent:WaitForChild("VehicleService"))
 
 type JobResult = Types.JobResult
 type JobDef = JobConfig.JobDef
@@ -98,6 +100,10 @@ local function allowedSpeed(player: Player): number
 			if def and def.maxSpeed > speed then
 				speed = def.maxSpeed
 			end
+		end
+		local service = VehicleConfig.forJob(data.jobs.current)
+		if service and service.maxSpeed > speed then
+			speed = service.maxSpeed
 		end
 	end
 	return speed * JobConfig.SPEED_SLACK
@@ -422,9 +428,15 @@ local function selectJob(player: Player, jobId: any): JobResult
 
 	data.jobs.current = jobId
 	publish(player)
+	VehicleService.onJobChanged(player, jobId)
+	UniformService.refresh(player)
 	assignTask(player)
 	if def then
-		return result(true, `Kamu sekarang bekerja sebagai {def.name}. Ikuti penanda kuning!`)
+		local service = VehicleConfig.forJob(def.id)
+		if service then
+			return result(true, `Kamu sekarang {def.name}! {service.name} ada di menu Pekerjaan.`)
+		end
+		return result(true, `Kamu sekarang {def.name}! Ikuti penanda kuning.`)
 	end
 	return result(true, "Kamu berhenti bekerja. Terima kasih sudah membantu kota!")
 end

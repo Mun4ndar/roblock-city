@@ -8,8 +8,10 @@ local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 
 local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
+local Net = require(Shared:WaitForChild("Net"))
 local Format = require(Shared:WaitForChild("Format"))
 local JobConfig = require(Shared:WaitForChild("JobConfig"))
+local VehicleConfig = require(Shared:WaitForChild("VehicleConfig"))
 
 local HudController = require(script.Parent:WaitForChild("HudController"))
 local JobController = require(script.Parent:WaitForChild("JobController"))
@@ -35,6 +37,7 @@ local COLORS = {
 	stop = Color3.fromRGB(235, 90, 90),
 	accent = Color3.fromRGB(240, 150, 40),
 	marker = Color3.fromRGB(255, 204, 0),
+	service = Color3.fromRGB(90, 150, 235),
 }
 
 local gui: ScreenGui
@@ -42,6 +45,8 @@ local panel: Frame
 local panelScale: UIScale
 local openButton: TextButton
 local skipButton: TextButton
+local serviceButton: TextButton
+local hintLabel: TextLabel
 local tracker: TextButton
 local trackerScale: UIScale
 local trackerTitle: TextLabel
@@ -110,6 +115,13 @@ local function refreshCards()
 		end
 	end
 	skipButton.Visible = current ~= ""
+	-- Pekerjaan dengan kendaraan dinas mendapat tombol untuk mengeluarkannya.
+	local service = VehicleConfig.forJob(current)
+	serviceButton.Visible = service ~= nil
+	hintLabel.Visible = service == nil
+	if service then
+		serviceButton.Text = "Keluarkan " .. service.name
+	end
 end
 
 local function refreshTracker()
@@ -188,6 +200,26 @@ local function onSkipClicked()
 	HudController.toast(res.message)
 	if res.ok then
 		setOpen(false)
+	end
+	busy = false
+end
+
+local function onServiceClicked()
+	local service = VehicleConfig.forJob(currentJob())
+	if busy or service == nil then
+		return
+	end
+	busy = true
+	local ok, res = pcall(function(): any
+		return Net.func(Net.Names.VehicleSpawn):InvokeServer(service.id)
+	end)
+	if ok and type(res) == "table" and type(res.message) == "string" then
+		HudController.toast(res.message)
+		if res.ok then
+			setOpen(false)
+		end
+	else
+		HudController.toast("Gagal terhubung, coba lagi.")
 	end
 	busy = false
 end
@@ -441,7 +473,22 @@ local function buildGui()
 	skipButton.Parent = panel
 	skipButton.Activated:Connect(onSkipClicked)
 
-	label({
+	serviceButton = Instance.new("TextButton")
+	serviceButton.Name = "ServiceVehicle"
+	serviceButton.AnchorPoint = Vector2.new(1, 1)
+	serviceButton.Position = UDim2.new(1, -14, 1, -12)
+	serviceButton.Size = UDim2.fromOffset(250, 42)
+	serviceButton.BackgroundColor3 = COLORS.service
+	serviceButton.Font = Enum.Font.FredokaOne
+	serviceButton.TextSize = 17
+	serviceButton.TextColor3 = Color3.new(1, 1, 1)
+	serviceButton.Text = ""
+	serviceButton.Visible = false
+	corner(serviceButton, 12)
+	serviceButton.Parent = panel
+	serviceButton.Activated:Connect(onServiceClicked)
+
+	hintLabel = label({
 		Name = "Hint",
 		AnchorPoint = Vector2.new(1, 1),
 		Position = UDim2.new(1, -14, 1, -12),
@@ -451,8 +498,8 @@ local function buildGui()
 		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Right,
 		Text = "Ikuti penanda kuning, lalu tahan tombolnya. Gaji naik 5% setiap naik level.",
-	}).Parent =
-		panel
+	})
+	hintLabel.Parent = panel
 
 	gui.Parent = player:WaitForChild("PlayerGui")
 end

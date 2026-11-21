@@ -6,7 +6,7 @@
 -- Satuan: panjang dalam stud, kecepatan stud/detik (1 stud/dtk ~ 1 km/j di speedometer).
 -- Arah depan model = sumbu -Z, titik asal model = tengah mobil di permukaan tanah.
 
-export type BodyStyle = "hatch" | "sedan" | "suv" | "sport"
+export type BodyStyle = "hatch" | "sedan" | "suv" | "sport" | "van" | "truck"
 
 export type VehicleBody = {
 	style: BodyStyle,
@@ -24,6 +24,12 @@ export type VehicleBody = {
 	wheelbase: number, -- jarak poros depan ke poros belakang
 	spoiler: boolean?,
 	roofRack: boolean?,
+	-- Perlengkapan kendaraan dinas (semua opsional):
+	lightBar: { Color3 }?, -- dua warna lampu atap; berkedip saat ada pengemudi
+	band: Color3?, -- pita lebar di sisi bodi
+	sideText: string?, -- tulisan di sisi bodi / boks
+	box: { height: number, color: Color3 }?, -- boks di belakang kabin (ambulans, truk)
+	ladder: boolean?, -- tangga di atas boks
 }
 
 export type VehicleDef = {
@@ -32,6 +38,7 @@ export type VehicleDef = {
 	class: string, -- teks jenis yang tampil di UI
 	description: string,
 	price: number,
+	job: string?, -- kendaraan dinas: hanya untuk pemain dengan pekerjaan ini (tidak dijual)
 	seats: number, -- termasuk pengemudi (1, 2 atau 4)
 	maxSpeed: number,
 	reverseSpeed: number,
@@ -57,6 +64,8 @@ VehicleConfig.SPEED_TOLERANCE = 1.6 -- server menegur jika kecepatan > maxSpeed 
 VehicleConfig.TAG_VEHICLE = "Vehicle" -- Model kendaraan yang bisa dikendarai
 VehicleConfig.TAG_DEALER = "VehicleDealer" -- Part penanda lokasi dealer
 VehicleConfig.TAG_DISPLAY_SLOT = "VehicleDisplaySlot" -- Part tempat mobil pajangan
+VehicleConfig.TAG_BEACON = "VehicleBeacon" -- Part lampu atap kendaraan dinas
+VehicleConfig.ATTR_BEACON_PHASE = "BeaconPhase" -- 0 atau 1: giliran kedip
 VehicleConfig.ATTR_VEHICLE_ID = "VehicleId"
 VehicleConfig.ATTR_OWNER = "OwnerUserId"
 VehicleConfig.ATTR_OWNED = "OwnedVehicles" -- atribut Player: id dipisah koma
@@ -187,10 +196,128 @@ VehicleConfig.LIST = {
 	},
 } :: { VehicleDef }
 
+-- Kendaraan dinas: gratis, tidak dijual di dealer, dan hanya bisa dikeluarkan
+-- pemain yang sedang menjalani pekerjaan `job` (lihat JobConfig). Menambah
+-- kendaraan dinas untuk pekerjaan lain = menambah satu entri di sini.
+VehicleConfig.SERVICE = {
+	{
+		id = "ambulans",
+		name = "Ambulans",
+		class = "Kendaraan Dinas",
+		description = "Mengantar dokter ke pasien dengan cepat dan aman.",
+		price = 0,
+		job = "dokter",
+		seats = 2,
+		maxSpeed = 70,
+		reverseSpeed = 22,
+		acceleration = 28,
+		brake = 80,
+		steerAngle = 31,
+		color = Color3.fromRGB(245, 247, 250),
+		accent = Color3.fromRGB(40, 180, 160),
+		body = {
+			style = "van",
+			length = 17,
+			width = 7.6,
+			clearance = 1.3,
+			lowerHeight = 2.6,
+			cabinHeight = 3,
+			cabinFront = 0.12,
+			cabinBack = 0.42,
+			rakeFront = 1.5,
+			rakeBack = 0.3,
+			wheelRadius = 1.5,
+			wheelWidth = 1.3,
+			wheelbase = 10.5,
+			lightBar = { Color3.fromRGB(40, 200, 180), Color3.fromRGB(255, 255, 255) },
+			band = Color3.fromRGB(40, 180, 160),
+			sideText = "AMBULANS",
+			box = { height = 4.2, color = Color3.fromRGB(245, 247, 250) },
+		},
+	},
+	{
+		id = "damkar",
+		name = "Mobil Pemadam",
+		class = "Kendaraan Dinas",
+		description = "Truk merah besar dengan tangga, siap memadamkan api.",
+		price = 0,
+		job = "pemadam",
+		seats = 2,
+		maxSpeed = 62,
+		reverseSpeed = 20,
+		acceleration = 24,
+		brake = 80,
+		steerAngle = 30,
+		color = Color3.fromRGB(215, 50, 45),
+		accent = Color3.fromRGB(250, 250, 250),
+		body = {
+			style = "truck",
+			length = 20,
+			width = 8,
+			clearance = 1.5,
+			lowerHeight = 2.8,
+			cabinHeight = 3.2,
+			cabinFront = 0.06,
+			cabinBack = 0.32,
+			rakeFront = 1,
+			rakeBack = 0.3,
+			wheelRadius = 1.7,
+			wheelWidth = 1.5,
+			wheelbase = 12,
+			lightBar = { Color3.fromRGB(255, 70, 50), Color3.fromRGB(255, 190, 40) },
+			band = Color3.fromRGB(250, 250, 250),
+			sideText = "PEMADAM",
+			box = { height = 3.4, color = Color3.fromRGB(215, 50, 45) },
+			ladder = true,
+		},
+	},
+	{
+		id = "patroli",
+		name = "Mobil Patroli",
+		class = "Kendaraan Dinas",
+		description = "Mobil polisi untuk berpatroli menjaga kota.",
+		price = 0,
+		job = "polisi",
+		seats = 4,
+		maxSpeed = 76,
+		reverseSpeed = 24,
+		acceleration = 30,
+		brake = 85,
+		steerAngle = 32,
+		color = Color3.fromRGB(245, 247, 250),
+		accent = Color3.fromRGB(40, 80, 190),
+		body = {
+			style = "sedan",
+			length = 15.5,
+			width = 7,
+			clearance = 0.9,
+			lowerHeight = 2.2,
+			cabinHeight = 2.8,
+			cabinFront = 0.3,
+			cabinBack = 0.8,
+			rakeFront = 1.9,
+			rakeBack = 1.7,
+			wheelRadius = 1.3,
+			wheelWidth = 1.1,
+			wheelbase = 9.4,
+			lightBar = { Color3.fromRGB(60, 110, 255), Color3.fromRGB(255, 70, 60) },
+			band = Color3.fromRGB(40, 80, 190),
+			sideText = "POLISI",
+		},
+	},
+} :: { VehicleDef }
+
 local byId: { [string]: VehicleDef } = {}
+local byJob: { [string]: VehicleDef } = {}
 for _, def in VehicleConfig.LIST do
 	assert(byId[def.id] == nil, "id kendaraan ganda: " .. def.id)
 	byId[def.id] = def
+end
+for _, def in VehicleConfig.SERVICE do
+	assert(byId[def.id] == nil, "id kendaraan ganda: " .. def.id)
+	assert(def.job ~= nil, "kendaraan dinas tanpa pekerjaan: " .. def.id)
+	byId[def.id] = def
+	byJob[def.job :: string] = def
 end
 
 -- Mengembalikan definisi kendaraan, atau nil jika id tidak dikenal.
@@ -200,6 +327,14 @@ function VehicleConfig.get(id: any): VehicleDef?
 		return nil
 	end
 	return byId[id]
+end
+
+-- Kendaraan dinas untuk pekerjaan `jobId`, atau nil jika pekerjaan itu tidak punya.
+function VehicleConfig.forJob(jobId: any): VehicleDef?
+	if type(jobId) ~= "string" then
+		return nil
+	end
+	return byJob[jobId]
 end
 
 -- "kancil,serasi" -> { kancil = true, serasi = true }

@@ -7,6 +7,7 @@ local ORDER = {
 	"HudController",
 	"VehicleController",
 	"VehicleUiController",
+	"BeaconController",
 	"JobController",
 	"JobUiController",
 }

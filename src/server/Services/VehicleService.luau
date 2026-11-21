@@ -19,6 +19,7 @@ local Types = require(Shared:WaitForChild("Types"))
 local Format = require(Shared:WaitForChild("Format"))
 local VehicleConfig = require(Shared:WaitForChild("VehicleConfig"))
 local VehicleBuilder = require(Shared:WaitForChild("VehicleBuilder"))
+local JobConfig = require(Shared:WaitForChild("JobConfig"))
 
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local EconomyService = require(script.Parent:WaitForChild("EconomyService"))
@@ -107,6 +108,20 @@ function VehicleService.despawn(player: Player)
 	speedStrikes[player] = nil
 	if model then
 		model:Destroy()
+	end
+end
+
+-- Dipanggil JobService saat pekerjaan pemain berubah: kendaraan dinas dari
+-- pekerjaan lama dikembalikan.
+function VehicleService.onJobChanged(player: Player, jobId: string)
+	local model = spawned[player]
+	if model == nil then
+		return
+	end
+	local def = VehicleConfig.get(model:GetAttribute(VehicleConfig.ATTR_VEHICLE_ID))
+	if def and def.job and def.job ~= jobId then
+		VehicleService.despawn(player)
+		EconomyService.notify(player, `{def.name} dikembalikan ke kantor.`)
 	end
 end
 
@@ -253,7 +268,15 @@ local function spawnVehicle(player: Player, vehicleId: any): VehicleResult
 	if not DataService.isLoaded(player) then
 		return result(false, "Data kamu masih dimuat...")
 	end
-	if not VehicleService.owns(player, def.id) then
+	if def.job then
+		-- Kendaraan dinas: gratis, tapi hanya selama menjalani pekerjaannya.
+		local data = DataService.getData(player)
+		if data == nil or data.jobs.current ~= def.job then
+			local job = JobConfig.get(def.job)
+			local jobName = if job then job.name else "petugas"
+			return result(false, `{def.name} hanya untuk {jobName} yang sedang bertugas.`)
+		end
+	elseif not VehicleService.owns(player, def.id) then
 		return result(false, `Kamu belum punya {def.name}. Beli dulu di Dealer Mobil ya!`)
 	end
 	local root, humanoid = getRoot(player)
@@ -295,6 +318,9 @@ local function buyVehicle(player: Player, vehicleId: any): VehicleResult
 	local def = VehicleConfig.get(vehicleId)
 	if def == nil then
 		return result(false, "Kendaraan tidak dikenal.")
+	end
+	if def.job then
+		return result(false, `{def.name} adalah kendaraan dinas dan tidak dijual.`)
 	end
 	local data = DataService.getData(player)
 	if data == nil then

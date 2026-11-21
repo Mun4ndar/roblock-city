@@ -43,6 +43,17 @@ export type TaskTemplate = {
 	steps: { StepSpec },
 }
 
+export type HatKind = "cap" | "helmet" | "peaked" | "mirror"
+
+-- Seragam yang dipakai selama bekerja (dirakit UniformService di server).
+export type Uniform = {
+	hat: HatKind, -- topi kurir/mekanik, helm pemadam, topi polisi, cermin dokter
+	hatColor: Color3,
+	vest: Color3, -- rompi / jas
+	trim: Color3, -- garis rompi
+	badge: Color3, -- lencana di dada dan topi
+}
+
 export type JobDef = {
 	id: string,
 	name: string,
@@ -50,6 +61,7 @@ export type JobDef = {
 	color: Color3,
 	description: string,
 	workplace: string, -- teks lokasi kantor di UI
+	uniform: Uniform,
 	tasks: { TaskTemplate },
 }
 
@@ -271,6 +283,13 @@ JobConfig.LIST = {
 		color = Color3.fromRGB(240, 150, 40),
 		description = "Ambil paket lalu antar ke alamat tujuan. Makin jauh, makin besar upahnya!",
 		workplace = "Kantor Pos, Toko, dan Mall",
+		uniform = {
+			hat = "cap",
+			hatColor = Color3.fromRGB(240, 150, 40),
+			vest = Color3.fromRGB(240, 150, 40),
+			trim = Color3.fromRGB(250, 250, 250),
+			badge = Color3.fromRGB(120, 80, 50),
+		},
 		tasks = {
 			{
 				id = "dekat",
@@ -333,6 +352,13 @@ JobConfig.LIST = {
 		color = Color3.fromRGB(90, 150, 235),
 		description = "Servis mobil pelanggan di Bengkel dan tolong mobil yang mogok di jalan.",
 		workplace = "Bengkel (kota kecil)",
+		uniform = {
+			hat = "cap",
+			hatColor = Color3.fromRGB(50, 90, 160),
+			vest = Color3.fromRGB(60, 100, 170),
+			trim = Color3.fromRGB(255, 200, 40),
+			badge = Color3.fromRGB(200, 205, 212),
+		},
 		tasks = {
 			{
 				id = "servis",
@@ -412,6 +438,13 @@ JobConfig.LIST = {
 		color = Color3.fromRGB(60, 90, 190),
 		description = "Jaga kota tetap aman dan tertib: patroli, bantu warga, dan seberangkan anak-anak.",
 		workplace = "Pos Polisi di Balai Kota",
+		uniform = {
+			hat = "peaked",
+			hatColor = Color3.fromRGB(35, 50, 110),
+			vest = Color3.fromRGB(45, 65, 140),
+			trim = Color3.fromRGB(255, 210, 60),
+			badge = Color3.fromRGB(255, 210, 60),
+		},
 		tasks = {
 			{
 				id = "patroli",
@@ -504,6 +537,13 @@ JobConfig.LIST = {
 		color = Color3.fromRGB(225, 70, 60),
 		description = "Padamkan api kecil sebelum membesar dan selamatkan kucing yang terjebak di pohon.",
 		workplace = "Kantor Pemadam Kebakaran",
+		uniform = {
+			hat = "helmet",
+			hatColor = Color3.fromRGB(215, 50, 45),
+			vest = Color3.fromRGB(240, 190, 50),
+			trim = Color3.fromRGB(230, 232, 236),
+			badge = Color3.fromRGB(255, 210, 60),
+		},
 		tasks = {
 			{
 				id = "api",
@@ -571,6 +611,13 @@ JobConfig.LIST = {
 		color = Color3.fromRGB(40, 180, 160),
 		description = "Periksa pasien di Rumah Sakit, kunjungi pasien di rumah, dan jemput yang butuh bantuan.",
 		workplace = "Rumah Sakit",
+		uniform = {
+			hat = "mirror",
+			hatColor = Color3.fromRGB(220, 225, 230),
+			vest = Color3.fromRGB(248, 248, 250),
+			trim = Color3.fromRGB(40, 180, 160),
+			badge = Color3.fromRGB(235, 90, 110),
+		},
 		tasks = {
 			{
 				id = "kunjungan",

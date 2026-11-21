@@ -52,6 +52,18 @@ Urutan load ada di `ORDER` pada `init.server.luau` / `init.client.luau`; tambahk
   langkah, jarak, panah arah).
 - Koordinat di `PLACES` mengikuti peta di `map/`. Jika bangunan dipindah, perbarui posisinya di sana.
 
+### Seragam dan kendaraan dinas
+
+- **UniformService**: selama bekerja, pemain memakai topi dan rompi sederhana dari Part yang menempel di karakter
+  (R15 maupun R6). Bentuk dan warnanya ada di `uniform` pada tiap pekerjaan di `JobConfig`. Topi bawaan avatar
+  disembunyikan sementara dan dikembalikan saat berhenti bekerja.
+- Kendaraan dinas ada di `VehicleConfig.SERVICE` (Ambulans untuk Dokter, Mobil Pemadam, Mobil Patroli). Gratis,
+  tidak dijual di dealer, dan hanya bisa dikeluarkan dari menu Pekerjaan selama menjalani pekerjaannya; saat ganti
+  atau berhenti bekerja kendaraan itu dikembalikan. **Menambah kendaraan dinas = menambah satu entri** dengan `job`.
+- `VehicleBuilder` mengenal perlengkapan tambahan di `body`: `lightBar` (lampu atap), `band` (pita warna),
+  `sideText` (tulisan di sisi), `box` (boks belakang), dan `ladder`. `BeaconController` (client) mengedipkan lampu
+  atap selama kursi pengemudi terisi.
+
 ### Kendaraan
 
 - Semua kendaraan didefinisikan di `src/shared/VehicleConfig.luau` (`LIST`). **Menambah mobil baru = menambah
