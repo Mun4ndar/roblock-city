@@ -12,6 +12,7 @@ local RunService = game:GetService("RunService")
 
 local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local DayNightConfig = require(Shared:WaitForChild("DayNightConfig"))
+local VehicleConfig = require(Shared:WaitForChild("VehicleConfig"))
 
 local DayNightController = {}
 
@@ -36,6 +37,7 @@ local WINDOW_COLORS =
 	{ rgb(255, 190, 96), rgb(255, 204, 120), rgb(250, 176, 84), rgb(176, 208, 240) }
 local LAMP_OFF_COLOR = rgb(196, 196, 190)
 local APPLY_PER_FRAME = 40
+local HEADLIGHT_CHECK_SECONDS = 2 -- mobil yang baru muncul saat malam ikut menyala
 
 type Saved = { material: Enum.Material, color: Color3, reflectance: number }
 
@@ -45,6 +47,7 @@ local saved: { [BasePart]: Saved } = {}
 local queue: { Instance } = {}
 local lightsOn = false
 local lastFactor = -1
+local headlightTimer = 0
 
 local day: {
 	brightness: number,
@@ -123,6 +126,31 @@ local function setLights(on: boolean)
 	end
 end
 
+-- Lampu depan mobil: sorot lokal di part "Headlight" tiap kendaraan (hanya tampilan).
+local function setHeadlights(on: boolean)
+	for _, vehicle in CollectionService:GetTagged(VehicleConfig.TAG_VEHICLE) do
+		for _, d in vehicle:GetDescendants() do
+			if d.Name == "Headlight" and d:IsA("BasePart") then
+				local light = d:FindFirstChildOfClass("SpotLight")
+				if light == nil and on then
+					local created = Instance.new("SpotLight")
+					created.Face = Enum.NormalId.Front
+					created.Angle = 75
+					created.Range = 60
+					created.Brightness = 2.5
+					created.Color = d.Color
+					created.Shadows = false
+					created.Parent = d
+					light = created
+				end
+				if light then
+					light.Enabled = on
+				end
+			end
+		end
+	end
+end
+
 local function drainQueue()
 	local count = math.min(#queue, APPLY_PER_FRAME)
 	for _ = 1, count do
@@ -171,6 +199,12 @@ local function update(dt: number)
 	local shouldBeOn = f >= DayNightConfig.LIGHTS_ON_AT
 	if shouldBeOn ~= lightsOn then
 		setLights(shouldBeOn)
+		setHeadlights(shouldBeOn)
+	end
+	headlightTimer += dt
+	if lightsOn and headlightTimer >= HEADLIGHT_CHECK_SECONDS then
+		headlightTimer = 0
+		setHeadlights(true)
 	end
 	if #queue > 0 then
 		drainQueue()

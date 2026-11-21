@@ -10,6 +10,9 @@ Dibangun dengan [Rojo](https://rojo.space): kode ada di folder `src/`, lalu disi
 2. Pasang plugin Rojo di Studio: `rojo plugin install`
 3. Jalankan `rojo serve`, lalu di Studio klik **Rojo > Connect**.
 
+Tanpa Rojo tersambung, skrip yang diubah langsung di Studio bisa ditarik ke folder ini dengan
+`tools/studio_pull.py` (petunjuk ada di dalam berkasnya). Model Blender ada di `assets/blender/`.
+
 ## Struktur
 
 | Folder | Di Studio | Isi |
@@ -37,6 +40,21 @@ Urutan load ada di `ORDER` pada `init.server.luau` / `init.client.luau`; tambahk
   selesai". Setiap langkah dicek jaraknya (pemain harus di dekat penanda) dan waktu tempuhnya (harus wajar untuk
   kendaraan tercepat milik pemain). Ada pengawas perpindahan mendadak, rate limit, dan batas gaji per 5 menit.
   Kemajuan tersimpan di data pemain (`jobs`) dan dikirim ke client lewat atribut Player `Job` dan `JobStats`.
+
+- **TimeService**: jam dunia (siang 16 menit, malam 6 menit; angkanya di `src/shared/DayNightConfig.luau`).
+  `DayNightController` (client) memudarkan pencahayaan ke suasana malam, menyalakan lampu jalan, sebagian jendela,
+  dan lampu depan mobil.
+- **HouseService**: rumah pemain di perumahan (`Workspace.Map.Neighborhoods.Houses`, Rumah No. 1 sampai 89).
+  Beli/jual, cat dinding/atap/pintu, hiasan halaman, dan tombol Pulang. Tipe, harga, warna, dan hiasan ada di
+  `src/shared/HouseConfig.luau` (**menambah hiasan = menambah entri di `ITEMS`**). Tersimpan di data pemain
+  (`house`), dikirim ke client lewat atribut Player `House`. Kalau rumah pemain sedang ditempati orang lain di
+  server itu, ia mendapat rumah pengganti setipe.
+- **MissionService**: misi harian (berganti pukul 00.00 WIB). Daftar misi dan tempat di peta HP ada di
+  `src/shared/MissionConfig.luau`. Kemajuan dihitung server dari tugas pekerjaan dan kunjungan tempat; hadiah
+  diambil lewat remote `MissionClaim`. `PhoneController` (client) berisi HP: peta skema, GPS, dan daftar misi.
+- **DebugService**: alat uji, hanya aktif di Studio. Dari command bar server:
+  `game.ServerStorage.Debug:Invoke("money", pemain, 5000)` atau `game.ServerStorage.Debug:Invoke("clock", 21)`.
+- `src/client/Util/UiScale.luau` mengecilkan HUD di layar kecil; elemen HUD baru cukup memanggil `UiScale.attach`.
 
 ### Pekerjaan
 
