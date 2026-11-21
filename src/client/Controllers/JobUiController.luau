@@ -26,6 +26,8 @@ type Card = {
 
 local player = Players.LocalPlayer
 
+local UiScale = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("UiScale"))
+
 local JobUiController = {}
 
 local COLORS = {
@@ -305,6 +307,10 @@ local function buildTracker()
 	tracker.Name = "TaskTracker"
 	tracker.AnchorPoint = Vector2.new(0.5, 0)
 	tracker.Position = UDim2.new(0.5, 0, 0, 64)
+	UiScale.attach(tracker)
+	UiScale.onChange(function(value: number)
+		tracker.Position = UDim2.new(0.5, 0, 0, 8 + 56 * value)
+	end)
 	tracker.Size = UDim2.fromOffset(380, 58)
 	tracker.BackgroundColor3 = COLORS.panel
 	tracker.BackgroundTransparency = 0.08
@@ -384,7 +390,7 @@ local function buildGui()
 	openButton = Instance.new("TextButton")
 	openButton.Name = "OpenJobs"
 	openButton.AnchorPoint = Vector2.new(0, 0.5)
-	openButton.Position = UDim2.new(0, 10, 0.42, 50)
+	UiScale.sideButton(openButton, 1)
 	openButton.Size = UDim2.fromOffset(132, 42)
 	openButton.BackgroundColor3 = COLORS.accent
 	openButton.Font = Enum.Font.FredokaOne

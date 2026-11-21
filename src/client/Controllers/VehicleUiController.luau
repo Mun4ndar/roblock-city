@@ -27,6 +27,8 @@ type Card = {
 
 local player = Players.LocalPlayer
 
+local UiScale = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("UiScale"))
+
 local VehicleUiController = {}
 
 local COLORS = {
@@ -253,7 +255,7 @@ local function buildGui()
 	openButton = Instance.new("TextButton")
 	openButton.Name = "OpenVehicles"
 	openButton.AnchorPoint = Vector2.new(0, 0.5)
-	openButton.Position = UDim2.new(0, 10, 0.42, 0)
+	UiScale.sideButton(openButton, 0)
 	openButton.Size = UDim2.fromOffset(132, 42)
 	openButton.BackgroundColor3 = COLORS.store
 	openButton.Font = Enum.Font.FredokaOne

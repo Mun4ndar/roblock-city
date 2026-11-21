@@ -13,6 +13,8 @@ local Types = require(Shared:WaitForChild("Types"))
 
 local player = Players.LocalPlayer
 
+local UiScale = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("UiScale"))
+
 local HudController = {}
 
 local COLORS = {
@@ -52,6 +54,7 @@ local function buildGui()
 	panel.Name = "MoneyPanel"
 	panel.AnchorPoint = Vector2.new(1, 0)
 	panel.Position = UDim2.new(0.5, -6, 0, 8)
+	UiScale.attach(panel)
 	panel.Size = UDim2.fromOffset(200, 48)
 	panel.BackgroundColor3 = COLORS.panel
 	panel.BackgroundTransparency = 0.1
@@ -80,6 +83,7 @@ local function buildGui()
 	rewardButton = Instance.new("TextButton")
 	rewardButton.Name = "DailyReward"
 	rewardButton.Position = UDim2.new(0.5, 6, 0, 12)
+	UiScale.attach(rewardButton)
 	rewardButton.Size = UDim2.fromOffset(190, 40)
 	rewardButton.BackgroundColor3 = COLORS.button
 	rewardButton.Font = Enum.Font.FredokaOne
@@ -94,6 +98,7 @@ local function buildGui()
 	toastLabel.Name = "Toast"
 	toastLabel.AnchorPoint = Vector2.new(0.5, 1)
 	toastLabel.Position = UDim2.new(0.5, 0, 1, -120)
+	UiScale.attach(toastLabel)
 	toastLabel.Size = UDim2.fromOffset(380, 44)
 	toastLabel.BackgroundColor3 = COLORS.toastBg
 	toastLabel.BackgroundTransparency = 0.15

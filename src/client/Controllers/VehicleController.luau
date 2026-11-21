@@ -28,6 +28,8 @@ type Driving = {
 
 local player = Players.LocalPlayer
 
+local UiScale = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("UiScale"))
+
 local VehicleController = {}
 
 -- Arah putar engsel/attachment terhadap arah maju mobil (ditentukan oleh orientasi attachment di VehicleBuilder).
@@ -55,6 +57,7 @@ local function buildGui()
 
 	local panel = Instance.new("Frame")
 	panel.Name = "Speedometer"
+	UiScale.attach(panel)
 	panel.AnchorPoint = Vector2.new(0.5, 1)
 	panel.Position = UDim2.new(0.5, 0, 1, -16)
 	panel.Size = UDim2.fromOffset(170, 64)

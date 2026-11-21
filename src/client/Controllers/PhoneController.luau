@@ -23,6 +23,8 @@ type Destination = { name: string, icon: string, position: Vector3 }
 
 local player = Players.LocalPlayer
 
+local UiScale = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("UiScale"))
+
 local PhoneController = {}
 
 local rgb = Color3.fromRGB
@@ -467,6 +469,7 @@ local function buildGui()
 		Text = "📱",
 	})
 	corner(phoneButton, 16)
+	UiScale.attach(phoneButton)
 	phoneButton.Parent = gui
 	badge = Instance.new("Frame")
 	badge.Name = "Badge"
@@ -488,6 +491,10 @@ local function buildGui()
 		Visible = false,
 	})
 	corner(gpsPill, 12)
+	UiScale.attach(gpsPill)
+	UiScale.onChange(function(value: number)
+		gpsPill.Position = UDim2.new(1, -10, 0.42, 58 * value)
+	end)
 	gpsPill.Parent = gui
 	gpsArrow = buildArrow(gpsPill, COLORS.gps, 28)
 	gpsArrow.Position = UDim2.new(0, 22, 0.5, 0)

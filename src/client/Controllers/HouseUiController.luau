@@ -21,6 +21,8 @@ type HouseView = HouseConfig.HouseView
 
 local player = Players.LocalPlayer
 
+local UiScale = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("UiScale"))
+
 local HouseUiController = {}
 
 local COLORS = {
@@ -451,6 +453,7 @@ local function buildGui()
 		Text = "🏠 Rumah",
 	})
 	corner(openButton, 12)
+	UiScale.sideButton(openButton, 2)
 	openButton.Parent = gui
 
 	panel = Instance.new("Frame")
