@@ -49,6 +49,7 @@ local function defaultData(): PlayerData
 		money = Config.STARTING_MONEY,
 		lastDailyReward = 0,
 		stats = { totalEarned = 0, joins = 0 },
+		vehicles = {},
 	}
 end
 
@@ -83,6 +84,9 @@ local function migrate(raw: any): PlayerData
 		if raw.stats[key] == nil then
 			raw.stats[key] = value
 		end
+	end
+	if type(raw.vehicles) ~= "table" then
+		raw.vehicles = {}
 	end
 	return raw :: PlayerData
 end

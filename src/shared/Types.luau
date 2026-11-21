@@ -10,6 +10,19 @@ export type PlayerData = {
 		totalEarned: number,
 		joins: number,
 	},
+	-- Kendaraan yang dimiliki: id (lihat VehicleConfig) -> catatan kepemilikan.
+	vehicles: { [string]: OwnedVehicle },
+}
+
+export type OwnedVehicle = {
+	boughtAt: number, -- os.time() saat dibeli
+	-- modifikasi (cat, velg, dll.) ditambahkan di sini nanti
+}
+
+-- Balasan semua remote kendaraan.
+export type VehicleResult = {
+	ok: boolean,
+	message: string,
 }
 
 export type DailyRewardResult = {

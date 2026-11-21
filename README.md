@@ -14,7 +14,7 @@ Dibangun dengan [Rojo](https://rojo.space): kode ada di folder `src/`, lalu disi
 
 | Folder | Di Studio | Isi |
 | --- | --- | --- |
-| `src/shared` | ReplicatedStorage/Shared | Config, Types, Net (remote), Format |
+| `src/shared` | ReplicatedStorage/Shared | Config, Types, Net (remote), Format, VehicleConfig, VehicleBuilder |
 | `src/server` | ServerScriptService/Server | `Services/`: logika server-authoritative |
 | `src/client` | StarterPlayerScripts/Client | `Controllers/`: UI, input, tampilan |
 
@@ -28,6 +28,24 @@ Urutan load ada di `ORDER` pada `init.server.luau` / `init.client.luau`; tambahk
   Di Studio tanpa akses API, berjalan dalam mode offline (tidak menyimpan).
 - **EconomyService**: satu-satunya tempat uang berubah (`addMoney`, `trySpend`, `getMoney`).
   Saldo dikirim ke client lewat atribut Player `Money`. Remote `ClaimDailyReward` dengan rate limit + cooldown.
+
+- **VehicleService**: kepemilikan, pembelian, dan spawn kendaraan. Client hanya mengirim `id`; harga, saldo,
+  jarak ke dealer, cooldown, dan batas spawn (1 mobil per pemain) dicek di server. Kendaraan yang dimiliki
+  tersimpan di data pemain (`vehicles`) dan dikirim ke client lewat atribut Player `OwnedVehicles`.
+
+### Kendaraan
+
+- Semua kendaraan didefinisikan di `src/shared/VehicleConfig.luau` (`LIST`). **Menambah mobil baru = menambah
+  satu entri** (nama, harga, kecepatan, ukuran bodi, warna); menu, dealer, dan fisika mengikuti otomatis.
+- `VehicleBuilder` merakit model dari Part secara parametris: chassis bermassa, bodi tanpa massa, empat roda
+  silinder dengan `HingeConstraint` motor (penggerak 4 roda). Roda depan dibelokkan dengan memutar attachment
+  `SteerFL/SteerFR` di chassis.
+- `VehicleController` (client) membaca `VehicleSeat.ThrottleFloat/SteerFloat`, yang diisi skrip kontrol bawaan
+  Roblox untuk keyboard, gamepad, dan thumbstick sentuh. Pengemudi memegang network ownership mobilnya.
+- Naik mobil lewat ProximityPrompt (ditangani server): pemilik selalu ke kursi pengemudi, pemain lain ke kursi
+  penumpang. Lompat untuk turun. Mobil terbalik dibalikkan otomatis.
+- Dealer ada di `Workspace.Map.Dealer` (dibangun `map/BuildDealer.luau`). Server menaruh mobil pajangan di part
+  bertag `VehicleDisplaySlot`; pembelian hanya bisa di dekat part bertag `VehicleDealer`.
 
 ### Mengubah skema data
 
@@ -50,6 +68,7 @@ require(MB.BuildDowntown)()
 require(MB.BuildResidential)()
 require(MB.BuildBeach)()
 require(MB.BuildAirport)()
+require(MB.BuildDealer)()
 ```
 
 Setiap skrip hanya mengganti foldernya sendiri di `Workspace.Map`. Modul bantu: `MapKit` (part, jalan, pohon,
@@ -65,6 +84,7 @@ Dunia (utara = -Z, sekitar 8.500 part, semua anchored, StreamingEnabled aktif):
 | Perumahan | `Residential`, `Neighborhoods` | selatan | Kota kecil (RS, damkar, bengkel, toko, kafe, balai kota, taman + spawn), sekolah, taman bermain, ±95 rumah, 6 rumah mewah |
 | Beach Island | `Beach` | pulau timur | Jalan pantai, promenade, resor & kolam, dermaga + bianglala, pelabuhan & kapal, mercusuar, sewa jet ski |
 | Countryside | `Countryside` | barat | Sungai & air terjun, hutan, ladang, lumbung, kincir angin, sapi & domba, perkemahan |
+| Dealer Mobil | `Dealer` | seberang barat taman kota | Showroom, kanopi dengan 6 alas pajangan, halaman untuk mengeluarkan mobil |
 | Bandara | `Airport` | barat daya | Landasan pacu, taxiway, terminal, garbarata, menara kontrol, hangar, pesawat |
 
 Catatan Terrain: permukaan terrain tampil sekitar 2 stud di atas batas isi `FillBlock`, jadi rumput diisi sampai

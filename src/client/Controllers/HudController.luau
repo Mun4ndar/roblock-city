@@ -126,6 +126,11 @@ local function showToast(message: string)
 	end)
 end
 
+-- Dipakai controller lain untuk menampilkan pesan singkat.
+function HudController.toast(message: string)
+	showToast(message)
+end
+
 local function setMoney(target: number, animate: boolean)
 	if not animate then
 		displayedMoney = target

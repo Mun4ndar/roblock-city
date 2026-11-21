@@ -12,6 +12,10 @@ local Net = {}
 Net.Names = table.freeze({
 	ClaimDailyReward = "ClaimDailyReward", -- RemoteFunction: client -> server, tanpa argumen
 	Notify = "Notify", -- RemoteEvent: server -> client, (message: string)
+	VehicleBuy = "VehicleBuy", -- RemoteFunction: (vehicleId: string) -> VehicleResult
+	VehicleSpawn = "VehicleSpawn", -- RemoteFunction: (vehicleId: string) -> VehicleResult
+	VehicleDespawn = "VehicleDespawn", -- RemoteFunction: () -> VehicleResult
+	VehicleFlip = "VehicleFlip", -- RemoteEvent: client -> server, tanpa argumen (balikkan mobil sendiri)
 })
 
 local function getFolder(): Folder

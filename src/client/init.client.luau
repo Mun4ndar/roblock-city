@@ -3,7 +3,7 @@
 
 local Controllers = script:WaitForChild("Controllers")
 
-local ORDER = { "HudController" }
+local ORDER = { "HudController", "VehicleController", "VehicleUiController" }
 
 local loaded: { any } = {}
 for _, name in ORDER do
