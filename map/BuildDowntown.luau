@@ -724,14 +724,28 @@ end
 local function buildSidewalks(zone: Instance)
 	local f = Kit.folder("Sidewalks")
 	for i, b in BLOCKS do
+		local cx, cz = (b[1] + b[2]) / 2, (b[3] + b[4]) / 2
 		Kit.P({
 			Name = "Blok" .. i,
 			Size = Vector3.new(b[2] - b[1], WALK, b[4] - b[3]),
-			Position = Vector3.new((b[1] + b[2]) / 2, WALK / 2, (b[3] + b[4]) / 2),
+			Position = Vector3.new(cx, WALK / 2, cz),
 			Color = C.walk,
 			Material = Enum.Material.Concrete,
 			Parent = f,
 		})
+		-- halaman rumput di dalam blok (gedung berdiri di atasnya) + pohon di sudut
+		Kit.P({
+			Name = "Halaman" .. i,
+			Size = Vector3.new(b[2] - b[1] - 14, 0.1, b[4] - b[3] - 14),
+			Position = Vector3.new(cx, WALK + 0.05, cz),
+			Color = C.grass,
+			Material = Enum.Material.Grass,
+			Parent = f,
+		})
+		if i ~= 15 and i ~= 20 then
+			Kit.tree(Vector3.new(b[1] + 12, WALK + 0.1, b[3] + 12), 0.9, f, "round", i)
+			Kit.tree(Vector3.new(b[2] - 12, WALK + 0.1, b[4] - 12), 0.9, f, "round", i + 50)
+		end
 	end
 	Kit.flush(f, zone)
 end
@@ -824,24 +838,21 @@ local function buildBuildings(zone: Instance)
 			Parent = spbu,
 		})
 	end
-	B.shop(
-		{
-			name = "TokoSPBU",
-			x = 771,
-			z = -310,
-			yaw = N,
-			w = 40,
-			d = 24,
-			h = 12,
-			floors = 1,
-			color = col(250, 250, 250),
-			trim = col(220, 50, 50),
-			sign = "SPBU",
-			signColor = col(220, 50, 50),
-			storefront = true,
-		},
-		spbu
-	)
+	B.shop({
+		name = "TokoSPBU",
+		x = 771,
+		z = -310,
+		yaw = N,
+		w = 40,
+		d = 24,
+		h = 12,
+		floors = 1,
+		color = col(250, 250, 250),
+		trim = col(220, 50, 50),
+		sign = "SPBU",
+		signColor = col(220, 50, 50),
+		storefront = true,
+	}, spbu)
 	local pylon = Kit.P({
 		Name = "SignPylon",
 		Size = Vector3.new(8, 20, 1.5),
@@ -914,9 +925,13 @@ local function buildProps(zone: Instance)
 	end
 
 	-- Taman Kota: jalur rumput antara Downtown dan Perumahan (z -224..-100)
+	-- jangan menaruh pohon di jalur jalan perumahan x = -280 dan x = 580
+	local function clear(px: number): boolean
+		return math.abs(px - 100) > 50 and math.abs(px + 280) > 26 and math.abs(px - 580) > 26
+	end
 	for i = 0, 25 do
 		local px = -430 + i * 50
-		if math.abs(px - 100) > 50 then
+		if clear(px) and clear(px + 20) then
 			Kit.tree(
 				Vector3.new(px, 0, -200 + Kit.rnd(i) * 20),
 				1 + Kit.rnd(i + 9) * 0.3,
@@ -933,7 +948,7 @@ local function buildProps(zone: Instance)
 			)
 		end
 	end
-	for i, bx in { -300, -150, 260, 400, 560, 720 } do
+	for i, bx in { -330, -150, 260, 400, 520, 720 } do
 		Kit.bench(
 			CFrame.new(bx, 0, -165) * CFrame.Angles(0, if i % 2 == 0 then 0 else math.pi, 0),
 			park
