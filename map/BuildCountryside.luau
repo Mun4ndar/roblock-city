@@ -19,8 +19,8 @@ local function col(r, g, b)
 end
 
 local RIVER = {
-	V2(-955, -540),
-	V2(-960, -420),
+	V2(-960, -470),
+	V2(-935, -385),
 	V2(-900, -330),
 	V2(-760, -180),
 	V2(-690, 0),
@@ -31,7 +31,7 @@ local RIVER = {
 	V2(-560, 1320),
 }
 local RIVER_W = 36
-local LAKE = V2(-955, -545)
+local LAKE = V2(-960, -472) -- di luar kaki gunung supaya tidak jadi gua
 local LAKE_R = 48
 local COUNTRY_ROAD =
 	{ V2(-950, -262), V2(-1060, -160), V2(-1110, 0), V2(-1150, 150), V2(-1100, 300), V2(-740, 300) }
@@ -111,11 +111,14 @@ end
 
 local function buildWaterfall(zone: Instance)
 	local f = Kit.folder("AirTerjun")
-	local x, zf = LAKE.X, LAKE.Y - 47
+	-- air jatuh sedikit miring mengikuti muka tebing
+	local x, zf = LAKE.X, LAKE.Y - 43
+	local top = Vector3.new(x, 47, LAKE.Y - 61)
+	local bot = Vector3.new(x, -1, zf)
 	local fall = Kit.deco({
 		Name = "Air",
-		Size = Vector3.new(22, 46, 2),
-		Position = Vector3.new(x, 23, zf),
+		Size = Vector3.new(22, (top - bot).Magnitude, 2),
+		CFrame = CFrame.lookAt((top + bot) / 2, top) * CFrame.Angles(math.pi / 2, 0, 0),
 		Color = col(150, 210, 245),
 		Transparency = 0.3,
 		Reflectance = 0.2,
@@ -126,7 +129,7 @@ local function buildWaterfall(zone: Instance)
 			Name = "Busa",
 			Shape = Enum.PartType.Ball,
 			Size = Vector3.one * (6 + (i % 2) * 3),
-			Position = Vector3.new(x - 10 + i * 5, -1, zf + 4),
+			Position = Vector3.new(x - 10 + i * 5, -1, zf + 3),
 			Color = Color3.new(1, 1, 1),
 			Transparency = 0.2,
 			Parent = f,

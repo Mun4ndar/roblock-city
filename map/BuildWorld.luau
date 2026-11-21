@@ -97,6 +97,8 @@ local function buildTerrain()
 	T.WaterReflectance = 0.35
 	T.WaterWaveSize = 0.08
 	T.WaterWaveSpeed = 6
+	-- rumput 3D terrain menembus jalan/parkir yang tipis, dan berat untuk HP
+	T.Decoration = false
 
 	-- Laut + dasar pasir, dibagi per lajur supaya Studio tidak macet
 	local W, D = 5600, 4800

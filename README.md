@@ -37,24 +37,41 @@ Urutan load ada di `ORDER` pada `init.server.luau` / `init.client.luau`; tambahk
 
 ## Peta
 
-Peta disimpan sebagai kode di `map/BuildTown.luau` (bukan file .rbxm), jadi perubahannya bisa dilihat di git.
-Skrip itu menghapus lalu membangun ulang `Workspace.Map`: jalankan di Studio mode Edit lewat Command Bar
-(tempel isinya) atau lewat Studio MCP. Setelah itu simpan place (Ctrl+S).
+Peta disimpan sebagai **kode** di folder `map/` (bukan file .rbxm), jadi setiap perubahan terlihat di git.
+Rojo menyinkronkan folder itu ke `ServerStorage/MapBuilders`. Untuk membangun ulang, jalankan di Command Bar
+Studio (mode Edit), lalu simpan place:
 
-Kota kecil saat ini (`Workspace.Map`, sekitar 700 part, semuanya anchored):
+```lua
+local MB = game.ServerStorage.MapBuilders
+require(MB.BuildWorld)()       -- Terrain (pulau, laut, gunung) + jalan lingkar. Menghapus Terrain!
+require(MB.BuildCountryside)() -- harus setelah BuildWorld (mengukir sungai di Terrain)
+require(MB.BuildTown)()
+require(MB.BuildDowntown)()
+require(MB.BuildResidential)()
+require(MB.BuildBeach)()
+require(MB.BuildAirport)()
+```
 
-| Folder | Isi |
-| --- | --- |
-| `Ground` | Tanah rumput 560x560 |
-| `Roads` | Grid jalan 3x3 (lebar 32, 2 lajur): segmen, persimpangan, marka kuning/putih, zebra cross |
-| `Sidewalks` | Pelat trotoar tiap blok + trotoar perumahan |
-| `Buildings/Downtown` | Toko, Kafe, Balai Kota, Rumah Sakit, Pemadam Kebakaran, Bengkel (masih placeholder) |
-| `Buildings/Houses` | 6 rumah di sisi utara jalan z = 120 |
-| `Park` | Taman dengan air mancur, bangku (bisa diduduki), petak bunga |
-| `Props` | Pohon, lampu jalan, tempat sampah, hidran |
-| `Spawns` | 4 SpawnLocation di jalan setapak taman (tanpa force field) |
+Setiap skrip hanya mengganti foldernya sendiri di `Workspace.Map`. Modul bantu: `MapKit` (part, jalan, pohon,
+lampu), `Buildings` (gedung tinggi, toko, lampu lalu lintas, parkir), `Homes` (rumah, rumah mewah, taman bermain),
+`Streets` (grid jalan bertrotoar).
+
+Dunia (utara = -Z, sekitar 8.500 part, semua anchored, StreamingEnabled aktif):
+
+| Kawasan | Folder `Workspace.Map` | Lokasi | Isi |
+| --- | --- | --- | --- |
+| Jalan lingkar | `Highway` | x -480..900, z -1100..1080 | 4 lajur, penghubung ke tiap kawasan, jembatan ke Beach Island |
+| Downtown City | `Downtown` | tengah-utara | Boulevard berpalem, bundaran monumen, 23 gedung tinggi (Menara ROBLOCK 260 stud), mal, hotel, bioskop, SPBU, taman kota |
+| Perumahan | `Residential`, `Neighborhoods` | selatan | Kota kecil (RS, damkar, bengkel, toko, kafe, balai kota, taman + spawn), sekolah, taman bermain, ±95 rumah, 6 rumah mewah |
+| Beach Island | `Beach` | pulau timur | Jalan pantai, promenade, resor & kolam, dermaga + bianglala, pelabuhan & kapal, mercusuar, sewa jet ski |
+| Countryside | `Countryside` | barat | Sungai & air terjun, hutan, ladang, lumbung, kincir angin, sapi & domba, perkemahan |
+| Bandara | `Airport` | barat daya | Landasan pacu, taxiway, terminal, garbarata, menara kontrol, hangar, pesawat |
+
+Catatan Terrain: permukaan terrain tampil sekitar 2 stud di atas batas isi `FillBlock`, jadi rumput diisi sampai
+y = -2 agar permukaannya pas di y = 0 (sejajar jalan part). `FillCylinder` membulatkan tinggi ke grid 4 stud,
+jadi bentuk bulat digambar sebagai jalur-jalur `FillBlock`.
 
 ## Cek kode
 
-- Format: `stylua src`
-- Lint: `selene src`
+- Format: `stylua src map`
+- Lint: `selene src map`
