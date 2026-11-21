@@ -16,6 +16,11 @@ Net.Names = table.freeze({
 	VehicleSpawn = "VehicleSpawn", -- RemoteFunction: (vehicleId: string) -> VehicleResult
 	VehicleDespawn = "VehicleDespawn", -- RemoteFunction: () -> VehicleResult
 	VehicleFlip = "VehicleFlip", -- RemoteEvent: client -> server, tanpa argumen (balikkan mobil sendiri)
+	JobSelect = "JobSelect", -- RemoteFunction: (jobId: string, "" = berhenti) -> JobResult
+	JobStep = "JobStep", -- RemoteFunction: (taskId: number, stepIndex: number) -> JobResult
+	JobSkip = "JobSkip", -- RemoteFunction: () -> JobResult (minta tugas lain)
+	JobTask = "JobTask", -- RemoteEvent: server -> client, (task: JobConfig.TaskView?)
+	JobSync = "JobSync", -- RemoteEvent: client -> server, minta kirim ulang tugas aktif
 })
 
 local function getFolder(): Folder

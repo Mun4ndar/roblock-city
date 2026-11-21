@@ -14,7 +14,7 @@ Dibangun dengan [Rojo](https://rojo.space): kode ada di folder `src/`, lalu disi
 
 | Folder | Di Studio | Isi |
 | --- | --- | --- |
-| `src/shared` | ReplicatedStorage/Shared | Config, Types, Net (remote), Format, VehicleConfig, VehicleBuilder |
+| `src/shared` | ReplicatedStorage/Shared | Config, Types, Net (remote), Format, VehicleConfig, VehicleBuilder, JobConfig |
 | `src/server` | ServerScriptService/Server | `Services/`: logika server-authoritative |
 | `src/client` | StarterPlayerScripts/Client | `Controllers/`: UI, input, tampilan |
 
@@ -32,6 +32,25 @@ Urutan load ada di `ORDER` pada `init.server.luau` / `init.client.luau`; tambahk
 - **VehicleService**: kepemilikan, pembelian, dan spawn kendaraan. Client hanya mengirim `id`; harga, saldo,
   jarak ke dealer, cooldown, dan batas spawn (1 mobil per pemain) dicek di server. Kendaraan yang dimiliki
   tersimpan di data pemain (`vehicles`) dan dikirim ke client lewat atribut Player `OwnedVehicles`.
+
+- **JobService**: pekerjaan pemain. Server menyusun tugas dan menghitung gaji; client hanya melapor "langkah ke-n
+  selesai". Setiap langkah dicek jaraknya (pemain harus di dekat penanda) dan waktu tempuhnya (harus wajar untuk
+  kendaraan tercepat milik pemain). Ada pengawas perpindahan mendadak, rate limit, dan batas gaji per 5 menit.
+  Kemajuan tersimpan di data pemain (`jobs`) dan dikirim ke client lewat atribut Player `Job` dan `JobStats`.
+
+### Pekerjaan
+
+- Semua pekerjaan didefinisikan di `src/shared/JobConfig.luau`: `PLACES` (titik di peta), `POOLS` (kelompok tempat),
+  dan `LIST` (pekerjaan + templat tugas). **Menambah pekerjaan atau tugas baru = menambah entri**; menu dan server
+  mengikuti otomatis. Saat ini: Kurir, Mekanik, Polisi, Pemadam Kebakaran, Dokter.
+- Satu tugas = beberapa langkah. Tiap langkah punya tempat (tetap, acak dari pool, atau sama dengan langkah lain),
+  teks tombol, lama menahan tombol, dan hiasan opsional (`package`, `car`, `fire`, `person`, `cat`, `cone`).
+- Gaji = (`basePay` + `payPerStud` x jarak antar langkah) x bonus level. Level naik menurut jumlah tugas selesai
+  (`LEVELS`), +5% gaji per level. Kisaran saat ini sekitar $100 sampai $200 per menit bermain aktif.
+- `JobController` (client) menggambar penanda kuning, tiang cahaya, tombol tahan (ProximityPrompt), dan hiasan
+  tugas hanya di layar pemain yang bertugas. `JobUiController` berisi menu Pekerjaan dan panel tugas (judul, gaji,
+  langkah, jarak, panah arah).
+- Koordinat di `PLACES` mengikuti peta di `map/`. Jika bangunan dipindah, perbarui posisinya di sana.
 
 ### Kendaraan
 

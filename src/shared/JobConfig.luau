@@ -1,0 +1,696 @@
+--!strict
+-- Daftar pekerjaan. Semuanya berbasis data:
+--   * PLACES    : titik di peta (nama + posisi) yang bisa jadi tujuan tugas
+--   * POOLS     : kelompok tempat (mis. "alamat" = semua tujuan antar paket)
+--   * LIST      : pekerjaan, masing-masing punya beberapa templat tugas
+-- Menambah pekerjaan/tugas baru = menambah entri di sini; JobService (server)
+-- dan UI (client) mengikuti otomatis.
+--
+-- Modul ini ikut ter-replikasi ke client. Client hanya memakainya untuk
+-- tampilan; gaji dihitung dan divalidasi server.
+
+export type PropKind = "package" | "car" | "fire" | "person" | "cat" | "cone"
+
+export type Place = {
+	name: string,
+	position: Vector3, -- titik di permukaan tanah
+	yaw: number?, -- derajat; arah hadap prop mobil di tempat ini
+}
+
+export type StepSpec = {
+	-- Tempat langkah ini (pilih satu):
+	place: string?, -- tempat tetap
+	pool: string?, -- dipilih acak dari kelompok tempat
+	sameAs: number?, -- tempat yang sama dengan langkah ke-n
+	-- Batasan pemilihan dari pool, relatif ke titik sebelumnya:
+	nearest: number?, -- acak di antara n tempat terdekat
+	minDist: number?,
+	maxDist: number?,
+	offset: Vector3?, -- geser penanda dari titik tempat (mengikuti yaw tempat)
+	action: string, -- teks tombol tahan (ProximityPrompt)
+	text: string, -- teks di panel tugas; "{tempat}" diganti nama tempat
+	hold: number, -- detik menahan tombol
+	prop: PropKind?, -- hiasan yang muncul di langkah ini (hanya di layar pemain itu)
+	consume: boolean?, -- prop hilang setelah langkah selesai
+}
+
+export type TaskTemplate = {
+	id: string,
+	title: string,
+	weight: number, -- peluang terpilih
+	basePay: number,
+	payPerStud: number, -- tambahan per stud jarak antar langkah
+	steps: { StepSpec },
+}
+
+export type JobDef = {
+	id: string,
+	name: string,
+	icon: string,
+	color: Color3,
+	description: string,
+	workplace: string, -- teks lokasi kantor di UI
+	tasks: { TaskTemplate },
+}
+
+-- Payload yang dikirim server ke client (remote JobTask).
+export type TaskStepView = {
+	position: Vector3,
+	origin: Vector3, -- titik tempat (lokasi prop mobil)
+	yaw: number,
+	placeName: string,
+	action: string,
+	text: string,
+	hold: number,
+	prop: PropKind?,
+	consume: boolean,
+}
+
+export type TaskView = {
+	id: number,
+	jobId: string,
+	title: string,
+	pay: number,
+	index: number, -- langkah yang sedang aktif (1..#steps)
+	steps: { TaskStepView },
+}
+
+export type JobStats = { tasks: number, earned: number }
+
+local JobConfig = {}
+
+-- ---------------------------------------------------------------- aturan server
+
+JobConfig.STEP_RADIUS = 16 -- pemain harus sedekat ini (mendatar) dari penanda
+JobConfig.PROMPT_DISTANCE = 12
+JobConfig.REMOTE_COOLDOWN = 0.3 -- jeda minimal antar panggilan remote pekerjaan
+JobConfig.SELECT_COOLDOWN = 3 -- jeda ganti pekerjaan
+JobConfig.SKIP_COOLDOWN = 20 -- jeda tombol "Ganti tugas"
+JobConfig.WALK_SPEED = 24 -- stud/dtk; batas wajar tanpa kendaraan (sedikit di atas lari)
+JobConfig.SPEED_SLACK = 1.25 -- kelonggaran di atas kecepatan kendaraan tercepat milik pemain
+JobConfig.HOLD_SLACK = 0.8 -- bagian dari waktu tahan yang wajib berlalu
+JobConfig.TELEPORT_SPEED = 200 -- stud/dtk; lebih dari ini dianggap berpindah tidak wajar
+JobConfig.TELEPORT_SLACK = 40 -- stud
+JobConfig.EARN_WINDOW = 300 -- detik
+JobConfig.MAX_EARN_PER_WINDOW = 3000 -- batas gaji per jendela waktu (pengaman)
+JobConfig.NEXT_TASK_DELAY = 1.5 -- detik sebelum tugas berikutnya muncul
+
+-- Naik level berdasarkan jumlah tugas selesai di pekerjaan itu.
+-- LEVELS[n] = jumlah tugas minimal untuk level n.
+JobConfig.LEVELS = { 0, 5, 15, 30, 50, 80, 120, 170, 230, 300 }
+JobConfig.LEVEL_BONUS = 0.05 -- +5% gaji per level di atas 1
+
+-- Atribut Player (diset server, dibaca client)
+JobConfig.ATTR_JOB = "Job" -- id pekerjaan aktif, "" = tidak bekerja
+JobConfig.ATTR_STATS = "JobStats" -- JSON { [jobId] = { tasks, earned } }
+
+-- ---------------------------------------------------------------- tempat
+
+local function place(name: string, x: number, y: number, z: number, yaw: number?): Place
+	return { name = name, position = Vector3.new(x, y, z), yaw = yaw }
+end
+
+JobConfig.PLACES = {
+	-- Kota kecil (Perumahan)
+	rumahSakit = place("Rumah Sakit", 40, 1, 433),
+	toko = place("Toko", 138, 1, 433),
+	kafe = place("Kafe", 184, 1, 433),
+	damkar = place("Pemadam Kebakaran", 132, 1, 467),
+	bengkel = place("Bengkel", 186, 1, 467),
+	bengkelServis = place("Halaman Bengkel", 186, 1, 518, 90),
+	balaiKota = place("Balai Kota", 160, 1, 347),
+	tamanPerumahan = place("Taman Perumahan", 24, 1, 538),
+	sekolah = place("Sekolah", -183, 0, 146, 90),
+	aula = place("Aula Sekolah", -263, 0.6, 245),
+	tamanBermain = place("Taman Bermain", 440, 0, 340, 90),
+	rumah18 = place("Rumah No. 18", 438, 0.6, 100),
+	rumah20 = place("Rumah No. 20", 658, 0.6, 100),
+	rumah27 = place("Rumah No. 27", 787, 0.6, 140),
+	rumah29 = place("Rumah No. 29", -427, 0.6, 760),
+	rumah34 = place("Rumah No. 34", -42, 0.6, 760),
+	rumah49 = place("Rumah No. 49", 493, 0.6, 760),
+	rumah62 = place("Rumah No. 62", -427, 0.6, 940),
+	rumah65 = place("Rumah No. 65", -152, 0.6, 940),
+	rumah74 = place("Rumah No. 74", -48, 0.6, 980),
+	rumah76 = place("Rumah No. 76", 163, 0.6, 940),
+	rumah78 = place("Rumah No. 78", 273, 0.6, 940),
+	rumah85 = place("Rumah No. 85", 267, 0.6, 980),
+	rumah88 = place("Rumah No. 88", 432, 0.6, 980),
+	-- Downtown
+	kantorPos = place("Kantor Pos", -380, 1.1, -399),
+	mall = place("ROBLOCK Mall", 565, 1.1, -536),
+	kafeKota = place("Kafe Kota", 20, 1.1, -551),
+	pusatBisnis = place("Pusat Bisnis", 258, 1.1, -541),
+	perpustakaan = place("Perpustakaan", 272, 1.1, -409),
+	bioskop = place("Bioskop", -368, 1.1, -566),
+	hotel = place("Hotel", 525, 1.1, -962),
+	menara = place("Menara ROBLOCK", 258, 1.1, -955),
+	spbu = place("Toko SPBU", 771, 1.3, -330),
+	spbuParkir = place("Halaman SPBU", 700, 1.3, -330, 90),
+	parkirUmum = place("Parkir Umum", 771, 1.3, -604),
+	parkirUmumBarat = place("Parkir Umum Barat", 720, 1.3, -570, 90),
+	tamanKota = place("Taman Kota", -120, 0, -140),
+	-- Beach Island
+	sewaJetSki = place("Sewa Jet Ski", 2075, 0, -150),
+	kiosKelapa = place("Kios Kelapa", 1871, 0, 250),
+	kiosEsKrim = place("Kios Es Krim", 1871, 0, -60),
+	terminalFeri = place("Terminal Feri", 1770, 0, 697),
+	dermaga = place("Dermaga", 2150, 3, 120),
+	mercusuar = place("Mercusuar", 1780, 0, -560),
+	-- Bandara
+	bandara = place("Terminal Bandara", -975, 0.4, 628),
+	parkirBandara = place("Parkir Bandara", -990, 0.3, 535, 90),
+	parkirBandaraTimur = place("Parkir Bandara Timur", -900, 0.3, 520),
+	-- Countryside
+	lumbung = place("Lumbung", -830, 0, 365),
+	kincirAngin = place("Kincir Angin", -960, 0, 400),
+	perkemahan = place("Perkemahan", -865, 3, -400),
+} :: { [string]: Place }
+
+local RUMAH = {
+	"rumah18",
+	"rumah20",
+	"rumah27",
+	"rumah29",
+	"rumah34",
+	"rumah49",
+	"rumah62",
+	"rumah65",
+	"rumah74",
+	"rumah76",
+	"rumah78",
+	"rumah85",
+	"rumah88",
+}
+
+JobConfig.POOLS = {
+	-- tempat mengambil paket
+	depot = { "kantorPos", "toko", "mall", "terminalFeri", "bandara", "lumbung" },
+	-- tujuan antar (rumah + tempat umum)
+	alamat = {
+		"kafe",
+		"balaiKota",
+		"rumahSakit",
+		"sekolah",
+		"kafeKota",
+		"pusatBisnis",
+		"perpustakaan",
+		"bioskop",
+		"hotel",
+		"menara",
+		"spbu",
+		"sewaJetSki",
+		"kiosKelapa",
+		"kiosEsKrim",
+		"lumbung",
+		"perkemahan",
+		table.unpack(RUMAH),
+	},
+	rumah = RUMAH,
+	-- tempat lapang untuk mobil mogok
+	mogok = {
+		"sekolah",
+		"tamanBermain",
+		"spbuParkir",
+		"parkirUmum",
+		"parkirUmumBarat",
+		"parkirBandara",
+		"parkirBandaraTimur",
+	},
+	patroli = {
+		"tamanPerumahan",
+		"toko",
+		"sekolah",
+		"tamanBermain",
+		"tamanKota",
+		"mall",
+		"kantorPos",
+		"perpustakaan",
+		"bioskop",
+		"menara",
+		"spbu",
+		"dermaga",
+		"terminalFeri",
+		"kiosEsKrim",
+		"bandara",
+	},
+	-- tempat warga menunggu bantuan
+	warga = {
+		"tamanPerumahan",
+		"tamanBermain",
+		"tamanKota",
+		"mall",
+		"perpustakaan",
+		"bioskop",
+		"dermaga",
+	},
+	penyeberangan = { "sekolah", "aula", "tamanBermain", "mall" },
+	-- lokasi api kecil (tempat sampah berasap)
+	kebakaran = {
+		"kafe",
+		"toko",
+		"sekolah",
+		"kafeKota",
+		"bioskop",
+		"lumbung",
+		"kiosKelapa",
+		"rumah18",
+		"rumah34",
+		"rumah76",
+	},
+	pohon = { "tamanPerumahan", "tamanBermain", "tamanKota", "aula", "kincirAngin" },
+} :: { [string]: { string } }
+
+-- ---------------------------------------------------------------- pekerjaan
+
+JobConfig.LIST = {
+	{
+		id = "kurir",
+		name = "Kurir",
+		icon = "📦",
+		color = Color3.fromRGB(240, 150, 40),
+		description = "Ambil paket lalu antar ke alamat tujuan. Makin jauh, makin besar upahnya!",
+		workplace = "Kantor Pos, Toko, dan Mall",
+		tasks = {
+			{
+				id = "dekat",
+				title = "Antar paket",
+				weight = 3,
+				basePay = 30,
+				payPerStud = 0.08,
+				steps = {
+					{
+						pool = "depot",
+						nearest = 1,
+						action = "Ambil paket",
+						text = "Ambil paket di {tempat}",
+						hold = 1,
+						prop = "package",
+						consume = true,
+					},
+					{
+						pool = "alamat",
+						minDist = 150,
+						maxDist = 900,
+						action = "Serahkan paket",
+						text = "Antar paket ke {tempat}",
+						hold = 1,
+					},
+				},
+			},
+			{
+				id = "jauh",
+				title = "Kiriman kilat antar kawasan",
+				weight = 1,
+				basePay = 40,
+				payPerStud = 0.09,
+				steps = {
+					{
+						pool = "depot",
+						nearest = 1,
+						action = "Ambil paket",
+						text = "Ambil paket kilat di {tempat}",
+						hold = 1,
+						prop = "package",
+						consume = true,
+					},
+					{
+						pool = "alamat",
+						minDist = 900,
+						maxDist = 3200,
+						action = "Serahkan paket",
+						text = "Antar paket kilat ke {tempat}",
+						hold = 1,
+					},
+				},
+			},
+		},
+	},
+	{
+		id = "mekanik",
+		name = "Mekanik",
+		icon = "🔧",
+		color = Color3.fromRGB(90, 150, 235),
+		description = "Servis mobil pelanggan di Bengkel dan tolong mobil yang mogok di jalan.",
+		workplace = "Bengkel (kota kecil)",
+		tasks = {
+			{
+				id = "servis",
+				title = "Servis mobil pelanggan",
+				weight = 3,
+				basePay = 45,
+				payPerStud = 0,
+				steps = {
+					{
+						place = "bengkelServis",
+						offset = Vector3.new(0, 0, -11),
+						action = "Periksa mesin",
+						text = "Periksa mesin mobil di {tempat}",
+						hold = 3,
+						prop = "car",
+					},
+					{
+						sameAs = 1,
+						offset = Vector3.new(-7, 0, 3),
+						action = "Ganti oli",
+						text = "Ganti oli mobil",
+						hold = 3,
+					},
+					{
+						sameAs = 1,
+						offset = Vector3.new(7, 0, -3),
+						action = "Pompa ban",
+						text = "Pompa ban mobil",
+						hold = 3,
+					},
+					{
+						sameAs = 1,
+						offset = Vector3.new(0, 0, 11),
+						action = "Cuci mobil",
+						text = "Cuci mobil sampai kinclong",
+						hold = 3,
+					},
+				},
+			},
+			{
+				id = "mogok",
+				title = "Panggilan mobil mogok",
+				weight = 2,
+				basePay = 40,
+				payPerStud = 0.08,
+				steps = {
+					{
+						place = "bengkel",
+						action = "Ambil peralatan",
+						text = "Ambil kotak peralatan di {tempat}",
+						hold = 1,
+					},
+					{
+						pool = "mogok",
+						minDist = 200,
+						offset = Vector3.new(0, 0, -11),
+						action = "Perbaiki mesin",
+						text = "Perbaiki mobil mogok di {tempat}",
+						hold = 4,
+						prop = "car",
+					},
+					{
+						sameAs = 2,
+						offset = Vector3.new(7, 0, 3),
+						action = "Ganti ban",
+						text = "Ganti ban yang kempes",
+						hold = 3,
+					},
+				},
+			},
+		},
+	},
+	{
+		id = "polisi",
+		name = "Polisi",
+		icon = "👮",
+		color = Color3.fromRGB(60, 90, 190),
+		description = "Jaga kota tetap aman dan tertib: patroli, bantu warga, dan seberangkan anak-anak.",
+		workplace = "Pos Polisi di Balai Kota",
+		tasks = {
+			{
+				id = "patroli",
+				title = "Patroli kota",
+				weight = 3,
+				basePay = 30,
+				payPerStud = 0.08,
+				steps = {
+					{
+						pool = "patroli",
+						nearest = 3,
+						action = "Periksa keadaan",
+						text = "Patroli ke {tempat}",
+						hold = 2,
+					},
+					{
+						pool = "patroli",
+						minDist = 120,
+						maxDist = 900,
+						action = "Periksa keadaan",
+						text = "Lanjut patroli ke {tempat}",
+						hold = 2,
+					},
+					{
+						pool = "patroli",
+						minDist = 120,
+						maxDist = 900,
+						action = "Periksa keadaan",
+						text = "Patroli terakhir di {tempat}",
+						hold = 2,
+					},
+				},
+			},
+			{
+				id = "tersesat",
+				title = "Antar anak tersesat pulang",
+				weight = 2,
+				basePay = 35,
+				payPerStud = 0.08,
+				steps = {
+					{
+						pool = "warga",
+						nearest = 3,
+						action = "Tenangkan anak",
+						text = "Temui anak yang tersesat di {tempat}",
+						hold = 2,
+						prop = "person",
+						consume = true,
+					},
+					{
+						pool = "rumah",
+						minDist = 150,
+						maxDist = 1400,
+						action = "Antar sampai rumah",
+						text = "Antar anak itu pulang ke {tempat}",
+						hold = 1,
+					},
+				},
+			},
+			{
+				id = "seberang",
+				title = "Bantu menyeberang jalan",
+				weight = 2,
+				basePay = 45,
+				payPerStud = 0.08,
+				steps = {
+					{
+						place = "balaiKota",
+						action = "Ambil rompi dan peluit",
+						text = "Ambil rompi dan peluit di {tempat}",
+						hold = 1,
+					},
+					{
+						pool = "penyeberangan",
+						minDist = 100,
+						action = "Seberangkan warga",
+						text = "Bantu warga menyeberang di {tempat}",
+						hold = 5,
+						prop = "cone",
+						consume = true,
+					},
+				},
+			},
+		},
+	},
+	{
+		id = "pemadam",
+		name = "Pemadam Kebakaran",
+		icon = "🚒",
+		color = Color3.fromRGB(225, 70, 60),
+		description = "Padamkan api kecil sebelum membesar dan selamatkan kucing yang terjebak di pohon.",
+		workplace = "Kantor Pemadam Kebakaran",
+		tasks = {
+			{
+				id = "api",
+				title = "Padamkan api",
+				weight = 3,
+				basePay = 40,
+				payPerStud = 0.08,
+				steps = {
+					{
+						place = "damkar",
+						action = "Siapkan selang",
+						text = "Siapkan selang di {tempat}",
+						hold = 1,
+					},
+					{
+						pool = "kebakaran",
+						minDist = 80,
+						action = "Semprot air",
+						text = "Padamkan api di {tempat}",
+						hold = 4,
+						prop = "fire",
+						consume = true,
+					},
+					{
+						sameAs = 2,
+						offset = Vector3.new(9, 0, 0),
+						action = "Semprot air",
+						text = "Padamkan sisa api",
+						hold = 3,
+						prop = "fire",
+						consume = true,
+					},
+				},
+			},
+			{
+				id = "kucing",
+				title = "Selamatkan kucing",
+				weight = 2,
+				basePay = 45,
+				payPerStud = 0.08,
+				steps = {
+					{
+						place = "damkar",
+						action = "Ambil tangga",
+						text = "Ambil tangga di {tempat}",
+						hold = 1,
+					},
+					{
+						pool = "pohon",
+						minDist = 80,
+						action = "Turunkan kucing",
+						text = "Selamatkan kucing di {tempat}",
+						hold = 4,
+						prop = "cat",
+						consume = true,
+					},
+				},
+			},
+		},
+	},
+	{
+		id = "dokter",
+		name = "Dokter",
+		icon = "🩺",
+		color = Color3.fromRGB(40, 180, 160),
+		description = "Periksa pasien di Rumah Sakit, kunjungi pasien di rumah, dan jemput yang butuh bantuan.",
+		workplace = "Rumah Sakit",
+		tasks = {
+			{
+				id = "kunjungan",
+				title = "Kunjungan ke rumah pasien",
+				weight = 3,
+				basePay = 40,
+				payPerStud = 0.08,
+				steps = {
+					{
+						place = "rumahSakit",
+						action = "Ambil tas dokter",
+						text = "Ambil tas dokter di {tempat}",
+						hold = 1,
+					},
+					{
+						pool = "rumah",
+						minDist = 150,
+						action = "Periksa pasien",
+						text = "Periksa pasien di {tempat}",
+						hold = 4,
+						prop = "person",
+					},
+				},
+			},
+			{
+				id = "jemput",
+				title = "Jemput pasien",
+				weight = 2,
+				basePay = 40,
+				payPerStud = 0.08,
+				steps = {
+					{
+						pool = "warga",
+						nearest = 4,
+						action = "Bantu pasien",
+						text = "Jemput pasien di {tempat}",
+						hold = 2,
+						prop = "person",
+						consume = true,
+					},
+					{
+						place = "rumahSakit",
+						action = "Antar ke dokter jaga",
+						text = "Antar pasien ke {tempat}",
+						hold = 2,
+					},
+				},
+			},
+			{
+				id = "periksa",
+				title = "Periksa pasien di Rumah Sakit",
+				weight = 2,
+				basePay = 40,
+				payPerStud = 0,
+				steps = {
+					{
+						place = "rumahSakit",
+						offset = Vector3.new(-14, 0, 0),
+						action = "Periksa pasien",
+						text = "Periksa pasien pertama di {tempat}",
+						hold = 3,
+						prop = "person",
+						consume = true,
+					},
+					{
+						sameAs = 1,
+						offset = Vector3.new(0, 0, 0),
+						action = "Beri obat",
+						text = "Beri obat ke pasien kedua",
+						hold = 3,
+						prop = "person",
+						consume = true,
+					},
+					{
+						sameAs = 1,
+						offset = Vector3.new(14, 0, 0),
+						action = "Balut luka",
+						text = "Balut luka pasien ketiga",
+						hold = 3,
+						prop = "person",
+						consume = true,
+					},
+				},
+			},
+		},
+	},
+} :: { JobDef }
+
+local byId: { [string]: JobDef } = {}
+for _, def in JobConfig.LIST do
+	assert(byId[def.id] == nil, "id pekerjaan ganda: " .. def.id)
+	byId[def.id] = def
+end
+
+-- Mengembalikan definisi pekerjaan, atau nil jika id tidak dikenal.
+-- Aman dipanggil dengan nilai apa pun dari client.
+function JobConfig.get(id: any): JobDef?
+	if type(id) ~= "string" or #id > 32 then
+		return nil
+	end
+	return byId[id]
+end
+
+function JobConfig.levelFor(tasks: number): number
+	local level = 1
+	for index, needed in JobConfig.LEVELS do
+		if tasks >= needed then
+			level = index
+		end
+	end
+	return level
+end
+
+-- Jumlah tugas untuk naik ke level berikutnya, nil jika sudah level tertinggi.
+function JobConfig.nextLevelAt(tasks: number): number?
+	return JobConfig.LEVELS[JobConfig.levelFor(tasks) + 1]
+end
+
+function JobConfig.payMultiplier(level: number): number
+	return 1 + JobConfig.LEVEL_BONUS * (level - 1)
+end
+
+return JobConfig

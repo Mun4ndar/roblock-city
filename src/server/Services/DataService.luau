@@ -50,6 +50,7 @@ local function defaultData(): PlayerData
 		lastDailyReward = 0,
 		stats = { totalEarned = 0, joins = 0 },
 		vehicles = {},
+		jobs = { current = "", stats = {} },
 	}
 end
 
@@ -87,6 +88,15 @@ local function migrate(raw: any): PlayerData
 	end
 	if type(raw.vehicles) ~= "table" then
 		raw.vehicles = {}
+	end
+	if type(raw.jobs) ~= "table" then
+		raw.jobs = {}
+	end
+	if type(raw.jobs.current) ~= "string" then
+		raw.jobs.current = ""
+	end
+	if type(raw.jobs.stats) ~= "table" then
+		raw.jobs.stats = {}
 	end
 	return raw :: PlayerData
 end

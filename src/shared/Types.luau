@@ -12,6 +12,18 @@ export type PlayerData = {
 	},
 	-- Kendaraan yang dimiliki: id (lihat VehicleConfig) -> catatan kepemilikan.
 	vehicles: { [string]: OwnedVehicle },
+	-- Pekerjaan: yang sedang dijalani + kemajuan tiap pekerjaan (lihat JobConfig).
+	jobs: JobData,
+}
+
+export type JobData = {
+	current: string, -- id pekerjaan aktif, "" = tidak bekerja
+	stats: { [string]: JobProgress },
+}
+
+export type JobProgress = {
+	tasks: number, -- jumlah tugas selesai
+	earned: number, -- total gaji dari pekerjaan ini
 }
 
 export type OwnedVehicle = {
@@ -21,6 +33,12 @@ export type OwnedVehicle = {
 
 -- Balasan semua remote kendaraan.
 export type VehicleResult = {
+	ok: boolean,
+	message: string,
+}
+
+-- Balasan semua remote pekerjaan.
+export type JobResult = {
 	ok: boolean,
 	message: string,
 }
