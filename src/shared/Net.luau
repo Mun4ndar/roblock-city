@@ -21,6 +21,11 @@ Net.Names = table.freeze({
 	JobSkip = "JobSkip", -- RemoteFunction: () -> JobResult (minta tugas lain)
 	JobTask = "JobTask", -- RemoteEvent: server -> client, (task: JobConfig.TaskView?)
 	JobSync = "JobSync", -- RemoteEvent: client -> server, minta kirim ulang tugas aktif
+	HouseBuy = "HouseBuy", -- RemoteFunction: (houseId: number) -> HouseResult
+	HouseSell = "HouseSell", -- RemoteFunction: () -> HouseResult
+	HousePaint = "HousePaint", -- RemoteFunction: (slot: string, colorIndex: number) -> HouseResult
+	HouseItem = "HouseItem", -- RemoteFunction: (yardSlot: number, itemId: string, "" = kosongkan) -> HouseResult
+	HouseGoHome = "HouseGoHome", -- RemoteFunction: () -> HouseResult (pulang ke depan rumah)
 })
 
 local function getFolder(): Folder

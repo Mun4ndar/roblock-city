@@ -14,6 +14,16 @@ export type PlayerData = {
 	vehicles: { [string]: OwnedVehicle },
 	-- Pekerjaan: yang sedang dijalani + kemajuan tiap pekerjaan (lihat JobConfig).
 	jobs: JobData,
+	-- Rumah yang dimiliki (lihat HouseConfig). id 0 = belum punya.
+	house: HouseData,
+}
+
+export type HouseData = {
+	id: number, -- nomor rumah di peta, 0 = belum punya
+	tier: string,
+	boughtAt: number,
+	paint: { [string]: number }, -- bagian (wall/roof/door) -> indeks warna, 0/nil = asli
+	items: { [string]: string }, -- nomor slot halaman (teks) -> id hiasan
 }
 
 export type JobData = {
@@ -33,6 +43,12 @@ export type OwnedVehicle = {
 
 -- Balasan semua remote kendaraan.
 export type VehicleResult = {
+	ok: boolean,
+	message: string,
+}
+
+-- Balasan semua remote rumah.
+export type HouseResult = {
 	ok: boolean,
 	message: string,
 }

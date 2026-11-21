@@ -39,7 +39,9 @@ local APPLY_PER_FRAME = 40
 
 type Saved = { material: Enum.Material, color: Color3, reflectance: number }
 
-local saved: { [BasePart]: Saved } = setmetatable({}, { __mode = "k" }) :: any
+-- Tabel biasa (bukan weak): pembungkus Instance di Luau bisa ikut tersapu GC
+-- walau part-nya masih ada, lalu tampilan asli hilang. Dibersihkan saat part dilepas.
+local saved: { [BasePart]: Saved } = {}
 local queue: { Instance } = {}
 local lightsOn = false
 local lastFactor = -1
@@ -206,6 +208,9 @@ function DayNightController.start()
 	for _, tag in { DayNightConfig.TAG_LIGHT, DayNightConfig.TAG_WINDOW } do
 		CollectionService:GetInstanceAddedSignal(tag):Connect(function(inst: Instance)
 			apply(inst, lightsOn)
+		end)
+		CollectionService:GetInstanceRemovedSignal(tag):Connect(function(inst: Instance)
+			saved[inst :: BasePart] = nil
 		end)
 	end
 

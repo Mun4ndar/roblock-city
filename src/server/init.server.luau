@@ -12,6 +12,8 @@ local ORDER = {
 	"VehicleService",
 	"UniformService",
 	"JobService",
+	"HouseService",
+	"DebugService",
 }
 
 local loaded: { { name: string, module: any } } = {}

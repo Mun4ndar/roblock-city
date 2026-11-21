@@ -1,0 +1,539 @@
+--!strict
+-- HouseService: rumah pemain di perumahan (Workspace.Map.Neighborhoods.Houses).
+--   * rumah dikenali dari peta saat server mulai (nomor, tipe, titik pusat)
+--   * beli/jual/cat/hiasan halaman: semuanya divalidasi di sini, client hanya meminta
+--   * kepemilikan tersimpan di PlayerData.house; kalau rumahnya sedang ditempati
+--     pemain lain di server ini, pemain mendapat rumah pengganti setipe
+--   * tampilan rumah (cat, hiasan, papan nama) hanya dipasang selama pemiliknya ada
+
+local CollectionService = game:GetService("CollectionService")
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+
+local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
+local Net = require(Shared:WaitForChild("Net"))
+local Types = require(Shared:WaitForChild("Types"))
+local Format = require(Shared:WaitForChild("Format"))
+local HouseConfig = require(Shared:WaitForChild("HouseConfig"))
+local DayNightConfig = require(Shared:WaitForChild("DayNightConfig"))
+
+local DataService = require(script.Parent:WaitForChild("DataService"))
+local EconomyService = require(script.Parent:WaitForChild("EconomyService"))
+
+type HouseData = Types.HouseData
+type HouseResult = Types.HouseResult
+
+type House = {
+	id: number,
+	model: Model,
+	base: CFrame, -- pusat rumah di tanah; depan rumah = -Z
+	tier: string,
+	owner: Player?,
+	groups: { [string]: { BasePart } }, -- bagian cat -> part
+	original: { [BasePart]: Color3 },
+	items: { [number]: Model },
+	sign: BillboardGui?,
+}
+
+local HouseService = {}
+
+local CALL_COOLDOWN = 0.35
+local FOUNDATION_HEIGHT = 0.8
+local TWO_STORY_HEIGHT = 12
+local DOOR_FRONT = CFrame.new(-3, 4, -13) * CFrame.Angles(0, math.pi, 0)
+
+local houses: { [number]: House } = {}
+local byPlayer: { [Player]: House } = {}
+local lastCall: { [Player]: number } = {}
+local lastHome: { [Player]: number } = {}
+local itemFolder: Folder
+
+-- ---------------------------------------------------------------- util
+
+local function result(ok: boolean, message: string): HouseResult
+	return { ok = ok, message = message }
+end
+
+local function allowCall(player: Player): boolean
+	local now = os.clock()
+	local last = lastCall[player]
+	if last and now - last < CALL_COOLDOWN then
+		return false
+	end
+	lastCall[player] = now
+	return true
+end
+
+local function isInteger(value: any, min: number, max: number): boolean
+	return type(value) == "number"
+		and value == value
+		and math.floor(value) == value
+		and value >= min
+		and value <= max
+end
+
+local function emptyHouse(): HouseData
+	return { id = 0, tier = "", boughtAt = 0, paint = {}, items = {} }
+end
+
+-- Data lama/rusak dirapikan supaya sisa kode boleh percaya pada bentuknya.
+local function sanitize(data: Types.PlayerData): HouseData
+	local hd: any = data.house
+	if type(hd) ~= "table" or type(hd.id) ~= "number" or HouseConfig.tier(hd.tier) == nil then
+		data.house = emptyHouse()
+		return data.house
+	end
+	if type(hd.paint) ~= "table" then
+		hd.paint = {}
+	end
+	if type(hd.items) ~= "table" then
+		hd.items = {}
+	end
+	return hd
+end
+
+local function publish(player: Player)
+	local data = DataService.getData(player)
+	if data == nil then
+		return
+	end
+	local hd = data.house
+	local house = byPlayer[player]
+	local pos = if house then (house.base * DOOR_FRONT).Position else Vector3.zero
+	local view: HouseConfig.HouseView = {
+		id = hd.id,
+		live = if house then house.id else 0,
+		tier = hd.tier,
+		paint = hd.paint,
+		items = hd.items,
+		pos = { math.round(pos.X), math.round(pos.Y), math.round(pos.Z) },
+	}
+	player:SetAttribute(HouseConfig.ATTR_PLAYER, HttpService:JSONEncode(view))
+end
+
+-- ---------------------------------------------------------------- tampilan rumah
+
+local function buildItem(house: House, slotIndex: number, def: HouseConfig.ItemDef)
+	local slot = HouseConfig.YARD_SLOTS[slotIndex]
+	local origin = house.base * slot.offset
+	local model = Instance.new("Model")
+	model.Name = `Hiasan_{house.id}_{slotIndex}_{def.id}`
+	for index, spec in def.parts do
+		local part = Instance.new("Part")
+		part.Name = def.id .. tostring(index)
+		part.Anchored = true
+		part.CanCollide = spec.collide ~= false
+		part.CastShadow = spec.collide ~= false
+		part.Shape = spec.shape or Enum.PartType.Block
+		part.Size = spec.size
+		part.CFrame = origin * spec.offset
+		part.Color = spec.color
+		part.Material = spec.material or Enum.Material.SmoothPlastic
+		part.TopSurface = Enum.SurfaceType.Smooth
+		part.BottomSurface = Enum.SurfaceType.Smooth
+		if spec.light then
+			local light = Instance.new("PointLight")
+			light.Range = 18
+			light.Brightness = 2
+			light.Color = spec.color
+			light.Shadows = false
+			light.Parent = part
+			CollectionService:AddTag(part, DayNightConfig.TAG_LIGHT)
+		end
+		if spec.bounce then
+			-- Pantulan dihitung di client pemilik karakter (lihat HouseUiController).
+			part:SetAttribute(HouseConfig.ATTR_BOUNCE, spec.bounce)
+			CollectionService:AddTag(part, HouseConfig.TAG_BOUNCE)
+		end
+		part.Parent = model
+	end
+	model.Parent = itemFolder
+	house.items[slotIndex] = model
+end
+
+local function clearItem(house: House, slotIndex: number)
+	local model = house.items[slotIndex]
+	if model then
+		model:Destroy()
+		house.items[slotIndex] = nil
+	end
+end
+
+local function applyPaint(house: House, hd: HouseData?)
+	for slot, parts in house.groups do
+		local palette = HouseConfig.PAINT[slot]
+		local index = if hd then hd.paint[slot] else nil
+		local color: Color3? = if type(index) == "number" then palette[index] else nil
+		for _, part in parts do
+			if color == nil then
+				part.Color = house.original[part]
+			elseif part.Name == "Garage" then
+				part.Color = color:Lerp(Color3.new(1, 1, 1), 0.25)
+			else
+				part.Color = color
+			end
+		end
+	end
+end
+
+local function applyItems(house: House, hd: HouseData?)
+	for slotIndex in HouseConfig.YARD_SLOTS do
+		clearItem(house, slotIndex)
+		local itemId = if hd then hd.items[tostring(slotIndex)] else nil
+		local def = if type(itemId) == "string" then HouseConfig.item(itemId) else nil
+		if def then
+			buildItem(house, slotIndex, def)
+		end
+	end
+end
+
+local function setSign(house: House, owner: Player?)
+	if house.sign then
+		house.sign:Destroy()
+		house.sign = nil
+	end
+	local door = house.model:FindFirstChild("Door")
+	if owner == nil or door == nil then
+		return
+	end
+	local gui = Instance.new("BillboardGui")
+	gui.Name = "PapanNama"
+	gui.Size = UDim2.fromScale(12, 1.8)
+	gui.StudsOffset = Vector3.new(0, 6, 3) -- maju ke arah kamera supaya tidak terpotong dinding
+	gui.MaxDistance = 80
+	gui.LightInfluence = 0
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.fromScale(1, 1)
+	label.BackgroundTransparency = 1
+	label.Font = Enum.Font.FredokaOne
+	label.TextScaled = true
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.TextStrokeTransparency = 0.3
+	label.Text = "Rumah " .. owner.DisplayName
+	label.Parent = gui
+	gui.Parent = door
+	house.sign = gui
+end
+
+local function claim(player: Player, house: House, hd: HouseData)
+	house.owner = player
+	byPlayer[player] = house
+	house.model:SetAttribute(HouseConfig.ATTR_OWNER_ID, player.UserId)
+	house.model:SetAttribute(HouseConfig.ATTR_OWNER_NAME, player.DisplayName)
+	applyPaint(house, hd)
+	applyItems(house, hd)
+	setSign(house, player)
+end
+
+local function release(player: Player)
+	local house = byPlayer[player]
+	if house == nil then
+		return
+	end
+	byPlayer[player] = nil
+	house.owner = nil
+	house.model:SetAttribute(HouseConfig.ATTR_OWNER_ID, 0)
+	house.model:SetAttribute(HouseConfig.ATTR_OWNER_NAME, "")
+	applyPaint(house, nil)
+	applyItems(house, nil)
+	setSign(house, nil)
+end
+
+-- Rumah kosong setipe yang paling dekat dengan rumah asli pemain.
+local function findSubstitute(tier: string, near: Vector3): House?
+	local best: House? = nil
+	local bestDistance = math.huge
+	for _, house in houses do
+		if house.owner == nil and house.tier == tier then
+			local distance = (house.base.Position - near).Magnitude
+			if distance < bestDistance then
+				best, bestDistance = house, distance
+			end
+		end
+	end
+	return best
+end
+
+local function onProfileLoaded(player: Player, data: Types.PlayerData)
+	local hd = sanitize(data)
+	if hd.id ~= 0 then
+		local house = houses[hd.id]
+		if house and house.owner == nil and house.tier == hd.tier then
+			claim(player, house, hd)
+		else
+			local near = if house then house.base.Position else Vector3.zero
+			local substitute = findSubstitute(hd.tier, near)
+			if substitute then
+				claim(player, substitute, hd)
+				EconomyService.notify(
+					player,
+					"Rumahmu sedang ditempati, kamu dapat rumah pengganti dulu ya."
+				)
+			end
+		end
+	end
+	publish(player)
+end
+
+-- ---------------------------------------------------------------- remote handler
+
+local function buy(player: Player, houseId: any): HouseResult
+	if not isInteger(houseId, 1, 100000) then
+		return result(false, "Rumah tidak dikenal.")
+	end
+	local house = houses[houseId]
+	local data = DataService.getData(player)
+	if house == nil or data == nil then
+		return result(false, "Rumah tidak dikenal.")
+	end
+	if data.house.id ~= 0 then
+		return result(false, "Kamu sudah punya rumah. Jual dulu rumah lamamu kalau mau pindah.")
+	end
+	if house.owner ~= nil then
+		return result(false, "Rumah ini sudah ada pemiliknya.")
+	end
+	local character = player.Character
+	local root = if character then character.PrimaryPart else nil
+	if
+		root == nil
+		or (root.Position - house.base.Position).Magnitude > HouseConfig.BUY_DISTANCE
+	then
+		return result(false, "Datangi dulu rumahnya ya.")
+	end
+	local tier = HouseConfig.tier(house.tier) :: HouseConfig.Tier
+	if not EconomyService.trySpend(player, tier.price, "house:" .. tier.id) then
+		return result(false, "Uangmu belum cukup. Harganya " .. Format.money(tier.price) .. ".")
+	end
+	local hd = emptyHouse()
+	hd.id = house.id
+	hd.tier = house.tier
+	hd.boughtAt = os.time()
+	data.house = hd
+	claim(player, house, hd)
+	publish(player)
+	return result(true, "Selamat! " .. HouseConfig.address(house.id) .. " sekarang milikmu.")
+end
+
+local function sell(player: Player): HouseResult
+	local data = DataService.getData(player)
+	if data == nil or data.house.id == 0 then
+		return result(false, "Kamu belum punya rumah.")
+	end
+	local refund = HouseConfig.sellPrice(data.house.tier)
+	release(player)
+	data.house = emptyHouse()
+	if refund > 0 then
+		EconomyService.addMoney(player, refund, "house:sell")
+	end
+	publish(player)
+	return result(true, "Rumah terjual. Kamu dapat " .. Format.money(refund) .. ".")
+end
+
+local function paint(player: Player, slot: any, index: any): HouseResult
+	local data = DataService.getData(player)
+	local house = byPlayer[player]
+	if data == nil or data.house.id == 0 or house == nil then
+		return result(false, "Kamu belum punya rumah.")
+	end
+	local palette = if type(slot) == "string" then HouseConfig.PAINT[slot] else nil
+	if palette == nil or not isInteger(index, 0, #palette) then
+		return result(false, "Pilihan cat tidak dikenal.")
+	end
+	local hd = data.house
+	if (hd.paint[slot] or 0) == index then
+		return result(true, "Warnanya sudah itu.")
+	end
+	if
+		index ~= 0 and not EconomyService.trySpend(player, HouseConfig.PAINT_PRICE, "house:paint")
+	then
+		return result(
+			false,
+			"Uangmu belum cukup untuk cat (" .. Format.money(HouseConfig.PAINT_PRICE) .. ")."
+		)
+	end
+	hd.paint[slot] = index
+	applyPaint(house, hd)
+	publish(player)
+	return result(true, if index == 0 then "Warna asli dikembalikan." else "Cat baru terpasang!")
+end
+
+local function setItem(player: Player, slotIndex: any, itemId: any): HouseResult
+	local data = DataService.getData(player)
+	local house = byPlayer[player]
+	if data == nil or data.house.id == 0 or house == nil then
+		return result(false, "Kamu belum punya rumah.")
+	end
+	if not isInteger(slotIndex, 1, #HouseConfig.YARD_SLOTS) or type(itemId) ~= "string" then
+		return result(false, "Pilihan hiasan tidak dikenal.")
+	end
+	local hd = data.house
+	local key = tostring(slotIndex)
+	if itemId == "" then
+		hd.items[key] = nil
+		clearItem(house, slotIndex)
+		publish(player)
+		return result(true, "Hiasan disimpan ke gudang.")
+	end
+	local def = HouseConfig.item(itemId)
+	if def == nil then
+		return result(false, "Pilihan hiasan tidak dikenal.")
+	end
+	if hd.items[key] == itemId then
+		return result(true, "Hiasan itu sudah terpasang di sana.")
+	end
+	if not EconomyService.trySpend(player, def.price, "house:item:" .. def.id) then
+		return result(false, "Uangmu belum cukup. Harganya " .. Format.money(def.price) .. ".")
+	end
+	hd.items[key] = itemId
+	clearItem(house, slotIndex)
+	buildItem(house, slotIndex, def)
+	publish(player)
+	return result(true, def.name .. " terpasang di halaman!")
+end
+
+local function goHome(player: Player): HouseResult
+	local house = byPlayer[player]
+	if house == nil then
+		return result(false, "Kamu belum punya rumah.")
+	end
+	local now = os.clock()
+	local last = lastHome[player]
+	if last and now - last < HouseConfig.HOME_COOLDOWN then
+		local left = math.ceil(HouseConfig.HOME_COOLDOWN - (now - last))
+		return result(false, `Tunggu {left} detik lagi sebelum pulang.`)
+	end
+	local character = player.Character
+	local humanoid = if character then character:FindFirstChildOfClass("Humanoid") else nil
+	if character == nil or humanoid == nil or humanoid.Health <= 0 then
+		return result(false, "Belum bisa pulang sekarang.")
+	end
+	lastHome[player] = now
+	if humanoid.SeatPart then
+		humanoid.Sit = false
+		task.wait(0.15)
+	end
+	character:PivotTo(house.base * DOOR_FRONT)
+	return result(true, "Selamat datang di rumah!")
+end
+
+-- ---------------------------------------------------------------- API server
+
+-- Rumah yang ditempati pemain di server ini (untuk sistem lain, mis. misi).
+function HouseService.getHomePosition(player: Player): Vector3?
+	local house = byPlayer[player]
+	return if house then (house.base * DOOR_FRONT).Position else nil
+end
+
+-- ---------------------------------------------------------------- bootstrap
+
+local function registerHouse(model: Model)
+	local id = tonumber(model.Name:match("^Rumah(%d+)$"))
+	local body = model:FindFirstChild("Body")
+	local door = model:FindFirstChild("Door")
+	if id == nil or houses[id] ~= nil or body == nil or door == nil then
+		return
+	end
+	if not body:IsA("BasePart") or not door:IsA("BasePart") then
+		return
+	end
+	local garage = model:FindFirstChild("Garage")
+	local stories = if body.Size.Y > TWO_STORY_HEIGHT then 2 else 1
+	local house: House = {
+		id = id,
+		model = model,
+		base = body.CFrame * CFrame.new(0, -body.Size.Y / 2 - FOUNDATION_HEIGHT, 0),
+		tier = HouseConfig.tierFor(stories, garage ~= nil),
+		owner = nil,
+		groups = { wall = {}, roof = {}, door = {} },
+		original = {},
+		items = {},
+		sign = nil,
+	}
+	local slotByName =
+		{ Body = "wall", Garage = "wall", RoofFront = "roof", RoofBack = "roof", Door = "door" }
+	for _, child in model:GetChildren() do
+		local slot = slotByName[child.Name]
+		if slot and child:IsA("BasePart") then
+			table.insert(house.groups[slot], child)
+			house.original[child] = child.Color
+		end
+	end
+	houses[id] = house
+
+	model:SetAttribute(HouseConfig.ATTR_ID, id)
+	model:SetAttribute(HouseConfig.ATTR_TIER, house.tier)
+	model:SetAttribute(HouseConfig.ATTR_OWNER_ID, 0)
+	model:SetAttribute(HouseConfig.ATTR_OWNER_NAME, "")
+	CollectionService:AddTag(model, HouseConfig.TAG_HOUSE)
+
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.Name = "LihatRumah"
+	prompt.ActionText = "Lihat rumah"
+	prompt.ObjectText = HouseConfig.address(id)
+	prompt.HoldDuration = 0.25
+	prompt.MaxActivationDistance = 11
+	prompt.RequiresLineOfSight = false
+	prompt:SetAttribute(HouseConfig.ATTR_PROMPT, id)
+	prompt.Parent = door
+end
+
+local function bind(name: string, handler: (Player, ...any) -> HouseResult)
+	Net.func(name).OnServerInvoke = function(player: Player, ...: any)
+		if not allowCall(player) then
+			return result(false, "Pelan-pelan ya, coba lagi sebentar.")
+		end
+		local ok, value = pcall(handler, player, ...)
+		if ok then
+			return value
+		end
+		warn(`[House] {name} error: {tostring(value)}`)
+		return result(false, "Terjadi kesalahan, coba lagi nanti.")
+	end
+end
+
+function HouseService.init()
+	itemFolder = Instance.new("Folder")
+	itemFolder.Name = "HiasanRumah"
+	itemFolder.Parent = Workspace
+
+	local map = Workspace:FindFirstChild("Map")
+	local zone = if map then map:FindFirstChild("Neighborhoods") else nil
+	local folder = if zone then zone:FindFirstChild("Houses") else nil
+	if folder then
+		for _, child in folder:GetChildren() do
+			if child:IsA("Model") then
+				registerHouse(child)
+			end
+		end
+	else
+		warn("[House] Workspace.Map.Neighborhoods.Houses tidak ditemukan")
+	end
+
+	bind(Net.Names.HouseBuy, buy)
+	bind(Net.Names.HouseSell, sell)
+	bind(Net.Names.HousePaint, paint)
+	bind(Net.Names.HouseItem, setItem)
+	bind(Net.Names.HouseGoHome, goHome)
+end
+
+function HouseService.start()
+	DataService.ProfileLoaded:Connect(onProfileLoaded)
+	for _, player in Players:GetPlayers() do
+		local data = DataService.getData(player)
+		if
+			data
+			and byPlayer[player] == nil
+			and player:GetAttribute(HouseConfig.ATTR_PLAYER) == nil
+		then
+			onProfileLoaded(player, data)
+		end
+	end
+	Players.PlayerRemoving:Connect(function(player: Player)
+		release(player)
+		lastCall[player] = nil
+		lastHome[player] = nil
+	end)
+end
+
+return HouseService
