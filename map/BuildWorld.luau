@@ -148,7 +148,8 @@ end
 local function buildHighway()
 	local zone = Kit.zone("Highway")
 
-	local ring = Kit.roundedRect(-480, -1100, 900, 1080, 160, 6)
+	-- 16 ruas per tikungan supaya lengkungnya mulus (6 ruas terlihat patah-patah).
+	local ring = Kit.roundedRect(-480, -1100, 900, 1080, 160, 16)
 	local f = Kit.folder("RingRoad")
 	Kit.road(ring, { width = 48, lanes = 4, closed = true, parent = f, name = "JalanLingkar" })
 	Kit.flush(f, zone)

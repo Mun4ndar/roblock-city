@@ -52,6 +52,13 @@ Urutan load ada di `ORDER` pada `init.server.luau` / `init.client.luau`; tambahk
 - **MissionService**: misi harian (berganti pukul 00.00 WIB). Daftar misi dan tempat di peta HP ada di
   `src/shared/MissionConfig.luau`. Kemajuan dihitung server dari tugas pekerjaan dan kunjungan tempat; hadiah
   diambil lewat remote `MissionClaim`. `PhoneController` (client) berisi HP: peta skema, GPS, dan daftar misi.
+- **PortalService**: pintu masuk/keluar ruang dalam. Ruang dalam dibangun tepat di atas bangunannya (y = 2000,
+  tidak terlihat dari tanah) supaya posisi mendatar pemain tetap. Lobi Rumah Sakit dan ruang tunggu Bandara
+  dibangun `map/BuildInteriors.luau`; isi rumah pemain dirakit HouseService dari `HouseConfig.INTERIOR`.
+  Lampu ruang dalam harus redup (Brightness sekitar 0,3) dan dindingnya tebal, kalau tidak ruangan jadi silau.
+- `VehicleEffectsController` (client): asap knalpot, bekas ban, dan debu; setelannya di tabel `TUNING`.
+- Tugas pemadam memakai prop `kios` (kios terbakar) dari `src/client/Util/JobProps.luau`; menahan tombol
+  menyemburkan air, dan api yang padam mengepulkan uap dulu.
 - **DebugService**: alat uji, hanya aktif di Studio. Dari command bar server:
   `game.ServerStorage.Debug:Invoke("money", pemain, 5000)` atau `game.ServerStorage.Debug:Invoke("clock", 21)`.
 - `src/client/Util/UiScale.luau` mengecilkan HUD di layar kecil; elemen HUD baru cukup memanggil `UiScale.attach`.
@@ -120,6 +127,7 @@ require(MB.BuildAirport)()
 require(MB.BuildDealer)()
 require(MB.StyleWorld)()       -- rias tampilan; setelah semua pembangun (lihat "Tampilan")
 require(MB.StyleTrees)()       -- pohon mesh di taman; setelah StyleWorld
+require(MB.BuildInteriors)()   -- lobi Rumah Sakit dan ruang tunggu Bandara (kapan saja)
 ```
 
 Setiap skrip hanya mengganti foldernya sendiri di `Workspace.Map`. Modul bantu: `MapKit` (part, jalan, pohon,
