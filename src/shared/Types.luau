@@ -16,6 +16,14 @@ export type PlayerData = {
 	jobs: JobData,
 	-- Rumah yang dimiliki (lihat HouseConfig). id 0 = belum punya.
 	house: HouseData,
+	-- Misi harian (lihat MissionConfig).
+	missions: MissionData,
+}
+
+export type MissionData = {
+	day: number, -- nomor hari saat kemajuan ini dicatat; hari berganti = mulai dari nol
+	progress: { [string]: number },
+	claimed: { [string]: boolean },
 }
 
 export type HouseData = {

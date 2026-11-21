@@ -13,6 +13,7 @@ local ORDER = {
 	"UniformService",
 	"JobService",
 	"HouseService",
+	"MissionService",
 	"DebugService",
 }
 

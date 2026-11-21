@@ -42,6 +42,10 @@ type Track = { character: Model, position: Vector3, time: number }
 
 local JobService = {}
 
+local completedEvent = Instance.new("BindableEvent")
+-- Terpicu (player, jobId, gaji) setiap satu tugas selesai dan dibayar (dipakai misi).
+JobService.TaskCompleted = completedEvent.Event
+
 local FALLBACK_ORIGIN = Vector3.new(40, 1, 510) -- taman kota kecil (titik spawn)
 local HORIZONTAL = Vector3.new(1, 0, 1)
 
@@ -343,6 +347,7 @@ local function payTask(player: Player, task_: ActiveTask): JobResult
 	local levelBefore = JobConfig.levelFor(progress.tasks)
 	progress.tasks += 1
 	progress.earned += pay
+	completedEvent:Fire(player, def.id, pay)
 	local levelAfter = JobConfig.levelFor(progress.tasks)
 	publish(player)
 

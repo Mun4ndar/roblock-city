@@ -26,6 +26,7 @@ Net.Names = table.freeze({
 	HousePaint = "HousePaint", -- RemoteFunction: (slot: string, colorIndex: number) -> HouseResult
 	HouseItem = "HouseItem", -- RemoteFunction: (yardSlot: number, itemId: string, "" = kosongkan) -> HouseResult
 	HouseGoHome = "HouseGoHome", -- RemoteFunction: () -> HouseResult (pulang ke depan rumah)
+	MissionClaim = "MissionClaim", -- RemoteFunction: (missionId: string) -> { ok, message }
 })
 
 local function getFolder(): Folder

@@ -52,6 +52,7 @@ local function defaultData(): PlayerData
 		vehicles = {},
 		jobs = { current = "", stats = {} },
 		house = { id = 0, tier = "", boughtAt = 0, paint = {}, items = {} },
+		missions = { day = 0, progress = {}, claimed = {} },
 	}
 end
 
