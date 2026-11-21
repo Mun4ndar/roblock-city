@@ -100,7 +100,8 @@ require(MB.BuildResidential)()
 require(MB.BuildBeach)()
 require(MB.BuildAirport)()
 require(MB.BuildDealer)()
-require(MB.StyleWorld)()       -- rias tampilan; selalu PALING AKHIR (lihat "Tampilan")
+require(MB.StyleWorld)()       -- rias tampilan; setelah semua pembangun (lihat "Tampilan")
+require(MB.StyleTrees)()       -- pohon mesh di taman; setelah StyleWorld
 ```
 
 Setiap skrip hanya mengganti foldernya sendiri di `Workspace.Map`. Modul bantu: `MapKit` (part, jalan, pohon,
@@ -141,6 +142,11 @@ biasanya diklik manual. Jalankan setelah semua pembangun, dan ulangi setiap kali
 - `PavingKota` adalah satu-satunya MaterialVariant bertekstur sendiri (dibuat dengan generator material Studio);
   sisanya material bawaan Roblox, jadi tidak menambah beban tekstur. Jika hilang dari `MaterialService`, skrip
   membuatnya lagi dari ID di `VARIANTS`.
+- Bagian `lights` juga memasang tag `NightLight` (part berlampu) dan `NightWindow` (jendela) yang dipakai
+  siklus siang/malam di client (`src/shared/DayNightConfig.luau`).
+- `map/StyleTrees.luau` mengganti sebagian pohon bola di taman dengan pohon mesh bercabang dari
+  "Low-Poly Oak Trees Asset Pack" karya Cliosow (Creator Store, gratis, aset 8556375773; hanya MeshPart, tanpa
+  skrip). Paketnya disimpan di `ServerStorage.AsetPihakKetiga` di dalam place, bukan di repo ini.
 - Hiasan alam tanpa tabrakan dan tanpa bayangan. Sebaran selalu sama selama `SEED` tidak diubah.
 
 ## Cek kode
