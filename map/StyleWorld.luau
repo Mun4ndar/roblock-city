@@ -16,6 +16,7 @@
 	Semua hiasan tanpa tabrakan dan tanpa bayangan supaya tetap ringan di HP.
 ]]
 
+local CollectionService = game:GetService("CollectionService")
 local Lighting = game:GetService("Lighting")
 local MaterialService = game:GetService("MaterialService")
 local ServerStorage = game:GetService("ServerStorage")
@@ -290,8 +291,14 @@ end
 
 -- Setelan per nama part induk lampu. Tanpa bayangan: ratusan lampu berbayang terlalu berat.
 local LIGHTS: { [string]: { Range: number, Brightness: number, Color: Color3 } } = {
-	Lamp = { Range = 28, Brightness = 1.5, Color = rgb(255, 222, 168) }, -- lampu jalan
+	Lamp = { Range = 40, Brightness = 3, Color = rgb(255, 222, 168) }, -- lampu jalan
 }
+
+-- Tag untuk siklus siang/malam (lihat src/shared/DayNightConfig.luau): client
+-- menyalakan part bertag NightLight dan sebagian jendela bertag NightWindow saat malam.
+local TAG_NIGHT_LIGHT = "NightLight"
+local TAG_NIGHT_WINDOW = "NightWindow"
+local NIGHT_WINDOW_NAMES = { "^Window%d*$", "^Windows%d*$", "^Storefront$", "^TowerWindows%d*$" }
 
 local function lights(): number
 	local map = workspace:FindFirstChild("Map")
@@ -300,6 +307,16 @@ local function lights(): number
 	end
 	local n = 0
 	for _, d in map:GetDescendants() do
+		if d:IsA("BasePart") then
+			for _, pattern in NIGHT_WINDOW_NAMES do
+				if d.Name:match(pattern) then
+					CollectionService:AddTag(d, TAG_NIGHT_WINDOW)
+					break
+				end
+			end
+		elseif d:IsA("Light") and d.Parent and d.Parent:IsA("BasePart") then
+			CollectionService:AddTag(d.Parent, TAG_NIGHT_LIGHT)
+		end
 		if d:IsA("Light") then
 			d.Shadows = false
 			local cfg = d.Parent and LIGHTS[d.Parent.Name]

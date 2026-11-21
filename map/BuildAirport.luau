@@ -392,26 +392,23 @@ local function buildTerminal(zone: Instance)
 	})
 
 	-- hangar
-	B.shop(
-		{
-			name = "Hangar",
-			x = -1290,
-			z = 880,
-			yaw = -math.pi / 2,
-			baseY = 0,
-			w = 90,
-			d = 60,
-			h = 26,
-			floors = 1,
-			color = col(200, 205, 210),
-			trim = col(80, 150, 210),
-			material = M.DiamondPlate,
-			sign = "HANGAR",
-			signColor = col(80, 150, 210),
-			doors = { { x = 0, w = 60, h = 20, color = col(150, 155, 160) } },
-		},
-		f
-	)
+	B.shop({
+		name = "Hangar",
+		x = -1290,
+		z = 880,
+		yaw = -math.pi / 2,
+		baseY = 0,
+		w = 90,
+		d = 60,
+		h = 26,
+		floors = 1,
+		color = col(200, 205, 210),
+		trim = col(80, 150, 210),
+		material = M.DiamondPlate,
+		sign = "HANGAR",
+		signColor = col(80, 150, 210),
+		doors = { { x = 0, w = 60, h = 20, color = col(150, 155, 160) } },
+	}, f)
 	Kit.flush(f, zone)
 end
 
