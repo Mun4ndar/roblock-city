@@ -21,13 +21,22 @@ local KEPT = "StyleTreesKept"
 local SEED = 20261122
 
 -- Folder pohon yang diganti (relatif ke Workspace.Map) dan seberapa banyak (1 = semua, 2 = selang-seling).
+-- pack = nama paket di ServerStorage.AsetPihakKetiga; pattern = nama model pohon di dalamnya.
+local OAK = { pack = "CliosowOakTrees", pattern = "^Tree%d+$", height = 1.25 }
+-- "Low-Poly Palm Trees Asset Pack" karya Cliosow (Creator Store, gratis, aset 8556183988; hanya MeshPart).
+local PALM = { pack = "CliosowPalmTrees", pattern = "^PalmTree%d+$", height = 1.1 }
+
 local TARGETS = {
-	{ path = { "Downtown", "Props", "TamanKota" }, every = 2 },
-	{ path = { "Neighborhoods", "Taman" }, every = 2 },
-	{ path = { "Residential", "Props", "Trees" }, every = 3 },
+	{ path = { "Downtown", "Props", "TamanKota" }, every = 2, source = OAK },
+	{ path = { "Neighborhoods", "Taman" }, every = 2, source = OAK },
+	{ path = { "Residential", "Props", "Trees" }, every = 3, source = OAK },
+	{ path = { "Downtown", "Props", "Trees" }, every = 2, source = OAK },
+	{ path = { "Neighborhoods", "Houses" }, every = 3, source = OAK },
+	{ path = { "Beach", "Palms" }, every = 1, source = PALM },
+	{ path = { "Beach", "Roads" }, every = 1, source = PALM },
+	{ path = { "Beach", "Resort" }, every = 1, source = PALM },
 }
 
-local HEIGHT_FACTOR = 1.25 -- pohon mesh sedikit lebih tinggi daripada pohon bola yang digantikan
 local LEAF_TINTS = {
 	Color3.fromRGB(104, 176, 78),
 	Color3.fromRGB(126, 190, 84),
@@ -37,13 +46,13 @@ local LEAF_TINTS = {
 local TRUNK_COLOR = Color3.fromRGB(122, 88, 62)
 local SHADOW_LEAF_SIZE = 8 -- hanya gumpalan daun besar yang berbayang (lebih ringan di HP)
 
-local function sourceTrees(): { Model }
+local function sourceTrees(packName: string, pattern: string): { Model }
 	local folder = ServerStorage:FindFirstChild("AsetPihakKetiga")
-	local pack = folder and folder:FindFirstChild("CliosowOakTrees")
+	local pack = folder and folder:FindFirstChild(packName)
 	local list: { Model } = {}
 	if pack then
 		for _, d in pack:GetDescendants() do
-			if d:IsA("Model") and d.Name:match("^Tree%d+$") then
+			if d:IsA("Model") and d.Name:match(pattern) then
 				table.insert(list, d)
 			end
 		end
@@ -83,12 +92,19 @@ local function footprint(model: Model): (Vector3, number)
 	return Vector3.new(center.X, minY, center.Z), maxY - minY
 end
 
-local function plant(source: Model, base: Vector3, height: number, rng: Random, parent: Instance)
+local function plant(
+	source: Model,
+	base: Vector3,
+	height: number,
+	rng: Random,
+	parent: Instance,
+	factor: number
+)
 	local tree = source:Clone()
 	tree.Name = "PohonMesh"
 	tree:SetAttribute(TAG, true)
 	local _, sourceHeight = footprint(tree)
-	tree:ScaleTo(math.clamp(height * HEIGHT_FACTOR / sourceHeight, 0.3, 1.5))
+	tree:ScaleTo(math.clamp(height * factor / sourceHeight, 0.3, 2.5))
 	-- Putar mengelilingi sumbu tegak DUNIA (pivot paket ini tidak tegak, jadi jangan putar di ruang pivot).
 	local pivot = tree:GetPivot()
 	tree:PivotTo(
@@ -107,7 +123,9 @@ local function plant(source: Model, base: Vector3, height: number, rng: Random, 
 				d.Color = TRUNK_COLOR
 				trunkPosition = d.Position
 			else
-				d.Color = tint
+				if d.Name:match("^Leaves") then
+					d.Color = tint
+				end -- (buah kelapa dan lainnya memakai warna aslinya)
 				d.CanCollide = false
 				d.CanQuery = false
 				d.CastShadow = d.Size.X >= SHADOW_LEAF_SIZE * tree:GetScale()
@@ -125,10 +143,9 @@ end
 
 -- redo = true: pohon mesh yang sudah ada ikut ditanam ulang (mis. setelah mengubah setelan di atas).
 return function(redo: boolean?): number
-	local sources = sourceTrees()
 	local map = workspace:FindFirstChild("Map")
-	if #sources == 0 or not map then
-		warn("[StyleTrees] paket pohon atau Workspace.Map tidak ditemukan; dilewati")
+	if not map then
+		warn("[StyleTrees] Workspace.Map tidak ditemukan; dilewati")
 		return 0
 	end
 	local rng = Random.new(SEED)
@@ -138,7 +155,17 @@ return function(redo: boolean?): number
 		for _, name in target.path do
 			folder = folder and folder:FindFirstChild(name)
 		end
-		if folder then
+		local sources = sourceTrees(target.source.pack, target.source.pattern)
+		local factor = target.source.height
+		if folder and #sources == 0 then
+			warn(
+				"[StyleTrees] paket "
+					.. target.source.pack
+					.. " tidak ditemukan; "
+					.. folder.Name
+					.. " dilewati"
+			)
+		elseif folder then
 			local old: { Model } = {}
 			for _, child in folder:GetChildren() do
 				if
@@ -152,9 +179,10 @@ return function(redo: boolean?): number
 					plant(
 						sources[rng:NextInteger(1, #sources)],
 						base,
-						math.clamp(height / HEIGHT_FACTOR, 16, 24),
+						math.clamp(height / factor, 16, 24),
 						rng,
-						folder
+						folder,
+						factor
 					)
 					child:Destroy()
 					replaced += 1
@@ -171,7 +199,7 @@ return function(redo: boolean?): number
 			for index, tree in old do
 				if index % target.every == 0 then
 					local base, height = footprint(tree)
-					plant(sources[rng:NextInteger(1, #sources)], base, height, rng, folder)
+					plant(sources[rng:NextInteger(1, #sources)], base, height, rng, folder, factor)
 					tree:Destroy()
 					replaced += 1
 				else

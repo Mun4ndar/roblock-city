@@ -122,10 +122,11 @@ local function lighting()
 	-- Air sedikit lebih jernih dan memantulkan langit.
 	local T = workspace.Terrain
 	T.WaterColor = rgb(36, 178, 208)
-	T.WaterTransparency = 0.5
-	T.WaterReflectance = 0.45
-	T.WaterWaveSize = 0.1
-	T.WaterWaveSpeed = 7
+	T.WaterTransparency = 0.35
+	T.WaterReflectance = 0.6
+	-- Ombak cukup besar supaya laut terlihat bergerak, tapi masih tenang di tepi pantai.
+	T.WaterWaveSize = 0.45
+	T.WaterWaveSpeed = 14
 	T:SetMaterialColor(M.Grass, rgb(104, 176, 74))
 	T:SetMaterialColor(M.Sand, rgb(242, 226, 176))
 end

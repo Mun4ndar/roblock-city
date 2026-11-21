@@ -170,7 +170,9 @@ biasanya diklik manual. Jalankan setelah semua pembangun, dan ulangi setiap kali
   membuatnya lagi dari ID di `VARIANTS`.
 - Bagian `lights` juga memasang tag `NightLight` (part berlampu) dan `NightWindow` (jendela) yang dipakai
   siklus siang/malam di client (`src/shared/DayNightConfig.luau`).
-- `map/StyleTrees.luau` mengganti sebagian pohon bola di taman dengan pohon mesh bercabang dari
+- `map/StyleTrees.luau` juga mengganti semua pohon kelapa pantai dengan "Low-Poly Palm Trees Asset Pack" karya
+  Cliosow (aset 8556183988, gratis, hanya MeshPart). Daftar tempat dan paketnya ada di tabel `TARGETS`.
+- `map/StyleTrees.luau` mengganti sebagian pohon bola di taman, kota, dan perumahan dengan pohon mesh bercabang dari
   "Low-Poly Oak Trees Asset Pack" karya Cliosow (Creator Store, gratis, aset 8556375773; hanya MeshPart, tanpa
   skrip). Paketnya disimpan di `ServerStorage.AsetPihakKetiga` di dalam place, bukan di repo ini.
 - Hiasan alam tanpa tabrakan dan tanpa bayangan. Sebaran selalu sama selama `SEED` tidak diubah.
