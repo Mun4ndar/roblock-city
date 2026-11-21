@@ -1,0 +1,11 @@
+[package]
+name = "roblock/roblock-city"
+version = "0.1.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+
+[dependencies]
+# Belum ada dependency. Contoh:
+# Trove = "sleitnick/trove@1"
+
+[server-dependencies]
