@@ -423,6 +423,223 @@ HouseConfig.ITEMS = {
 	},
 } :: { ItemDef }
 
+-- ---------------------------------------------------------------- isi rumah
+
+-- Ruang dalam dibangun setinggi ini (stud) tepat di atas rumah; pemain masuk lewat pintu.
+-- Jauh di atas supaya tidak terlihat dari tanah. (Di bawah tanah tidak bisa: kabut
+-- Atmosphere menebal di ketinggian rendah dan ruangan jadi putih semua.)
+HouseConfig.INTERIOR_HEIGHT = 2000
+-- Pintu keluar di dalam ruang (relatif ke tengah lantai), menghadap ke dalam.
+HouseConfig.INTERIOR_DOOR = CFrame.new(0, 3.7, 10.8)
+
+local WALL = rgb(250, 240, 222)
+local SOFA = rgb(86, 136, 200)
+local WHITE = rgb(248, 248, 246)
+local PLASTER = Enum.Material.Plaster
+local PLANKS = Enum.Material.WoodPlanks
+
+-- Ruang 26 x 22 stud, tinggi 11. offset relatif ke tengah lantai (y = 0 di permukaan lantai).
+-- Mengubah/menambah perabot = mengubah daftar ini; semua rumah mengikuti.
+HouseConfig.INTERIOR = {
+	-- lantai, plafon, dinding
+	-- (kulit ruangan sengaja tebal 6 stud: dinding tipis ditembus sinar matahari)
+	{
+		size = Vector3.new(38, 6, 34),
+		offset = CFrame.new(0, -3, 0),
+		color = rgb(196, 154, 108),
+		material = PLANKS,
+	},
+	{ size = Vector3.new(38, 6, 34), offset = CFrame.new(0, 14, 0), color = WHITE },
+	{
+		size = Vector3.new(38, 18, 6),
+		offset = CFrame.new(0, 5.5, -14),
+		color = WALL,
+		material = PLASTER,
+	},
+	{
+		size = Vector3.new(38, 18, 6),
+		offset = CFrame.new(0, 5.5, 14),
+		color = WALL,
+		material = PLASTER,
+	},
+	{
+		size = Vector3.new(6, 18, 22),
+		offset = CFrame.new(-16, 5.5, 0),
+		color = WALL,
+		material = PLASTER,
+	},
+	{
+		size = Vector3.new(6, 18, 22),
+		offset = CFrame.new(16, 5.5, 0),
+		color = WALL,
+		material = PLASTER,
+	},
+	-- lampu plafon dan jendela terang
+	{
+		size = Vector3.new(3, 0.4, 3),
+		offset = CFrame.new(-7, 10.8, -3),
+		color = rgb(255, 240, 205),
+		material = Enum.Material.Neon,
+		collide = false,
+		light = true,
+	},
+	{
+		size = Vector3.new(3, 0.4, 3),
+		offset = CFrame.new(7, 10.8, -3),
+		color = rgb(255, 240, 205),
+		material = Enum.Material.Neon,
+		collide = false,
+		light = true,
+	},
+	{
+		size = Vector3.new(3, 0.4, 3),
+		offset = CFrame.new(0, 10.8, 6),
+		color = rgb(255, 240, 205),
+		material = Enum.Material.Neon,
+		collide = false,
+		light = true,
+	},
+	{
+		size = Vector3.new(8, 4.5, 0.2),
+		offset = CFrame.new(0, 6, -10.9),
+		color = rgb(176, 220, 255),
+		material = Enum.Material.Neon,
+		collide = false,
+	},
+	{
+		size = Vector3.new(8.6, 0.4, 0.5),
+		offset = CFrame.new(0, 3.6, -10.8),
+		color = WHITE,
+		collide = false,
+	},
+	-- ruang tamu: karpet, sofa, meja, TV
+	{
+		size = Vector3.new(7, 0.12, 10),
+		offset = CFrame.new(-8, 0.06, -4),
+		color = rgb(236, 186, 120),
+		collide = false,
+	},
+	{ size = Vector3.new(3, 1.4, 8), offset = CFrame.new(-4, 0.7, -4), color = SOFA },
+	{ size = Vector3.new(0.9, 2.4, 8), offset = CFrame.new(-2.9, 2, -4), color = SOFA },
+	{ size = Vector3.new(3, 2.2, 0.9), offset = CFrame.new(-4, 1.1, -8.4), color = SOFA },
+	{ size = Vector3.new(3, 2.2, 0.9), offset = CFrame.new(-4, 1.1, 0.4), color = SOFA },
+	{
+		size = Vector3.new(2.4, 0.3, 4),
+		offset = CFrame.new(-8, 1.4, -4),
+		color = WOOD,
+		material = PLANKS,
+	},
+	{ size = Vector3.new(1.6, 1.2, 3), offset = CFrame.new(-8, 0.6, -4), color = rgb(90, 64, 44) },
+	{
+		size = Vector3.new(1.6, 1.6, 6),
+		offset = CFrame.new(-12.2, 0.8, -4),
+		color = WOOD,
+		material = PLANKS,
+	},
+	{
+		size = Vector3.new(0.3, 3.2, 5.4),
+		offset = CFrame.new(-12.4, 3.4, -4),
+		color = rgb(24, 26, 34),
+		material = Enum.Material.Glass,
+	},
+	-- kamar: tempat tidur, meja kecil + lampu, lemari
+	{
+		size = Vector3.new(6, 1.2, 9),
+		offset = CFrame.new(9.5, 0.6, -6),
+		color = WOOD,
+		material = PLANKS,
+	},
+	{ size = Vector3.new(5.6, 0.8, 8.6), offset = CFrame.new(9.5, 1.6, -6), color = WHITE },
+	{
+		size = Vector3.new(5.7, 0.3, 5.5),
+		offset = CFrame.new(9.5, 2.1, -4.5),
+		color = rgb(240, 150, 170),
+	},
+	{ size = Vector3.new(4, 0.6, 1.8), offset = CFrame.new(9.5, 2.3, -9.3), color = WHITE },
+	{
+		size = Vector3.new(2, 1.8, 2),
+		offset = CFrame.new(5.2, 0.9, -9.6),
+		color = WOOD,
+		material = PLANKS,
+	},
+	{
+		size = Vector3.new(1, 1, 1),
+		offset = CFrame.new(5.2, 2.4, -9.6),
+		color = rgb(255, 226, 170),
+		material = Enum.Material.Neon,
+		shape = BALL,
+		collide = false,
+	},
+	{
+		size = Vector3.new(2, 8, 5),
+		offset = CFrame.new(12.4, 4, 2.6),
+		color = WOOD,
+		material = PLANKS,
+	},
+	-- dapur dan meja makan
+	{ size = Vector3.new(8, 3, 2.2), offset = CFrame.new(8, 1.5, 10.2), color = WHITE },
+	{
+		size = Vector3.new(8.2, 0.3, 2.4),
+		offset = CFrame.new(8, 3.15, 10.2),
+		color = rgb(70, 76, 88),
+	},
+	{
+		size = Vector3.new(2.4, 6.5, 2.6),
+		offset = CFrame.new(12.1, 3.25, 7.6),
+		color = rgb(206, 212, 220),
+		material = Enum.Material.Metal,
+	},
+	{
+		size = Vector3.new(5, 0.3, 3.4),
+		offset = CFrame.new(6.5, 2.6, 3),
+		color = WOOD,
+		material = PLANKS,
+	},
+	{ size = Vector3.new(1, 2.5, 1), offset = CFrame.new(6.5, 1.25, 3), color = rgb(90, 64, 44) },
+	{
+		size = Vector3.new(1.8, 1.6, 1.8),
+		offset = CFrame.new(6.5, 0.8, 0.2),
+		color = rgb(240, 150, 90),
+	},
+	{
+		size = Vector3.new(1.8, 1.6, 1.8),
+		offset = CFrame.new(6.5, 0.8, 5.8),
+		color = rgb(240, 150, 90),
+	},
+	-- rak buku dan tanaman
+	{
+		size = Vector3.new(5, 7, 1.4),
+		offset = CFrame.new(-8, 3.5, 10.6),
+		color = WOOD,
+		material = PLANKS,
+	},
+	{
+		size = Vector3.new(4.4, 1, 1),
+		offset = CFrame.new(-8, 4.6, 10.2),
+		color = rgb(210, 70, 70),
+		collide = false,
+	},
+	{
+		size = Vector3.new(4.4, 1, 1),
+		offset = CFrame.new(-8, 2.6, 10.2),
+		color = rgb(70, 120, 200),
+		collide = false,
+	},
+	{
+		size = Vector3.new(1.6, 1.8, 1.8),
+		offset = up(-11.6, 0.8, 7.6),
+		color = rgb(190, 110, 70),
+		shape = CYL,
+	},
+	{
+		size = Vector3.new(2.6, 2.6, 2.6),
+		offset = CFrame.new(-11.6, 2.8, 7.6),
+		color = rgb(70, 160, 80),
+		shape = BALL,
+		collide = false,
+	},
+} :: { PartSpec }
+
 -- ---------------------------------------------------------------- util
 
 local tierById: { [string]: Tier } = {}

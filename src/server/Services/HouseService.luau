@@ -20,6 +20,7 @@ local DayNightConfig = require(Shared:WaitForChild("DayNightConfig"))
 
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local EconomyService = require(script.Parent:WaitForChild("EconomyService"))
+local PortalService = require(script.Parent:WaitForChild("PortalService"))
 
 type HouseData = Types.HouseData
 type HouseResult = Types.HouseResult
@@ -33,6 +34,7 @@ type House = {
 	groups: { [string]: { BasePart } }, -- bagian cat -> part
 	original: { [BasePart]: Color3 },
 	items: { [number]: Model },
+	interior: Model?,
 	sign: BillboardGui?,
 }
 
@@ -114,14 +116,18 @@ end
 
 -- ---------------------------------------------------------------- tampilan rumah
 
-local function buildItem(house: House, slotIndex: number, def: HouseConfig.ItemDef)
-	local slot = HouseConfig.YARD_SLOTS[slotIndex]
-	local origin = house.base * slot.offset
-	local model = Instance.new("Model")
-	model.Name = `Hiasan_{house.id}_{slotIndex}_{def.id}`
-	for index, spec in def.parts do
+-- Rakit daftar part (hiasan halaman atau isi rumah) ke dalam model.
+-- alwaysLit = true: lampunya menyala terus (ruang dalam), bukan hanya malam hari.
+local function buildParts(
+	model: Model,
+	origin: CFrame,
+	specs: { HouseConfig.PartSpec },
+	prefix: string,
+	alwaysLit: boolean
+)
+	for index, spec in specs do
 		local part = Instance.new("Part")
-		part.Name = def.id .. tostring(index)
+		part.Name = prefix .. tostring(index)
 		part.Anchored = true
 		part.CanCollide = spec.collide ~= false
 		part.CastShadow = spec.collide ~= false
@@ -134,12 +140,15 @@ local function buildItem(house: House, slotIndex: number, def: HouseConfig.ItemD
 		part.BottomSurface = Enum.SurfaceType.Smooth
 		if spec.light then
 			local light = Instance.new("PointLight")
-			light.Range = 18
-			light.Brightness = 2
+			-- Lampu ruang dalam harus redup (ruang tertutup cepat silau); lampu taman boleh terang.
+			light.Range = if alwaysLit then 26 else 18
+			light.Brightness = if alwaysLit then 0.3 else 2
 			light.Color = spec.color
 			light.Shadows = false
 			light.Parent = part
-			CollectionService:AddTag(part, DayNightConfig.TAG_LIGHT)
+			if not alwaysLit then
+				CollectionService:AddTag(part, DayNightConfig.TAG_LIGHT)
+			end
 		end
 		if spec.bounce then
 			-- Pantulan dihitung di client pemilik karakter (lihat HouseUiController).
@@ -148,8 +157,62 @@ local function buildItem(house: House, slotIndex: number, def: HouseConfig.ItemD
 		end
 		part.Parent = model
 	end
+end
+
+local function buildItem(house: House, slotIndex: number, def: HouseConfig.ItemDef)
+	local slot = HouseConfig.YARD_SLOTS[slotIndex]
+	local model = Instance.new("Model")
+	model.Name = `Hiasan_{house.id}_{slotIndex}_{def.id}`
+	buildParts(model, house.base * slot.offset, def.parts, def.id, false)
 	model.Parent = itemFolder
 	house.items[slotIndex] = model
+end
+
+-- Isi rumah: ruang berperabot tepat di atas rumah (jauh di langit), dimasuki lewat pintu (PortalService).
+local function clearInterior(house: House)
+	local door = house.model:FindFirstChild("Door")
+	if door and door:IsA("BasePart") then
+		PortalService.removePortal(door)
+	end
+	local interior = house.interior
+	if interior then
+		-- Siapa pun yang masih di dalam dikembalikan ke depan rumah supaya tidak jatuh.
+		local center = interior:GetPivot().Position
+		for _, player in Players:GetPlayers() do
+			local character = player.Character
+			local root = if character then character.PrimaryPart else nil
+			if character and root and (root.Position - center).Magnitude < 40 then
+				character:PivotTo(house.base * DOOR_FRONT)
+			end
+		end
+		interior:Destroy()
+		house.interior = nil
+	end
+end
+
+local function buildInterior(house: House)
+	clearInterior(house)
+	local position = house.base.Position
+	local origin = CFrame.new(position.X, HouseConfig.INTERIOR_HEIGHT, position.Z)
+	local model = Instance.new("Model")
+	model.Name = `IsiRumah_{house.id}`
+	buildParts(model, origin, HouseConfig.INTERIOR, "ruang", true)
+	local exit = Instance.new("Part")
+	exit.Name = "PintuKeluar"
+	exit.Anchored = true
+	exit.Size = Vector3.new(4.4, 7.4, 0.4)
+	exit.CFrame = origin * HouseConfig.INTERIOR_DOOR
+	exit.Color = Color3.fromRGB(120, 80, 50)
+	exit.Material = Enum.Material.Wood
+	exit.Parent = model
+	model.Parent = itemFolder
+	house.interior = model
+
+	local door = house.model:FindFirstChild("Door")
+	if door and door:IsA("BasePart") then
+		PortalService.addPortal(door, `rumah{house.id}Luar`, `rumah{house.id}Dalam`, "Masuk")
+		PortalService.addPortal(exit, `rumah{house.id}Dalam`, `rumah{house.id}Luar`, "Keluar")
+	end
 end
 
 local function clearItem(house: House, slotIndex: number)
@@ -223,6 +286,7 @@ local function claim(player: Player, house: House, hd: HouseData)
 	house.model:SetAttribute(HouseConfig.ATTR_OWNER_NAME, player.DisplayName)
 	applyPaint(house, hd)
 	applyItems(house, hd)
+	buildInterior(house)
 	setSign(house, player)
 end
 
@@ -237,6 +301,7 @@ local function release(player: Player)
 	house.model:SetAttribute(HouseConfig.ATTR_OWNER_NAME, "")
 	applyPaint(house, nil)
 	applyItems(house, nil)
+	clearInterior(house)
 	setSign(house, nil)
 end
 
@@ -448,6 +513,7 @@ local function registerHouse(model: Model)
 		groups = { wall = {}, roof = {}, door = {} },
 		original = {},
 		items = {},
+		interior = nil,
 		sign = nil,
 	}
 	local slotByName =
