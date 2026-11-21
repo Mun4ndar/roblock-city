@@ -16,3 +16,9 @@ sourcemap.json
 # OS
 .DS_Store
 Thumbs.db
+
+# Selene std (digenerate otomatis)
+roblox.yml
+
+# Installer Rokit lokal
+rokit/
