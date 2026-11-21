@@ -42,6 +42,7 @@ local distanceLabel: TextLabel
 local props: { [number]: Model } = {} -- indeks langkah -> prop
 local grounded: { Grounded } = {}
 local busy = false
+local spray: Part? = nil -- semburan air saat menahan tombol di tugas pemadam
 
 -- ---------------------------------------------------------------- util
 
@@ -178,13 +179,50 @@ local function onTask(task_: TaskView?)
 	changed:Fire()
 end
 
+local function isFireProp(kind: string?): boolean
+	return kind == "fire" or kind == "kios"
+end
+
+local function stopSpray()
+	if spray then
+		spray:Destroy()
+		spray = nil
+	end
+end
+
+-- Menahan tombol di tugas pemadam: semprotkan air dari pemain ke arah api.
+local function startSpray()
+	stopSpray()
+	local task_ = currentTask
+	local step = if task_ then task_.steps[task_.index] else nil
+	local model = if task_ then props[task_.index] else nil
+	local character = player.Character
+	local root = if character then character.PrimaryPart else nil
+	if step == nil or model == nil or root == nil or not isFireProp(step.prop) then
+		return
+	end
+	local from = (root.CFrame * CFrame.new(0.8, 0.4, -1.2)).Position
+	local nozzle = JobProps.waterSpray(from, model:GetPivot().Position)
+	nozzle.Parent = folder
+	spray = nozzle
+end
+
 local function onPromptTriggered()
 	local task_ = currentTask
 	if busy or task_ == nil then
 		return
 	end
 	busy = true
+	local stepIndex = task_.index
 	local res = invoke(Net.Names.JobStep, task_.id, task_.index)
+	stopSpray()
+	-- Api yang berhasil dipadamkan mengepulkan uap dulu sebelum hilang.
+	local burning = props[stepIndex]
+	local finished = task_.steps[stepIndex]
+	if res.ok and burning and finished and finished.consume and isFireProp(finished.prop) then
+		props[stepIndex] = nil
+		JobProps.extinguish(burning)
+	end
 	if res.message ~= "" then
 		HudController.toast(res.message)
 	end
@@ -240,6 +278,13 @@ local function buildMarker()
 	prompt.KeyboardKeyCode = Enum.KeyCode.E
 	prompt.Parent = promptAnchor
 	prompt.Triggered:Connect(onPromptTriggered)
+	prompt.PromptButtonHoldBegan:Connect(startSpray)
+	prompt.PromptButtonHoldEnded:Connect(function()
+		-- Kalau tombol dilepas sebelum selesai, air berhenti (kalau selesai, onPromptTriggered yang menghentikan).
+		if not busy then
+			stopSpray()
+		end
+	end)
 
 	-- Papan jarak yang terlihat dari jauh (menembus bangunan).
 	local board = Instance.new("BillboardGui")

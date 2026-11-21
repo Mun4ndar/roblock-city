@@ -64,6 +64,173 @@ local function package(model: Model)
 	})
 end
 
+-- Api + asap di sebuah part (dipakai kios terbakar).
+local function burn(host: BasePart, flameSize: number, smokeSize: number)
+	local flames = Instance.new("Fire")
+	flames.Size = flameSize
+	flames.Heat = flameSize + 4
+	flames.Parent = host
+	local smoke = Instance.new("Smoke")
+	smoke.Size = smokeSize
+	smoke.RiseVelocity = 9
+	smoke.Opacity = 0.45
+	smoke.Color = Color3.fromRGB(70, 70, 76)
+	smoke.Parent = host
+end
+
+-- Kios kayu yang terbakar: api di atap dan di dalam, asap tebal, cahaya jingga.
+-- Berdiri sedikit di belakang titik prop supaya tidak menutupi penanda tugas.
+local function kiosk(model: Model)
+	local z = -4
+	local wood = Color3.fromRGB(150, 104, 66)
+	local burnt = Color3.fromRGB(62, 48, 42)
+	local planks = Enum.Material.WoodPlanks
+	part(
+		model,
+		{
+			Name = "Lantai",
+			Size = Vector3.new(9, 0.5, 6),
+			CFrame = CFrame.new(0, 0.25, z),
+			Color = burnt,
+		}
+	)
+	part(
+		model,
+		{
+			Name = "DindingBelakang",
+			Size = Vector3.new(9, 6, 0.5),
+			CFrame = CFrame.new(0, 3.5, z - 2.75),
+			Color = wood,
+			Material = planks,
+		}
+	)
+	part(
+		model,
+		{
+			Name = "DindingKiri",
+			Size = Vector3.new(0.5, 6, 6),
+			CFrame = CFrame.new(-4.25, 3.5, z),
+			Color = burnt,
+			Material = planks,
+		}
+	)
+	part(
+		model,
+		{
+			Name = "DindingKanan",
+			Size = Vector3.new(0.5, 6, 6),
+			CFrame = CFrame.new(4.25, 3.5, z),
+			Color = wood,
+			Material = planks,
+		}
+	)
+	part(
+		model,
+		{
+			Name = "Meja",
+			Size = Vector3.new(9, 2.6, 0.6),
+			CFrame = CFrame.new(0, 1.8, z + 2.7),
+			Color = wood,
+			Material = planks,
+		}
+	)
+	part(model, {
+		Name = "Atap",
+		Size = Vector3.new(10.5, 0.5, 7.6),
+		CFrame = CFrame.new(0, 7, z) * CFrame.Angles(math.rad(-10), 0, 0),
+		Color = Color3.fromRGB(196, 72, 60),
+	})
+	part(model, {
+		Name = "BalokJatuh",
+		Size = Vector3.new(0.6, 0.6, 6),
+		CFrame = CFrame.new(2.4, 0.5, z + 4.6) * CFrame.Angles(0, math.rad(35), math.rad(8)),
+		Color = burnt,
+	})
+	local glow = part(model, {
+		Name = "Bara",
+		Size = Vector3.new(7.6, 3.2, 4.4),
+		CFrame = CFrame.new(0, 3.2, z - 0.2),
+		Color = Color3.fromRGB(255, 140, 40),
+		Material = Enum.Material.Neon,
+		Transparency = 0.45,
+	})
+	local light = Instance.new("PointLight")
+	light.Color = Color3.fromRGB(255, 150, 60)
+	light.Range = 30
+	light.Brightness = 2
+	light.Parent = glow
+	for _, spot in { { 0, 7.6, 0, 16, 9 }, { -3, 4, 1.2, 10, 5 }, { 3, 3, -1, 9, 5 } } do
+		local host = part(model, {
+			Name = "TitikApi",
+			Size = Vector3.new(2, 0.4, 2),
+			CFrame = CFrame.new(spot[1], spot[2], z + spot[3]),
+			Transparency = 1,
+		})
+		burn(host, spot[4], spot[5])
+	end
+end
+
+-- Api padam: nyala mati, asap berubah jadi uap putih, lalu prop hilang.
+function JobProps.extinguish(model: Model)
+	for _, d in model:GetDescendants() do
+		if d:IsA("Fire") or d:IsA("PointLight") then
+			d.Enabled = false
+		elseif d:IsA("Smoke") then
+			d.Color = Color3.fromRGB(236, 238, 240)
+			d.Opacity = 0.25
+			d.RiseVelocity = 5
+		elseif d:IsA("BasePart") and d.Material == Enum.Material.Neon then
+			d.Material = Enum.Material.SmoothPlastic
+			d.Color = Color3.fromRGB(58, 50, 46)
+		end
+	end
+	task.delay(2, function()
+		for _, d in model:GetDescendants() do
+			if d:IsA("Smoke") then
+				d.Enabled = false
+			end
+		end
+	end)
+	task.delay(5, function()
+		model:Destroy()
+	end)
+end
+
+-- Semburan air dari `from` ke arah `target` (selang pemadam). Kembalikan part-nya;
+-- hancurkan untuk menghentikan semburan.
+function JobProps.waterSpray(from: Vector3, target: Vector3): Part
+	local nozzle = Instance.new("Part")
+	nozzle.Name = "SemburanAir"
+	nozzle.Anchored = true
+	nozzle.CanCollide = false
+	nozzle.CanQuery = false
+	nozzle.CanTouch = false
+	nozzle.Transparency = 1
+	nozzle.Size = Vector3.new(0.4, 0.4, 0.4)
+	nozzle.CFrame = CFrame.lookAt(from, target + Vector3.new(0, 2.5, 0))
+	local distance = (target - from).Magnitude
+	local water = Instance.new("ParticleEmitter")
+	water.Texture = "rbxasset://textures/particles/smoke_main.dds"
+	water.Color = ColorSequence.new(Color3.fromRGB(150, 210, 255))
+	water.Size = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.5),
+		NumberSequenceKeypoint.new(1, 1.8),
+	})
+	water.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.2),
+		NumberSequenceKeypoint.new(1, 0.8),
+	})
+	water.Speed = NumberRange.new(38, 44)
+	water.Lifetime = NumberRange.new(math.clamp(distance / 40, 0.25, 0.9))
+	water.Acceleration = Vector3.new(0, -14, 0)
+	water.SpreadAngle = Vector2.new(5, 5)
+	water.Rate = 70
+	water.LightEmission = 0.3
+	water.EmissionDirection = Enum.NormalId.Front
+	water.Parent = nozzle
+	return nozzle
+end
+
 local function fire(model: Model)
 	part(model, {
 		Name = "Bin",
@@ -222,6 +389,8 @@ function JobProps.build(kind: JobConfig.PropKind, ground: CFrame, seed: number):
 		package(model)
 	elseif kind == "fire" then
 		fire(model)
+	elseif kind == "kios" then
+		kiosk(model)
 	elseif kind == "person" then
 		person(model, random)
 	elseif kind == "cat" then

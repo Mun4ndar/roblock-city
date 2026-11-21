@@ -9,7 +9,7 @@
 -- Modul ini ikut ter-replikasi ke client. Client hanya memakainya untuk
 -- tampilan; gaji dihitung dan divalidasi server.
 
-export type PropKind = "package" | "car" | "fire" | "person" | "cat" | "cone"
+export type PropKind = "package" | "car" | "fire" | "kios" | "person" | "cat" | "cone"
 
 export type Place = {
 	name: string,
@@ -562,9 +562,9 @@ JobConfig.LIST = {
 						pool = "kebakaran",
 						minDist = 80,
 						action = "Semprot air",
-						text = "Padamkan api di {tempat}",
+						text = "Padamkan kios yang terbakar di {tempat}",
 						hold = 4,
-						prop = "fire",
+						prop = "kios", -- kios kayu terbakar (api besar + asap)
 						consume = true,
 					},
 					{
