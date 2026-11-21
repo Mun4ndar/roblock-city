@@ -35,6 +35,25 @@ Urutan load ada di `ORDER` pada `init.server.luau` / `init.client.luau`; tambahk
 2. Tambah `MIGRATIONS[versiLama] = function(data) ... return data end` di `DataService.luau`.
    Field baru yang cuma butuh nilai default terisi otomatis.
 
+## Peta
+
+Peta disimpan sebagai kode di `map/BuildTown.luau` (bukan file .rbxm), jadi perubahannya bisa dilihat di git.
+Skrip itu menghapus lalu membangun ulang `Workspace.Map`: jalankan di Studio mode Edit lewat Command Bar
+(tempel isinya) atau lewat Studio MCP. Setelah itu simpan place (Ctrl+S).
+
+Kota kecil saat ini (`Workspace.Map`, sekitar 700 part, semuanya anchored):
+
+| Folder | Isi |
+| --- | --- |
+| `Ground` | Tanah rumput 560x560 |
+| `Roads` | Grid jalan 3x3 (lebar 32, 2 lajur): segmen, persimpangan, marka kuning/putih, zebra cross |
+| `Sidewalks` | Pelat trotoar tiap blok + trotoar perumahan |
+| `Buildings/Downtown` | Toko, Kafe, Balai Kota, Rumah Sakit, Pemadam Kebakaran, Bengkel (masih placeholder) |
+| `Buildings/Houses` | 6 rumah di sisi utara jalan z = 120 |
+| `Park` | Taman dengan air mancur, bangku (bisa diduduki), petak bunga |
+| `Props` | Pohon, lampu jalan, tempat sampah, hidran |
+| `Spawns` | 4 SpawnLocation di jalan setapak taman (tanpa force field) |
+
 ## Cek kode
 
 - Format: `stylua src`
