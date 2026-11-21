@@ -100,13 +100,14 @@ require(MB.BuildResidential)()
 require(MB.BuildBeach)()
 require(MB.BuildAirport)()
 require(MB.BuildDealer)()
+require(MB.StyleWorld)()       -- rias tampilan; selalu PALING AKHIR (lihat "Tampilan")
 ```
 
 Setiap skrip hanya mengganti foldernya sendiri di `Workspace.Map`. Modul bantu: `MapKit` (part, jalan, pohon,
 lampu), `Buildings` (gedung tinggi, toko, lampu lalu lintas, parkir), `Homes` (rumah, rumah mewah, taman bermain),
 `Streets` (grid jalan bertrotoar).
 
-Dunia (utara = -Z, sekitar 8.500 part, semua anchored, StreamingEnabled aktif):
+Dunia (utara = -Z, sekitar 10.800 part termasuk hiasan alam, semua anchored, StreamingEnabled aktif):
 
 | Kawasan | Folder `Workspace.Map` | Lokasi | Isi |
 | --- | --- | --- | --- |
@@ -121,6 +122,26 @@ Dunia (utara = -Z, sekitar 8.500 part, semua anchored, StreamingEnabled aktif):
 Catatan Terrain: permukaan terrain tampil sekitar 2 stud di atas batas isi `FillBlock`, jadi rumput diisi sampai
 y = -2 agar permukaannya pas di y = 0 (sejajar jalan part). `FillCylinder` membulatkan tinggi ke grid 4 stud,
 jadi bentuk bulat digambar sebagai jalur-jalur `FillBlock`.
+
+### Tampilan (StyleWorld)
+
+`map/StyleWorld.luau` merias dunia tanpa mengubah bentuk bangunan, dan menggantikan plugin tampilan yang
+biasanya diklik manual. Jalankan setelah semua pembangun, dan ulangi setiap kali ada kawasan yang dibangun ulang
+(aman diulang). Bisa juga satu bagian saja, misalnya `require(MB.StyleWorld)("lighting")`.
+
+| Bagian | Isi | Yang diubah untuk menyetel |
+| --- | --- | --- |
+| `lighting` | Langit bawaan Roblox + awan dinamis, sudut matahari, kabut, bloom, warna, sinar matahari, air | tabel `LOOK` |
+| `materials` | Material per nama part: paving di trotoar/blok kota/jalan masuk, plester di dinding rumah, genteng di atap, kaca memantul | tabel `RULES` dan `VARIANTS` |
+| `lights` | Semua lampu jalan disetel serentak (jangkauan, terang, warna; tanpa bayangan) | tabel `LIGHTS` |
+| `scenery` | Semak, batu, dan bunga disebar acak di rumput kosong, lebih rapat di dekat jalan dan bangunan, ke `Workspace.Map.Scenery` | `REGIONS` (`parts` = batas part per kawasan) dan `SEED` |
+
+- Objek rias di `Lighting` dan `Terrain` ditandai atribut `RoblockStyle`. Sky, Atmosphere, atau efek lain yang
+  tidak bertanda (misalnya dari Toolbox) dipindahkan ke `ServerStorage.LightingLama`, tidak dihapus.
+- `PavingKota` adalah satu-satunya MaterialVariant bertekstur sendiri (dibuat dengan generator material Studio);
+  sisanya material bawaan Roblox, jadi tidak menambah beban tekstur. Jika hilang dari `MaterialService`, skrip
+  membuatnya lagi dari ID di `VARIANTS`.
+- Hiasan alam tanpa tabrakan dan tanpa bayangan. Sebaran selalu sama selama `SEED` tidak diubah.
 
 ## Cek kode
 

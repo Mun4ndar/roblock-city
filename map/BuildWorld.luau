@@ -16,8 +16,8 @@
 	Peringatan: Terrain dihapus dan dibangun ulang.
 ]]
 
-local Lighting = game:GetService("Lighting")
 local Kit = require(script.Parent.MapKit)
+local StyleWorld = require(script.Parent.StyleWorld)
 
 local M = Enum.Material
 
@@ -231,25 +231,9 @@ local function buildHighway()
 	return zone
 end
 
+-- Pencahayaan, langit, dan warna terrain diatur di satu tempat: StyleWorld.
 local function buildLighting()
-	Lighting.ClockTime = 13.5
-	Lighting.Brightness = 2.5
-	Lighting.Ambient = Color3.fromRGB(70, 70, 80)
-	Lighting.OutdoorAmbient = Color3.fromRGB(140, 140, 150)
-	Lighting.EnvironmentDiffuseScale = 1
-	Lighting.EnvironmentSpecularScale = 0.5
-	Lighting.GlobalShadows = true
-	local atm = Lighting:FindFirstChildOfClass("Atmosphere")
-	if atm then
-		atm.Density = 0.25
-		atm.Haze = 1
-		atm.Color = Color3.fromRGB(200, 220, 240)
-		atm.Decay = Color3.fromRGB(120, 170, 220)
-	end
-	local dof = Lighting:FindFirstChildOfClass("DepthOfFieldEffect")
-	if dof then
-		dof.Enabled = false
-	end
+	StyleWorld("lighting")
 end
 
 return function()
