@@ -279,26 +279,23 @@ local function kiosk(
 	color: Color3,
 	parent: Instance
 )
-	B.shop(
-		{
-			name = name,
-			x = pos.X,
-			z = pos.Z,
-			yaw = yaw,
-			baseY = pos.Y,
-			w = 16,
-			d = 12,
-			h = 9,
-			floors = 1,
-			color = Color3.new(1, 1, 1),
-			trim = color,
-			sign = sign,
-			signColor = color,
-			storefront = true,
-			awning = color,
-		},
-		parent
-	)
+	B.shop({
+		name = name,
+		x = pos.X,
+		z = pos.Z,
+		yaw = yaw,
+		baseY = pos.Y,
+		w = 16,
+		d = 12,
+		h = 9,
+		floors = 1,
+		color = Color3.new(1, 1, 1),
+		trim = color,
+		sign = sign,
+		signColor = color,
+		storefront = true,
+		awning = color,
+	}, parent)
 end
 
 local function buildRoads(zone: Instance)
@@ -333,24 +330,21 @@ end
 
 local function buildResort(zone: Instance)
 	local f = Kit.folder("Resort")
-	B.tower(
-		{
-			name = "ROBLOCKResort",
-			x = 1705,
-			z = -220,
-			w = 140,
-			d = 40,
-			h = 42,
-			yaw = -math.pi / 2,
-			color = col(250, 248, 240),
-			band = col(90, 190, 200),
-			bandEvery = 8,
-			crown = "ac",
-			sign = "ROBLOCK RESORT",
-			signColor = col(60, 170, 190),
-		},
-		f
-	)
+	B.tower({
+		name = "ROBLOCKResort",
+		x = 1705,
+		z = -220,
+		w = 140,
+		d = 40,
+		h = 42,
+		yaw = -math.pi / 2,
+		color = col(250, 248, 240),
+		band = col(90, 190, 200),
+		bandEvery = 8,
+		crown = "ac",
+		sign = "ROBLOCK RESORT",
+		signColor = col(60, 170, 190),
+	}, f)
 	-- kolam renang di depan resor
 	Kit.P({
 		Name = "PoolDeck",
@@ -492,27 +486,24 @@ local function buildBeachLife(zone: Instance)
 	)
 
 	-- sewa jet ski
-	B.shop(
-		{
-			name = "SewaJetSki",
-			x = 2060,
-			z = -150,
-			yaw = -math.pi / 2,
-			baseY = 0,
-			w = 22,
-			d = 14,
-			h = 10,
-			floors = 1,
-			color = col(70, 160, 235),
-			trim = Color3.new(1, 1, 1),
-			sign = "SEWA JET SKI",
-			signColor = Color3.new(1, 1, 1),
-			signText = col(40, 110, 200),
-			storefront = true,
-			awning = col(250, 200, 60),
-		},
-		f
-	)
+	B.shop({
+		name = "SewaJetSki",
+		x = 2060,
+		z = -150,
+		yaw = -math.pi / 2,
+		baseY = 0,
+		w = 22,
+		d = 14,
+		h = 10,
+		floors = 1,
+		color = col(70, 160, 235),
+		trim = Color3.new(1, 1, 1),
+		sign = "SEWA JET SKI",
+		signColor = Color3.new(1, 1, 1),
+		signText = col(40, 110, 200),
+		storefront = true,
+		awning = col(250, 200, 60),
+	}, f)
 	for i = 0, 3 do
 		jetSki(
 			CFrame.new(2135, WATER_Y + 0.4, -175 + i * 16) * CFrame.Angles(0, -math.pi / 2, 0),
@@ -605,25 +596,22 @@ local function buildHarbor(zone: Instance)
 		Color = col(250, 200, 60),
 		Parent = f,
 	})
-	B.shop(
-		{
-			name = "TerminalFeri",
-			x = 1770,
-			z = 720,
-			yaw = 0,
-			baseY = 0,
-			w = 70,
-			d = 30,
-			h = 16,
-			floors = 2,
-			color = col(240, 245, 250),
-			trim = col(40, 110, 200),
-			sign = "PELABUHAN",
-			signColor = col(40, 110, 200),
-			storefront = true,
-		},
-		f
-	)
+	B.shop({
+		name = "TerminalFeri",
+		x = 1770,
+		z = 720,
+		yaw = 0,
+		baseY = 0,
+		w = 70,
+		d = 30,
+		h = 16,
+		floors = 2,
+		color = col(240, 245, 250),
+		trim = col(40, 110, 200),
+		sign = "PELABUHAN",
+		signColor = col(40, 110, 200),
+		storefront = true,
+	}, f)
 	-- jetty kayu & kapal
 	for i, x in { 1680, 1760, 1840 } do
 		Kit.P({
