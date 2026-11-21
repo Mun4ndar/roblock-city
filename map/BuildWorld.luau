@@ -154,7 +154,6 @@ local function buildHighway()
 	local spokes = Kit.folder("Connectors")
 	local V = Vector2.new
 	local routes = {
-		{ "KeDowntown", { V(100, -1076), V(100, 250) } },
 		{ "KeSelatan", { V(100, 650), V(100, 1056) } },
 		{ "KeBarat", { V(-100, 450), V(-456, 450) } },
 		{ "KeTimur", { V(300, 450), V(876, 450) } },
