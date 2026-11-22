@@ -431,6 +431,10 @@ HouseConfig.ITEMS = {
 HouseConfig.INTERIOR_HEIGHT = 2000
 -- Pintu keluar di dalam ruang (relatif ke tengah lantai), menghadap ke dalam.
 HouseConfig.INTERIOR_DOOR = CFrame.new(0, 3.7, 10.8)
+-- Entri 1..INTERIOR_SHELL_COUNT di INTERIOR adalah kulit ruangan (lantai, plafon, dinding, lampu,
+-- jendela); sisanya perabot. Kalau templat perabot mesh ada (ServerStorage.AsetRumah.perabot,
+-- dibuat di Blender dengan tata letak yang sama), perabot part disembunyikan dan hanya jadi tabrakan.
+HouseConfig.INTERIOR_SHELL_COUNT = 11
 
 local WALL = rgb(250, 240, 222)
 local SOFA = rgb(86, 136, 200)

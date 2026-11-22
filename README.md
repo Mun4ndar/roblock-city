@@ -144,6 +144,7 @@ require(MB.BuildInteriors)()   -- lobi Rumah Sakit dan ruang tunggu Bandara (kap
 require(MB.BuildFarm)()        -- Pasar Tani dan Kebun Warga (setelah BuildCountryside)
 require(MB.StyleBeach)()       -- kursi pantai (paket gratis Tidewalk Sampler) dan perahu nelayan
 require(MB.StyleHouses)()      -- rumah modern (mesh Blender) menggantikan tampilan 89 rumah perumahan
+require(MB.StyleRocks)()       -- batu mesh menggantikan batu kotak di Map.Scenery (setelah StyleWorld)
 ```
 
 Setiap skrip hanya mengganti foldernya sendiri di `Workspace.Map`. Modul bantu: `MapKit` (part, jalan, pohon,

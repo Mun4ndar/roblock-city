@@ -9,6 +9,7 @@
 local CollectionService = game:GetService("CollectionService")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
+local ServerStorage = game:GetService("ServerStorage")
 local Workspace = game:GetService("Workspace")
 
 local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
@@ -168,6 +169,52 @@ local function buildItem(house: House, slotIndex: number, def: HouseConfig.ItemD
 	house.items[slotIndex] = model
 end
 
+-- Warna tiap bahan perabot mesh (nama MeshPart = "Perabot" + bahan).
+local FURNITURE = {
+	Fabric = { color = Color3.fromRGB(86, 136, 200), material = Enum.Material.Fabric },
+	Cushion = { color = Color3.fromRGB(240, 210, 120), material = Enum.Material.Fabric },
+	Rug = { color = Color3.fromRGB(236, 186, 120), material = Enum.Material.Fabric },
+	Pink = { color = Color3.fromRGB(240, 150, 170), material = Enum.Material.Fabric },
+	White = { color = Color3.fromRGB(248, 248, 246), material = Enum.Material.SmoothPlastic },
+	Wood = { color = Color3.fromRGB(160, 112, 70), material = Enum.Material.Wood },
+	Dark = { color = Color3.fromRGB(70, 60, 56), material = Enum.Material.SmoothPlastic },
+	Screen = { color = Color3.fromRGB(24, 26, 34), material = Enum.Material.Glass },
+	Lamp = { color = Color3.fromRGB(255, 226, 170), material = Enum.Material.Neon },
+	Metal = { color = Color3.fromRGB(206, 212, 220), material = Enum.Material.Metal },
+	Accent = { color = Color3.fromRGB(240, 150, 90), material = Enum.Material.SmoothPlastic },
+	Red = { color = Color3.fromRGB(210, 70, 70), material = Enum.Material.SmoothPlastic },
+	Blue = { color = Color3.fromRGB(70, 120, 200), material = Enum.Material.SmoothPlastic },
+	Pot = { color = Color3.fromRGB(190, 110, 70), material = Enum.Material.SmoothPlastic },
+	Green = { color = Color3.fromRGB(70, 160, 80), material = Enum.Material.SmoothPlastic },
+}
+
+-- Perabot mesh (sudut membulat) dari templat ServerStorage.AsetRumah.perabot. false jika templat tidak ada.
+local function addFurniture(model: Model, origin: CFrame): boolean
+	local folder = ServerStorage:FindFirstChild("AsetRumah")
+	local template = if folder then folder:FindFirstChild("perabot") else nil
+	local ref = if template then template:FindFirstChild("PerabotRef") else nil
+	if template == nil or ref == nil or not ref:IsA("BasePart") then
+		return false
+	end
+	local base = ref.CFrame * CFrame.new(0, -ref.Size.Y / 2, 0)
+	for _, piece in template:GetChildren() do
+		local look = FURNITURE[piece.Name:sub(8)]
+		if piece:IsA("MeshPart") and piece ~= ref and look then
+			local clone = piece:Clone()
+			clone.CFrame = origin * base:ToObjectSpace(piece.CFrame)
+			clone.Anchored = true
+			clone.CanCollide = false
+			clone.CanTouch = false
+			clone.CanQuery = false
+			clone.CastShadow = false
+			clone.Color = look.color
+			clone.Material = look.material
+			clone.Parent = model
+		end
+	end
+	return true
+end
+
 -- Isi rumah: ruang berperabot tepat di atas rumah (jauh di langit), dimasuki lewat pintu (PortalService).
 local function clearInterior(house: House)
 	local door = house.model:FindFirstChild("Door")
@@ -197,6 +244,16 @@ local function buildInterior(house: House)
 	local model = Instance.new("Model")
 	model.Name = `IsiRumah_{house.id}`
 	buildParts(model, origin, HouseConfig.INTERIOR, "ruang", true)
+	if addFurniture(model, origin) then
+		-- Perabot mesh terpasang: perabot part cukup jadi tabrakan yang tidak terlihat.
+		for _, child in model:GetChildren() do
+			local index = tonumber(child.Name:match("^ruang(%d+)$"))
+			if index and index > HouseConfig.INTERIOR_SHELL_COUNT and child:IsA("BasePart") then
+				child.Transparency = 1
+				child.CastShadow = false
+			end
+		end
+	end
 	local exit = Instance.new("Part")
 	exit.Name = "PintuKeluar"
 	exit.Anchored = true
