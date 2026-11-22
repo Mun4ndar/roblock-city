@@ -64,7 +64,7 @@ local function act(player: Player, action: any): Result
 		return result(false, "Data kamu masih dimuat...")
 	end
 	if not atCounter(player) then
-		return result(false, "Datang dulu ke Kafe Mall di dalam ROBLOCK Mall ya.")
+		return result(false, "Datang dulu ke kasir Kafe Kota di pusat kota ya.")
 	end
 	local business = getBusiness(data)
 	if action == "buy" then
@@ -139,16 +139,16 @@ function BusinessService.init()
 	end
 
 	local counter = Instance.new("Part")
-	counter.Name = "KafeMall"
+	counter.Name = "KasirKafeKota"
 	counter.Anchored = true
 	counter.CanCollide = false
 	counter.CanQuery = false
 	counter.Transparency = 1
 	counter.Size = Vector3.new(2, 2, 2)
-	counter.Position = BusinessConfig.POSITION + Vector3.new(0, 4, 0)
+	counter.Position = BusinessConfig.POSITION + Vector3.new(0, 4.6, 0)
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.ActionText = "Kelola kafe"
-	prompt.ObjectText = "Kafe Mall"
+	prompt.ObjectText = "Kafe Kota"
 	prompt.HoldDuration = 0.2
 	prompt.MaxActivationDistance = 14
 	prompt.RequiresLineOfSight = false
@@ -189,7 +189,7 @@ function BusinessService.start()
 				if business.stored >= level.capacity then
 					EconomyService.notify(
 						player,
-						"Laci kasir kafemu penuh! Ambil hasilnya di Kafe Mall."
+						"Laci kasir kafemu penuh! Ambil hasilnya di Kafe Kota."
 					)
 				end
 			end

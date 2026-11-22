@@ -56,6 +56,16 @@ local GROUPS = {
 		places = { "kiosKelapa", "kiosEsKrim", "sewaJetSki", "dermaga" },
 		seatsIn = "Beach", -- warga di sini juga duduk santai di kursi (Seat) dalam Workspace.Map.Beach
 	},
+	{
+		-- Pengunjung Kafe Kota: hampir selalu duduk di teras sambil memegang cangkir kopi.
+		name = "KafeKota",
+		count = 4,
+		places = { "kafeKota", "pusatBisnis" },
+		seatsIn = "KafeKota",
+		relaxChance = 0.85,
+		sitSeconds = { 30, 70 },
+		cup = true,
+	},
 }
 
 local rgb = Color3.fromRGB
@@ -755,7 +765,7 @@ local function walkTo(model: Model, humanoid: Humanoid, goal: Vector3)
 end
 
 -- Duduk santai di kursi kosong terdekat dari daftar, lalu berdiri lagi.
-local function relax(model: Model, humanoid: Humanoid, seats: { Seat })
+local function relax(model: Model, humanoid: Humanoid, seats: { Seat }, group: any)
 	local free: { Seat } = {}
 	for _, seat in seats do
 		if seat.Parent and seat.Occupant == nil then
@@ -771,13 +781,41 @@ local function relax(model: Model, humanoid: Humanoid, seats: { Seat })
 		return
 	end
 	seat:Sit(humanoid)
-	task.wait(random:NextNumber(12, 28))
+	-- pengunjung kafe memegang cangkir selama duduk
+	local cup: Part? = nil
+	local hand = model:FindFirstChild("RightHand") or model:FindFirstChild("Right Arm")
+	if group.cup and hand and hand:IsA("BasePart") then
+		local created = Instance.new("Part")
+		created.Name = "Cangkir"
+		created.Shape = Enum.PartType.Cylinder
+		created.Size = Vector3.new(0.5, 0.55, 0.55)
+		created.Color = Color3.fromRGB(250, 242, 226)
+		created.Material = Enum.Material.SmoothPlastic
+		created.Massless = true
+		created.CanCollide = false
+		created.CanQuery = false
+		created.CanTouch = false
+		created.CFrame = hand.CFrame
+			* CFrame.new(0, -hand.Size.Y / 2 - 0.2, -0.3)
+			* CFrame.Angles(0, 0, math.rad(90))
+		local weld = Instance.new("WeldConstraint")
+		weld.Part0 = hand
+		weld.Part1 = created
+		weld.Parent = created
+		created.Parent = model
+		cup = created
+	end
+	local sit = group.sitSeconds or { 12, 28 }
+	task.wait(random:NextNumber(sit[1], sit[2]))
+	if cup then
+		cup:Destroy()
+	end
 	humanoid.Sit = false
 	humanoid.Jump = true
 	task.wait(1)
 end
 
-local function live(model: Model, places: { Vector3 }, seats: { Seat })
+local function live(model: Model, places: { Vector3 }, seats: { Seat }, group: any)
 	local humanoid = model:FindFirstChildOfClass("Humanoid")
 	if humanoid == nil then
 		return
@@ -792,8 +830,8 @@ local function live(model: Model, places: { Vector3 }, seats: { Seat })
 		if root.Position.Y < -30 then
 			model:PivotTo(CFrame.new(near(pick(places)))) -- jatuh ke air/lubang: kembali ke darat
 		end
-		if #seats > 0 and random:NextNumber() < 0.45 then
-			relax(model, humanoid, seats)
+		if #seats > 0 and random:NextNumber() < (group.relaxChance or 0.45) then
+			relax(model, humanoid, seats, group)
 		else
 			walkTo(model, humanoid, near(pick(places)))
 		end
@@ -850,7 +888,7 @@ function NpcService.start()
 						root:SetNetworkOwner(nil)
 					end)
 				end
-				task.spawn(live, model, places, seats)
+				task.spawn(live, model, places, seats, group)
 			end
 			task.wait(0.2)
 		end

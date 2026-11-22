@@ -1,6 +1,6 @@
 --!strict
 -- BusinessController: panel Kafe milik pemain (buka, naik tingkat, layani pelanggan, ambil hasil).
--- Terbuka dari tombol di kasir Kafe Mall atau dari HP. Semua aksi lewat remote BusinessAction;
+-- Terbuka dari tombol di kasir Kafe Kota atau dari HP. Semua aksi lewat remote BusinessAction;
 -- harga, jarak, dan jeda dicek BusinessService.
 
 local HttpService = game:GetService("HttpService")
@@ -136,7 +136,7 @@ function refresh()
 			.. Format.money(level.capacity)
 		fill.Size = UDim2.fromScale(math.clamp(view.stored / level.capacity, 0, 1), 1)
 	else
-		title.Text = "☕ Kafe Mall"
+		title.Text = "☕ Kafe Kota"
 		info.Text = "Buka kafemu sendiri! Kafe menghasilkan uang tiap menit selama kamu bermain, "
 			.. "dan kamu bisa melayani pelanggan untuk bonus."
 		drawer.Text = "Kamu belum punya kafe."
@@ -185,7 +185,7 @@ local function buildGui()
 		Size = UDim2.new(1, -80, 0, 36),
 		Font = Enum.Font.FredokaOne,
 		TextSize = 24,
-		Text = "☕ Kafe Mall",
+		Text = "☕ Kafe Kota",
 	})
 	button(panel, {
 		Name = "Close",

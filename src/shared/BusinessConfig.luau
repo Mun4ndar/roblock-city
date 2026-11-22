@@ -1,5 +1,5 @@
 --!strict
--- Usaha pemain: Kafe di dalam ROBLOCK Mega Mall. Pemain membuka kafe, lalu kafe menghasilkan
+-- Usaha pemain: Kafe Kota di pusat kota (teras di depan gedung Kafe Kota, lihat map/BuildCafe.luau). Pemain membuka kafe, lalu kafe menghasilkan
 -- uang tiap menit selama pemiliknya sedang bermain (ditampung di laci kasir sampai penuh).
 -- Pemilik mengambil hasilnya di kasir, bisa melayani pelanggan untuk bonus, dan menaikkan
 -- tingkat kafe. Semua angka diatur di sini.
@@ -17,9 +17,9 @@ export type Level = {
 -- Keadaan yang dikirim ke client (atribut Player "Business", JSON). level 0 = belum punya.
 export type BusinessView = { level: number, stored: number }
 
--- Kasir Kafe Mall (ruang dalam di y = 2000, lihat map/BuildInteriors.luau)
-BusinessConfig.POSITION = Vector3.new(564, 2000, -623)
-BusinessConfig.RANGE = 34
+-- Konter kasir di teras Kafe Kota (harus sama dengan COUNTER di map/BuildCafe.luau)
+BusinessConfig.POSITION = Vector3.new(28, 1.1, -555.4)
+BusinessConfig.RANGE = 30
 BusinessConfig.ATTR_PLAYER = "Business"
 BusinessConfig.ATTR_PROMPT = "BusinessCafe"
 BusinessConfig.TICK_SECONDS = 60

@@ -173,6 +173,11 @@ MissionConfig.MAP_BOUNDS = { minX = -1150, maxX = 2300, minZ = -1200, maxZ = 115
 -- Tempat dealer mobil tidak ada di JobConfig.PLACES, jadi dicatat di sini.
 MissionConfig.EXTRA_PLACES = {
 	dealer = { name = "Dealer Mobil", position = Vector3.new(-67, 1, 511), icon = "🚗" },
+	kasirKafe = {
+		name = "Kasir Kafe Kota (usahamu)",
+		position = Vector3.new(28, 1, -553),
+		icon = "☕",
+	},
 	pasarTani = { name = "Pasar Tani & Kebun", position = Vector3.new(-660, 1, 334), icon = "🌽" },
 }
 

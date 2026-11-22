@@ -99,10 +99,11 @@ Urutan load ada di `ORDER` pada `init.server.luau` / `init.client.luau`; tambahk
   (part beraspal + sampel Terrain); buat ulang kalau tata jalan berubah.
 - **Motor**: kendaraan dengan `body.bike = true` di VehicleConfig (skuter "lincah"): jok berurutan, dua roda
   tampak, roda fisika tetap empat dan tersembunyi. Templatnya `ReplicatedStorage.Assets.CarShells.lincah`.
-- **BusinessService**: usaha Kafe di kasir Kafe Mall (dalam ROBLOCK Mega Mall). Buka kafe, naik tingkat,
-  layani pelanggan (bonus, ada jeda), ambil hasil. Pemasukan tiap menit hanya selama pemilik bermain dan
-  ditampung sampai batas laci. Angka di `src/shared/BusinessConfig.luau` (`LEVELS`). Tersimpan di
-  `business`; panelnya `BusinessController` (juga dari HP: "Kafeku").
+- **BusinessService**: usaha Kafe Kota di pusat kota (kasir di teras depan gedung Kafe Kota, dibangun
+  `map/BuildCafe.luau`). Buka kafe, naik tingkat, layani pelanggan (bonus, ada jeda), ambil hasil. Pemasukan
+  tiap menit hanya selama pemilik bermain dan ditampung sampai batas laci. Angka di
+  `src/shared/BusinessConfig.luau`. Tersimpan di `business`; panelnya `BusinessController` (juga dari HP:
+  "Kafeku"). Warga grup "KafeKota" (NpcService) duduk di kursi teras sambil memegang cangkir.
 - **DebugService**: alat uji, hanya aktif di Studio. Dari command bar server:
   `game.ServerStorage.Debug:Invoke("money", pemain, 5000)` atau `game.ServerStorage.Debug:Invoke("clock", 21)`.
 - `src/client/Util/UiScale.luau` mengecilkan HUD di layar kecil; elemen HUD baru cukup memanggil `UiScale.attach`.
@@ -180,6 +181,7 @@ require(MB.StyleRocks)()       -- batu mesh menggantikan batu kotak di Map.Scene
 require(MB.StyleRound)()       -- bangunan bersudut bulat + gedung kaca bersirip (pusat kota, kota kecil, pantai, bandara)
 require(MB.StyleNature)()      -- tekstur rumput/kayu dan pohon rindang bergaya templat desa resmi Roblox
 require(MB.StyleFountains)()   -- setelah BuildInteriors: air mancur bertingkat (mesh Blender, partikel, suara)
+require(MB.BuildCafe)()        -- teras Kafe Kota: meja, kursi, kasir usaha kafe (kapan saja)
 require(MB.FixTrees)()         -- PALING AKHIR: pohon di jalan, pembatas tengah, dan parkiran dipindah ke CadanganPeta
 ```
 
