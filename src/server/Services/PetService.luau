@@ -97,6 +97,50 @@ local function buildPet(def: PetConfig.PetDef, at: CFrame): (Model, BasePart)
 	root.CFrame = at
 	root.Parent = model
 	model.PrimaryPart = root
+
+	-- Kalau ada templat mesh ServerStorage.AsetHewan.<id> (buatan Blender, assets/blender/hewan_*.fbx),
+	-- hewan tampil dengan mesh itu. Titik asal templat = tanah di bawah hewan; Root jadi tak terlihat.
+	local assets = game:GetService("ServerStorage"):FindFirstChild("AsetHewan")
+	local template = if assets then assets:FindFirstChild(def.id) else nil
+	if template then
+		root.Transparency = 1
+		root.Size = Vector3.new(1, 1, 1)
+		model:SetAttribute("Mesh", true)
+		for _, source in template:GetChildren() do
+			if source:IsA("BasePart") then
+				local clone = source:Clone()
+				clone.Anchored = false
+				clone.Massless = true
+				clone.CanCollide = false
+				clone.CanQuery = false
+				clone.CanTouch = false
+				clone.CFrame = at * source.CFrame
+				local weld = Instance.new("WeldConstraint")
+				weld.Part0 = root
+				weld.Part1 = clone
+				weld.Parent = clone
+				clone.Parent = model
+			end
+		end
+		local height = template:GetAttribute("Height")
+		local nameTag = Instance.new("BillboardGui")
+		nameTag.Name = "Nama"
+		nameTag.Size = UDim2.fromScale(5, 1)
+		nameTag.StudsOffset =
+			Vector3.new(0, (if type(height) == "number" then height else 3) + 0.9, 0)
+		nameTag.MaxDistance = 45
+		local nameLabel = Instance.new("TextLabel")
+		nameLabel.Size = UDim2.fromScale(1, 1)
+		nameLabel.BackgroundTransparency = 1
+		nameLabel.Font = Enum.Font.FredokaOne
+		nameLabel.TextScaled = true
+		nameLabel.TextColor3 = Color3.new(1, 1, 1)
+		nameLabel.TextStrokeTransparency = 0.4
+		nameLabel.Text = def.name
+		nameLabel.Parent = nameTag
+		nameTag.Parent = root
+		return model, root
+	end
 	local function add(size: Vector3, offset: CFrame, color: Color3, shape: Enum.PartType)
 		piece(
 			model,
@@ -184,7 +228,10 @@ local function spawnPet(player: Player)
 	-- titik tujuan: di samping belakang pemilik, setinggi tanah
 	local target = Instance.new("Attachment")
 	target.Name = "PetTarget"
-	target.Position = Vector3.new(3, -1.9 + 0.95 * def.size, 2.5)
+	-- hewan mesh: Root ada di tanah (kaki pemilik ~3 stud di bawah HumanoidRootPart)
+	target.Position = if model:GetAttribute("Mesh")
+		then Vector3.new(3, -2.95, 2.5)
+		else Vector3.new(3, -1.9 + 0.95 * def.size, 2.5)
 	target.Parent = hrp
 	local anchor = Instance.new("Attachment")
 	anchor.Parent = root
