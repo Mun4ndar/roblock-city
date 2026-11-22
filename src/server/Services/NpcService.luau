@@ -54,17 +54,11 @@ local GROUPS = {
 		name = "Pantai",
 		count = 4,
 		places = { "kiosKelapa", "kiosEsKrim", "sewaJetSki", "dermaga" },
+		seatsIn = "Beach", -- warga di sini juga duduk santai di kursi (Seat) dalam Workspace.Map.Beach
 	},
 }
 
 local rgb = Color3.fromRGB
-local SKINS = {
-	rgb(255, 214, 170),
-	rgb(240, 190, 140),
-	rgb(224, 172, 120),
-	rgb(168, 116, 76),
-	rgb(120, 80, 52),
-}
 local SHIRTS = {
 	rgb(235, 90, 90),
 	rgb(90, 150, 235),
@@ -77,10 +71,6 @@ local SHIRTS = {
 }
 local PANTS =
 	{ rgb(50, 60, 90), rgb(90, 70, 50), rgb(60, 60, 66), rgb(40, 90, 120), rgb(200, 190, 170) }
-local SHOES =
-	{ rgb(40, 40, 46), rgb(245, 245, 240), rgb(120, 80, 50), rgb(220, 70, 70), rgb(60, 110, 200) }
-local HAIRS =
-	{ rgb(40, 30, 26), rgb(90, 60, 40), rgb(20, 20, 24), rgb(180, 130, 70), rgb(120, 120, 126) }
 
 local folder: Folder
 local random = Random.new()
@@ -548,9 +538,7 @@ local function buildNpc(index: number): Model?
 			cylinder,
 			smooth
 		)
-	elseif style == "botak" then
-		-- tanpa rambut
-	else -- topi bertepi
+	elseif style ~= "botak" then -- topi bertepi ("botak": tanpa penutup kepala)
 		local hat = who.accent
 		attach(
 			model,
@@ -766,7 +754,30 @@ local function walkTo(model: Model, humanoid: Humanoid, goal: Vector3)
 	end
 end
 
-local function live(model: Model, places: { Vector3 })
+-- Duduk santai di kursi kosong terdekat dari daftar, lalu berdiri lagi.
+local function relax(model: Model, humanoid: Humanoid, seats: { Seat })
+	local free: { Seat } = {}
+	for _, seat in seats do
+		if seat.Parent and seat.Occupant == nil then
+			table.insert(free, seat)
+		end
+	end
+	if #free == 0 then
+		return
+	end
+	local seat = pick(free)
+	walkTo(model, humanoid, seat.Position + Vector3.new(0, 3, 0))
+	if seat.Parent == nil or seat.Occupant ~= nil then
+		return
+	end
+	seat:Sit(humanoid)
+	task.wait(random:NextNumber(12, 28))
+	humanoid.Sit = false
+	humanoid.Jump = true
+	task.wait(1)
+end
+
+local function live(model: Model, places: { Vector3 }, seats: { Seat })
 	local humanoid = model:FindFirstChildOfClass("Humanoid")
 	if humanoid == nil then
 		return
@@ -781,7 +792,11 @@ local function live(model: Model, places: { Vector3 })
 		if root.Position.Y < -30 then
 			model:PivotTo(CFrame.new(near(pick(places)))) -- jatuh ke air/lubang: kembali ke darat
 		end
-		walkTo(model, humanoid, near(pick(places)))
+		if #seats > 0 and random:NextNumber() < 0.45 then
+			relax(model, humanoid, seats)
+		else
+			walkTo(model, humanoid, near(pick(places)))
+		end
 	end
 end
 
@@ -811,6 +826,18 @@ function NpcService.start()
 		if #places < 2 then
 			continue
 		end
+		local seats: { Seat } = {}
+		local map = Workspace:FindFirstChild("Map")
+		local zone = if map and (group :: any).seatsIn
+			then map:FindFirstChild((group :: any).seatsIn)
+			else nil
+		if zone then
+			for _, d in zone:GetDescendants() do
+				if d:IsA("Seat") then
+					table.insert(seats, d)
+				end
+			end
+		end
 		for _ = 1, group.count do
 			index += 1
 			local model = buildNpc(index)
@@ -823,7 +850,7 @@ function NpcService.start()
 						root:SetNetworkOwner(nil)
 					end)
 				end
-				task.spawn(live, model, places)
+				task.spawn(live, model, places, seats)
 			end
 			task.wait(0.2)
 		end

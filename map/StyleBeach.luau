@@ -16,11 +16,73 @@ local ServerStorage = game:GetService("ServerStorage")
 local rgb = Color3.fromRGB
 local LOUNGER_SCALE = 1.6
 local BOATS = {
-	{ pos = Vector3.new(2168, 0.6, 60), yaw = 20, color = rgb(230, 80, 70) },
-	{ pos = Vector3.new(2176, 0.6, 96), yaw = -15, color = rgb(70, 150, 220) },
-	{ pos = Vector3.new(2170, 0.6, 176), yaw = 160, color = rgb(250, 200, 70) },
-	{ pos = Vector3.new(2182, 0.6, 214), yaw = 200, color = rgb(90, 180, 110) },
+	{ pos = Vector3.new(2190, -2, -250), yaw = 20, color = rgb(230, 80, 70) },
+	{ pos = Vector3.new(2200, -2, -170), yaw = -15, color = rgb(70, 150, 220) },
+	{ pos = Vector3.new(2175, -2, 330), yaw = 160, color = rgb(250, 200, 70) },
+	{ pos = Vector3.new(2165, -2, 410), yaw = 200, color = rgb(90, 180, 110) },
 }
+
+-- Model pilihan pemilik game dari Creator Store (gratis), disimpan di ServerStorage.AsetPengguna
+-- dengan nama "A<id aset>". Hanya yang sudah diperiksa (tanpa skrip, ringan) yang dipakai di sini.
+-- Skrip apa pun di dalamnya tetap dibuang saat dipasang. pos = titik di pasir, yaw = derajat.
+local PROPS = {
+	{ id = 156056461, name = "PosPenjagaPantai", pos = Vector3.new(2040, 0, 30), yaw = 90 }, -- "Beach Hut"
+	{ id = 19003610982, name = "MenaraPenjaga", pos = Vector3.new(2066, 0, 232), yaw = 0 }, -- "Beach station"
+	{ id = 1490839498, name = "LapanganVoli", pos = Vector3.new(1985, 0, -235), yaw = 0 }, -- "Beach VolleyBall Court"
+	{ id = 1782903086, name = "KursiPayung", pos = Vector3.new(2052, 0, -70), yaw = 0 }, -- "Beach Seats"
+	{ id = 1782903086, name = "KursiPayung", pos = Vector3.new(2044, 0, 310), yaw = 30 },
+	{ id = 1782903086, name = "KursiPayung", pos = Vector3.new(2004, 0, 420), yaw = -20 },
+	{ id = 400739628, name = "KanopiPantai", pos = Vector3.new(2060, 0, -150), yaw = 90 }, -- "Beach chairs, Umbrella and table"
+	{ id = 400739628, name = "KanopiPantai", pos = Vector3.new(2050, 0, 372), yaw = 90 },
+	{ id = 170882559, name = "SudutSantai", pos = Vector3.new(2072, 0, 70), yaw = 0 }, -- "Beach Pack"
+}
+
+-- Pasang salinan model di atas pasir: hanya digeser dan diputar tegak (orientasi asli dipertahankan).
+local function placeProp(parent: Instance, prop, ground: (Vector3) -> number): boolean
+	local folder = ServerStorage:FindFirstChild("AsetPengguna")
+	local source = folder and folder:FindFirstChild("A" .. tostring(prop.id))
+	if not source then
+		return false
+	end
+	local c = source:Clone()
+	c.Name = prop.name
+	for _, d in c:GetDescendants() do
+		if d:IsA("LuaSourceContainer") then
+			d:Destroy()
+		elseif d:IsA("BasePart") then
+			d.Anchored = true
+		end
+	end
+	local model = if c:IsA("Model") then c else nil
+	if not model then
+		return false
+	end
+	local box = model:GetBoundingBox()
+	model:PivotTo(
+		CFrame.new(box.Position)
+			* CFrame.Angles(0, math.rad(prop.yaw), 0)
+			* CFrame.new(-box.Position)
+			* model:GetPivot()
+	)
+	-- dasar model = titik terendah semua part
+	local minY = math.huge
+	for _, d in model:GetDescendants() do
+		if d:IsA("BasePart") then
+			local cf, half = d.CFrame, d.Size / 2
+			local reach = math.abs(cf.RightVector.Y) * half.X
+				+ math.abs(cf.UpVector.Y) * half.Y
+				+ math.abs(cf.LookVector.Y) * half.Z
+			minY = math.min(minY, d.Position.Y - reach)
+		end
+	end
+	local center = model:GetBoundingBox().Position
+	local y = ground(prop.pos)
+	model:PivotTo(
+		model:GetPivot() + Vector3.new(prop.pos.X - center.X, y - minY, prop.pos.Z - center.Z)
+	)
+	model.Parent = parent
+	return true
+end
 
 local function P(
 	parent: Instance,
@@ -103,8 +165,15 @@ return function(): number
 		for _, d in beach:GetDescendants() do
 			if d:IsA("Model") and d.Name == "Payung" then
 				local base = d:GetPivot().Position
-				local ground =
-					workspace:Raycast(base + Vector3.new(0, 30, 0), Vector3.new(0, -80, 0))
+				-- hanya terrain: tanpa filter, sinarnya mengenai kain payung dan kursi naik ke atas payung
+				local onlyTerrain = RaycastParams.new()
+				onlyTerrain.FilterType = Enum.RaycastFilterType.Include
+				onlyTerrain.FilterDescendantsInstances = { workspace.Terrain }
+				local ground = workspace:Raycast(
+					base + Vector3.new(0, 30, 0),
+					Vector3.new(0, -80, 0),
+					onlyTerrain
+				)
 				local y = if ground then ground.Position.Y else base.Y
 				for _, side in { -1, 1 } do
 					local c = lounger:Clone()
@@ -140,6 +209,52 @@ return function(): number
 			workspace:Raycast(b.pos + Vector3.new(0, 40, 0), Vector3.new(0, -100, 0), params)
 		local y = if hit then hit.Position.Y + 0.2 else b.pos.Y
 		boat(root, CFrame.new(b.pos.X, y, b.pos.Z) * CFrame.Angles(0, math.rad(b.yaw), 0), b.color)
+	end
+
+	-- model pilihan pemilik game
+	local sand = RaycastParams.new()
+	sand.FilterType = Enum.RaycastFilterType.Include
+	sand.FilterDescendantsInstances = { workspace.Terrain }
+	local function ground(pos: Vector3): number
+		local hit = workspace:Raycast(pos + Vector3.new(0, 60, 0), Vector3.new(0, -140, 0), sand)
+		return if hit then hit.Position.Y else pos.Y
+	end
+	for _, prop in PROPS do
+		if not placeProp(root, prop, ground) then
+			warn(
+				"[StyleBeach] model A"
+					.. tostring(prop.id)
+					.. " tidak ada di ServerStorage.AsetPengguna; dilewati"
+			)
+		end
+	end
+	local hut = root:FindFirstChild("PosPenjagaPantai")
+	if hut and hut:IsA("Model") then
+		local box, size = hut:GetBoundingBox()
+		local board = P(
+			root,
+			"PapanPenjaga",
+			Vector3.new(0.4, 2.2, 14),
+			CFrame.new(box.Position + Vector3.new(0, size.Y / 2 + 1, 0)),
+			rgb(230, 70, 60)
+		)
+		board.CanCollide = false
+		-- papan di bubungan atap, tulisannya di dua sisi
+		for _, face in { Enum.NormalId.Right, Enum.NormalId.Left } do
+			local gui = Instance.new("SurfaceGui")
+			gui.Face = face
+			gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+			gui.PixelsPerStud = 40
+			local label = Instance.new("TextLabel")
+			label.Size = UDim2.fromScale(1, 1)
+			label.BackgroundTransparency = 1
+			label.Font = Enum.Font.FredokaOne
+			label.TextScaled = true
+			label.TextColor3 = Color3.new(1, 1, 1)
+			label.Text = "POS PENJAGA PANTAI"
+			label.Parent = gui
+			gui.Parent = board
+		end
 	end
 
 	root.Parent = beach
