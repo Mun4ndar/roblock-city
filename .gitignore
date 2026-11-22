@@ -25,3 +25,6 @@ rokit/
 
 # Gambar referensi pribadi (bukan aset game)
 Image/
+
+# cadangan otomatis Blender
+*.blend1
