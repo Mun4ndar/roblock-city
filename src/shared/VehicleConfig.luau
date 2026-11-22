@@ -194,6 +194,38 @@ VehicleConfig.LIST = {
 			spoiler = true,
 		},
 	},
+	{
+		-- Tampilan dari templat mesh ReplicatedStorage.Assets.CarShells.elegan (mobil resmi Roblox
+		-- "Car", gratis di Creator Store). Ukuran di bawah mengikuti mesh itu (skala 0,75).
+		id = "elegan",
+		name = "Elegan",
+		class = "Sedan Mewah",
+		description = "Sedan mewah yang mengilap dengan lampu dan velg asli. Nyaman dan cepat.",
+		price = 9000,
+		seats = 4,
+		maxSpeed = 96,
+		reverseSpeed = 25,
+		acceleration = 36,
+		brake = 95,
+		steerAngle = 31,
+		color = Color3.fromRGB(235, 70, 70),
+		accent = Color3.fromRGB(30, 32, 38),
+		body = {
+			style = "sedan",
+			length = 15.4,
+			width = 6.44,
+			clearance = 0.73,
+			lowerHeight = 1.1, -- rendah supaya kursi turun dan kepala tidak menembus atap mesh
+			cabinHeight = 2.8,
+			cabinFront = 0.33,
+			cabinBack = 0.8,
+			rakeFront = 2,
+			rakeBack = 2,
+			wheelRadius = 1.13,
+			wheelWidth = 0.93,
+			wheelbase = 9.28,
+		},
+	},
 } :: { VehicleDef }
 
 -- Kendaraan dinas: gratis, tidak dijual di dealer, dan hanya bisa dikeluarkan

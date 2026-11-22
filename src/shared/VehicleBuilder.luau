@@ -534,15 +534,26 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 	local shellSource = findShell(def.id)
 	local shellBody = if shellSource then shellSource:FindFirstChild("ShellBody") else nil
 	if shellSource and shellBody and shellBody:IsA("BasePart") then
-		for _, old in bodyFolder:GetChildren() do
-			if old:IsA("BasePart") and SHELL_REPLACES[old.Name] then
+		-- Templat beratribut Preserve (model jadi, mis. mobil resmi Roblox) membawa tampilannya sendiri:
+		-- semua part bodi kotak disembunyikan (kursi tetap berfungsi) dan warna aslinya dipertahankan,
+		-- hanya part beratribut Paint yang ikut warna cat mobil.
+		local preserve = shellSource:GetAttribute("Preserve") == true
+		for _, old in model:GetDescendants() do
+			local hide = if preserve
+				then not old:IsDescendantOf(wheelFolder)
+				else old.Parent == bodyFolder and SHELL_REPLACES[old.Name]
+			if old:IsA("BasePart") and hide then
 				old.Transparency = 1
 				old.CastShadow = false
 			end
 		end
 		local target = CFrame.new(0, y0 + shellBody.Size.Y / 2, 0)
-		for _, piece in shellSource:GetChildren() do
-			if piece:IsA("MeshPart") then
+		for _, piece in shellSource:GetDescendants() do
+			if
+				piece:IsA("MeshPart")
+				and not piece:GetAttribute("ShellRef")
+				and not piece:FindFirstAncestor("Wheel")
+			then
 				local clone = piece:Clone()
 				clone.CFrame = target * shellBody.CFrame:ToObjectSpace(piece.CFrame)
 				clone.Anchored = false
@@ -550,10 +561,14 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 				clone.CanCollide = false
 				clone.CanTouch = false
 				clone.CanQuery = false
-				clone.DoubleSided = true
+				clone.DoubleSided = not preserve
 				clone.CustomPhysicalProperties = BODY_PHYSICS
 				clone.CollisionGroup = VehicleBuilder.GROUP_BODY
-				if piece.Name == "ShellGlass" then
+				if preserve then
+					if piece:GetAttribute("Paint") then
+						clone.Color = paint
+					end
+				elseif piece.Name == "ShellGlass" then
 					clone.Color = Color3.fromRGB(70, 96, 120)
 					clone.Material = Enum.Material.Glass
 					clone.Transparency = 0.35
@@ -567,6 +582,48 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 				end
 				weld(clone)
 				clone.Parent = bodyFolder
+			end
+		end
+
+		-- Roda mesh (opsional): templat punya model "Wheel" berisi satu roda kiri + part acuan "WheelRef".
+		local wheelSource = shellSource:FindFirstChild("Wheel")
+		local wheelRef = if wheelSource then wheelSource:FindFirstChild("WheelRef") else nil
+		if wheelSource and wheelRef and wheelRef:IsA("BasePart") then
+			for _, wheel in wheelFolder:GetChildren() do
+				if not wheel:IsA("BasePart") then
+					continue
+				end
+				wheel.Transparency = 1
+				for _, child in wheel:GetChildren() do
+					if child:IsA("BasePart") then
+						child.Transparency = 1
+					end
+				end
+				-- Roda kanan = roda kiri diputar setengah lingkaran.
+				local side = if wheel.Position.X > 0
+					then CFrame.Angles(0, math.pi, 0)
+					else CFrame.new()
+				for _, piece in wheelSource:GetChildren() do
+					if piece:IsA("MeshPart") then
+						local clone = piece:Clone()
+						clone.CFrame = CFrame.new(wheel.Position)
+							* side
+							* wheelRef.CFrame:ToObjectSpace(piece.CFrame)
+						clone.Anchored = static
+						clone.Massless = true
+						clone.CanCollide = false
+						clone.CanTouch = false
+						clone.CanQuery = false
+						clone.CollisionGroup = VehicleBuilder.GROUP_WHEEL
+						if not static then
+							local w = Instance.new("WeldConstraint")
+							w.Part0 = wheel
+							w.Part1 = clone
+							w.Parent = clone
+						end
+						clone.Parent = wheel
+					end
+				end
 			end
 		end
 	end

@@ -85,40 +85,55 @@ local function kiosk(model: Model)
 	local wood = Color3.fromRGB(150, 104, 66)
 	local burnt = Color3.fromRGB(62, 48, 42)
 	local planks = Enum.Material.WoodPlanks
-	part(model, {
-		Name = "Lantai",
-		Size = Vector3.new(9, 0.5, 6),
-		CFrame = CFrame.new(0, 0.25, z),
-		Color = burnt,
-	})
-	part(model, {
-		Name = "DindingBelakang",
-		Size = Vector3.new(9, 6, 0.5),
-		CFrame = CFrame.new(0, 3.5, z - 2.75),
-		Color = wood,
-		Material = planks,
-	})
-	part(model, {
-		Name = "DindingKiri",
-		Size = Vector3.new(0.5, 6, 6),
-		CFrame = CFrame.new(-4.25, 3.5, z),
-		Color = burnt,
-		Material = planks,
-	})
-	part(model, {
-		Name = "DindingKanan",
-		Size = Vector3.new(0.5, 6, 6),
-		CFrame = CFrame.new(4.25, 3.5, z),
-		Color = wood,
-		Material = planks,
-	})
-	part(model, {
-		Name = "Meja",
-		Size = Vector3.new(9, 2.6, 0.6),
-		CFrame = CFrame.new(0, 1.8, z + 2.7),
-		Color = wood,
-		Material = planks,
-	})
+	part(
+		model,
+		{
+			Name = "Lantai",
+			Size = Vector3.new(9, 0.5, 6),
+			CFrame = CFrame.new(0, 0.25, z),
+			Color = burnt,
+		}
+	)
+	part(
+		model,
+		{
+			Name = "DindingBelakang",
+			Size = Vector3.new(9, 6, 0.5),
+			CFrame = CFrame.new(0, 3.5, z - 2.75),
+			Color = wood,
+			Material = planks,
+		}
+	)
+	part(
+		model,
+		{
+			Name = "DindingKiri",
+			Size = Vector3.new(0.5, 6, 6),
+			CFrame = CFrame.new(-4.25, 3.5, z),
+			Color = burnt,
+			Material = planks,
+		}
+	)
+	part(
+		model,
+		{
+			Name = "DindingKanan",
+			Size = Vector3.new(0.5, 6, 6),
+			CFrame = CFrame.new(4.25, 3.5, z),
+			Color = wood,
+			Material = planks,
+		}
+	)
+	part(
+		model,
+		{
+			Name = "Meja",
+			Size = Vector3.new(9, 2.6, 0.6),
+			CFrame = CFrame.new(0, 1.8, z + 2.7),
+			Color = wood,
+			Material = planks,
+		}
+	)
 	part(model, {
 		Name = "Atap",
 		Size = Vector3.new(10.5, 0.5, 7.6),
