@@ -16,6 +16,10 @@ local DataService = require(script.Parent:WaitForChild("DataService"))
 
 type Uniform = JobConfig.Uniform
 
+local FashionConfig = require(
+	game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("FashionConfig")
+)
+
 local UniformService = {}
 
 local MODEL_NAME = "JobUniform"
@@ -240,6 +244,13 @@ function UniformService.refresh(player: Player)
 	local def = if data then JobConfig.get(data.jobs.current) else nil
 	if def then
 		apply(character, def.uniform)
+		return
+	end
+	-- Tidak sedang bekerja: pakai setelan dari Toko Baju kalau ada yang dipilih.
+	local fashion: any = if data then data.fashion else nil
+	local outfit = if type(fashion) == "table" then FashionConfig.get(fashion.active) else nil
+	if outfit then
+		apply(character, outfit.look)
 	end
 end
 

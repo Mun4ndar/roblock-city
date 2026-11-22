@@ -80,6 +80,9 @@ Urutan load ada di `ORDER` pada `init.server.luau` / `init.client.luau`; tambahk
 - **PetService**: hewan peliharaan. Beli di Toko Hewan (depan ROBLOCK Mall), satu hewan mengikuti pemilik
   (AlignPosition, tanpa tabrakan), beri makan supaya senang. Daftar hewan di `src/shared/PetConfig.luau`
   (**menambah hewan = menambah entri di `PETS`**). Tersimpan di `pets`; panelnya `PetController`.
+- **FashionService**: Toko Baju (depan ROBLOCK Mall). Setelan = topi + jaket yang dirakit UniformService dan
+  tampil saat pemain tidak sedang bekerja. Daftar setelan di `src/shared/FashionConfig.luau` (`OUTFITS`).
+  Tersimpan di `fashion`; panelnya `FashionController`.
 - **DebugService**: alat uji, hanya aktif di Studio. Dari command bar server:
   `game.ServerStorage.Debug:Invoke("money", pemain, 5000)` atau `game.ServerStorage.Debug:Invoke("clock", 21)`.
 - `src/client/Util/UiScale.luau` mengecilkan HUD di layar kecil; elemen HUD baru cukup memanggil `UiScale.attach`.

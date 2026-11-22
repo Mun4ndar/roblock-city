@@ -24,6 +24,13 @@ export type PlayerData = {
 	receipts: { string },
 	-- Hewan peliharaan (lihat PetConfig).
 	pets: PetData,
+	-- Setelan dari Toko Baju (lihat FashionConfig).
+	fashion: FashionData,
+}
+
+export type FashionData = {
+	owned: { [string]: boolean },
+	active: string, -- id setelan yang dipakai, "" = tidak ada
 }
 
 export type PetData = {

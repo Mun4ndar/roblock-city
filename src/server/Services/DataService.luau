@@ -56,6 +56,7 @@ local function defaultData(): PlayerData
 		farm = { plots = {}, seeds = {}, crops = {} },
 		receipts = {},
 		pets = { owned = {}, active = "", fedAt = 0 },
+		fashion = { owned = {}, active = "" },
 	}
 end
 
