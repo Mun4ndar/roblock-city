@@ -43,6 +43,67 @@ local props: { [number]: Model } = {} -- indeks langkah -> prop
 local grounded: { Grounded } = {}
 local busy = false
 local spray: Part? = nil -- semburan air saat menahan tombol di tugas pemadam
+local passengers: { Model } = {} -- penumpang yang terlihat duduk di bus (pekerjaan Sopir Bus)
+
+-- Titik duduk penumpang relatif ke sasis bus (x kiri/kanan, z dari depan ke belakang).
+local PASSENGER_SPOTS = {
+	Vector3.new(-1.9, 0, -4),
+	Vector3.new(1.9, 0, -1),
+	Vector3.new(-1.9, 0, 2),
+	Vector3.new(1.9, 0, 5),
+}
+
+local function clearPassengers()
+	for _, model in passengers do
+		model:Destroy()
+	end
+	table.clear(passengers)
+end
+
+-- Kendaraan milik pemain yang sedang dikeluarkan.
+local function myVehicle(): Model?
+	local vehicles = Workspace:FindFirstChild("Vehicles")
+	if vehicles then
+		for _, model in vehicles:GetChildren() do
+			if model:IsA("Model") and model:GetAttribute("OwnerUserId") == player.UserId then
+				return model
+			end
+		end
+	end
+	return nil
+end
+
+-- Penumpang naik: beberapa warga tampak duduk di dalam bus dan ikut bergerak bersama bus.
+-- Hanya tampilan di layar sopirnya (seperti hiasan tugas lain).
+local function boardPassengers(seed: number)
+	clearPassengers()
+	local vehicle = myVehicle()
+	local chassis = if vehicle then vehicle:FindFirstChild("Chassis") else nil
+	if
+		vehicle == nil
+		or chassis == nil
+		or not chassis:IsA("BasePart")
+		or vehicle:GetAttribute("VehicleId") ~= "bus"
+	then
+		return
+	end
+	for index, spot in PASSENGER_SPOTS do
+		local model = JobProps.build("person", chassis.CFrame * CFrame.new(spot), seed + index * 7)
+		model.Name = "Penumpang"
+		for _, d in model:GetDescendants() do
+			if d:IsA("BasePart") then
+				d.Anchored = false
+				d.Massless = true
+				local weld = Instance.new("WeldConstraint")
+				weld.Part0 = chassis
+				weld.Part1 = d
+				weld.Parent = d
+			end
+		end
+		model.Parent = vehicle
+		table.insert(passengers, model)
+	end
+end
 
 -- ---------------------------------------------------------------- util
 
@@ -152,6 +213,9 @@ end
 local function onTask(task_: TaskView?)
 	local previous = currentTask
 	currentTask = task_
+	if task_ == nil or (previous ~= nil and previous.id ~= task_.id) then
+		clearPassengers()
+	end
 	if task_ == nil then
 		clearProps()
 		hideMarker()
@@ -222,6 +286,21 @@ local function onPromptTriggered()
 	if res.ok and burning and finished and finished.consume and isFireProp(finished.prop) then
 		props[stepIndex] = nil
 		JobProps.extinguish(burning)
+	end
+	-- Sopir bus: penumpang naik saat dijemput, turun sebagian di tiap halte berikutnya.
+	if res.ok and task_.jobId == "sopir" and finished then
+		if finished.prop == "person" then
+			boardPassengers(task_.id)
+		elseif stepIndex >= #task_.steps then
+			clearPassengers()
+		else
+			for _ = 1, math.ceil(#passengers / 2) do
+				local leaving = table.remove(passengers)
+				if leaving then
+					leaving:Destroy()
+				end
+			end
+		end
 	end
 	if res.message ~= "" then
 		HudController.toast(res.message)

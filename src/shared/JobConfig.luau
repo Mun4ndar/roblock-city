@@ -196,6 +196,18 @@ local RUMAH = {
 }
 
 JobConfig.POOLS = {
+	-- halte bus (pekerjaan Sopir Bus)
+	halte = {
+		"tamanPerumahan",
+		"rumahSakit",
+		"balaiKota",
+		"sekolah",
+		"tamanKota",
+		"mall",
+		"perpustakaan",
+		"hotel",
+		"bandara",
+	},
 	-- tempat mengambil paket
 	depot = { "kantorPos", "toko", "mall", "terminalFeri", "bandara", "lumbung" },
 	-- tujuan antar (rumah + tempat umum)
@@ -426,6 +438,82 @@ JobConfig.LIST = {
 						action = "Ganti ban",
 						text = "Ganti ban yang kempes",
 						hold = 3,
+					},
+				},
+			},
+		},
+	},
+	{
+		id = "sopir",
+		name = "Sopir Bus",
+		icon = "🚌",
+		color = Color3.fromRGB(250, 190, 40),
+		description = "Jemput penumpang di halte dan antar keliling kota dengan Bus Kota.",
+		workplace = "Halte di seluruh kota",
+		uniform = {
+			hat = "peaked",
+			hatColor = Color3.fromRGB(40, 60, 110),
+			vest = Color3.fromRGB(60, 90, 150),
+			trim = Color3.fromRGB(250, 200, 60),
+			badge = Color3.fromRGB(250, 200, 60),
+		},
+		tasks = {
+			{
+				id = "rute",
+				title = "Rute bus kota",
+				weight = 3,
+				basePay = 45,
+				payPerStud = 0.08,
+				steps = {
+					{
+						pool = "halte",
+						nearest = 2,
+						action = "Naikkan penumpang",
+						text = "Jemput penumpang di halte {tempat}",
+						hold = 2,
+						prop = "person",
+						consume = true,
+					},
+					{
+						pool = "halte",
+						minDist = 200,
+						maxDist = 1200,
+						action = "Turunkan penumpang",
+						text = "Antar penumpang ke {tempat}",
+						hold = 2,
+					},
+					{
+						pool = "halte",
+						minDist = 200,
+						maxDist = 1200,
+						action = "Turunkan penumpang",
+						text = "Lanjut ke halte {tempat}",
+						hold = 2,
+					},
+				},
+			},
+			{
+				id = "sekolah",
+				title = "Bus antar-jemput sekolah",
+				weight = 1,
+				basePay = 50,
+				payPerStud = 0.08,
+				steps = {
+					{
+						place = "sekolah",
+						action = "Naikkan murid",
+						text = "Jemput murid di {tempat}",
+						hold = 2,
+						prop = "person",
+						consume = true,
+					},
+					{
+						pool = "halte",
+						minDist = 250,
+						maxDist = 1500,
+						action = "Turunkan murid",
+						text = "Antar murid ke {tempat}",
+						hold = 2,
 					},
 				},
 			},
