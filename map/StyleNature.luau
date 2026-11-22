@@ -4,6 +4,7 @@
 
 	"materials" : MaterialVariant bertekstur dari templat resmi Roblox (rumput lumut, papan kayu) dijadikan
 	              tampilan bawaan Grass dan WoodPlanks (rumput 3D di terrain tersedia tapi dimatikan, lihat DECORATION).
+	"bushes"    : semak bola di Map.Scenery diganti semak berdaun (jalankan setelah StyleWorld "scenery").
 	"trees"     : pohon bola dan pohon mesh lama di kota/taman/perumahan diganti pohon rindang bertekstur.
 	              Templat pohon ada di ServerStorage.AsetAlam (Pohon1, Pohon2), dirakit dari mesh dan
 	              tekstur templat resmi Roblox itu. Pohon kelapa pantai dan cemara hutan tidak diganti.
@@ -18,6 +19,9 @@ local TAG = "RoblockStyle"
 local SEED = 2211
 local DECORATION = false
 local GRASS_LENGTH = 0.12 -- pendek, supaya helai rumput tidak menembus jalan (tebal jalan 0,4)
+
+local CLIFF_NORMAL = "rbxassetid://15634141840"
+local CLIFF_ROUGHNESS = "rbxassetid://14899560341"
 
 local VARIANTS = {
 	{
@@ -37,6 +41,24 @@ local VARIANTS = {
 		roughness = "rbxassetid://15238279404",
 		metalness = "",
 		studs = 10,
+	},
+	{ -- tebing batu: dipakai gunung dan batu terrain
+		name = "TebingBatu",
+		base = Enum.Material.Rock,
+		color = "rbxassetid://14900084267",
+		normal = CLIFF_NORMAL,
+		roughness = CLIFF_ROUGHNESS,
+		metalness = "",
+		studs = 15,
+	},
+	{ -- jalan batu bulat: lantai Pasar Tani dan semua part Cobblestone
+		name = "JalanBatu",
+		base = Enum.Material.Cobblestone,
+		color = "rbxassetid://15940445564",
+		normal = "rbxassetid://15940436103",
+		roughness = "rbxassetid://15633798696",
+		metalness = "",
+		studs = 15,
 	},
 }
 
@@ -190,8 +212,47 @@ local function trees(): number
 	return count
 end
 
+-- Semak bola di Map.Scenery diganti semak berdaun (mesh + tekstur daun templat resmi Roblox).
+local function bushes(): number
+	local folder = ServerStorage:FindFirstChild("AsetAlam")
+	local source = folder and folder:FindFirstChild("Semak")
+	local leaf = source and source:FindFirstChild("leaves")
+	local map = workspace:FindFirstChild("Map")
+	local scenery = map and map:FindFirstChild("Scenery")
+	if not (leaf and leaf:IsA("MeshPart") and scenery) then
+		return 0
+	end
+	local rng = Random.new(SEED)
+	local count = 0
+	for _, old in scenery:GetDescendants() do
+		if old:IsA("Part") and old.Name == "Semak" then
+			local bush = leaf:Clone()
+			bush.Name = "Semak"
+			local s = old.Size.Y * 1.5
+			bush.Size = Vector3.new(s * 0.95, s, s)
+			bush.CFrame = CFrame.new(old.Position + Vector3.new(0, s * 0.12, 0))
+				* CFrame.Angles(0, rng:NextNumber(0, math.pi * 2), 0)
+			bush.Anchored = true
+			bush.CanCollide = false
+			bush.CanTouch = false
+			bush.CanQuery = false
+			bush.CastShadow = false
+			bush.Parent = old.Parent
+			old:Destroy()
+			count += 1
+			if count % 150 == 0 then
+				task.wait()
+			end
+		end
+	end
+	return count
+end
+
 return function(section: string?): number
 	local n = 0
+	if section == nil or section == "bushes" then
+		n += bushes()
+	end
 	if section == nil or section == "materials" then
 		n += materials()
 	end

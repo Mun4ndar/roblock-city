@@ -138,6 +138,7 @@ require(MB.BuildResidential)()
 require(MB.BuildBeach)()
 require(MB.BuildAirport)()
 require(MB.BuildDealer)()
+require(MB.FixRoads)()         -- penyambung jalan, jembatan ke Pasar Tani, bundaran putar balik di ujung jalan
 require(MB.StyleWorld)()       -- rias tampilan; setelah semua pembangun (lihat "Tampilan")
 require(MB.StyleTrees)()       -- pohon mesh di taman; setelah StyleWorld
 require(MB.BuildInteriors)()   -- lobi Rumah Sakit dan ruang tunggu Bandara (kapan saja)
