@@ -15,6 +15,7 @@ local Net = require(Shared:WaitForChild("Net"))
 local Format = require(Shared:WaitForChild("Format"))
 local DayNightConfig = require(Shared:WaitForChild("DayNightConfig"))
 local MissionConfig = require(Shared:WaitForChild("MissionConfig"))
+local ShopConfig = require(Shared:WaitForChild("ShopConfig"))
 
 local HudController = require(script.Parent:WaitForChild("HudController"))
 local HouseUiController = require(script.Parent:WaitForChild("HouseUiController"))
@@ -398,6 +399,70 @@ local function refreshMissions()
 	badge.Visible = claimable
 end
 
+-- ---------------------------------------------------------------- halaman Menu (aplikasi)
+
+-- Pintasan ke menu lain + Toko Koin. Aplikasi didaftarkan controller lain lewat
+-- PhoneController.addApp, jadi HP tidak perlu mengenal mereka satu per satu.
+local apps: { { icon: string, name: string, open: () -> () } } = {}
+
+local function refreshMenu()
+	local page = pages.Menu
+	for _, child in page:GetChildren() do
+		if child:IsA("GuiObject") then
+			child:Destroy()
+		end
+	end
+	local grid = page:FindFirstChildOfClass("UIGridLayout")
+	if grid == nil then
+		local created = Instance.new("UIGridLayout")
+		created.CellSize = UDim2.new(0.5, -4, 0, 58)
+		created.CellPadding = UDim2.fromOffset(8, 8)
+		created.SortOrder = Enum.SortOrder.LayoutOrder
+		created.Parent = page
+	end
+	for order, app in apps do
+		local b = button({
+			Name = "App" .. order,
+			LayoutOrder = order,
+			BackgroundColor3 = COLORS.card,
+			TextColor3 = COLORS.text,
+			TextSize = 14,
+			Text = app.icon .. "\n" .. app.name,
+		})
+		corner(b, 12)
+		b.Parent = page
+		b.Activated:Connect(function()
+			phone.Visible = false
+			app.open()
+		end)
+	end
+	-- Toko Koin (Robux): hanya muncul kalau produknya sudah dibuat (ID bukan 0)
+	local order = #apps
+	for _, product in ShopConfig.PRODUCTS do
+		if product.productId ~= 0 then
+			order += 1
+			local b = button({
+				Name = "Buy_" .. product.key,
+				LayoutOrder = order,
+				BackgroundColor3 = COLORS.buy,
+				TextColor3 = COLORS.text,
+				TextSize = 13,
+				Text = "🪙 " .. product.name .. "\n+" .. Format.money(product.coins),
+			})
+			corner(b, 12)
+			b.Parent = page
+			b.Activated:Connect(function()
+				local ok, value = pcall(function(): any
+					return Net.func(Net.Names.ShopPrompt):InvokeServer(product.key)
+				end)
+				if ok and type(value) == "table" and value.message ~= "" then
+					HudController.toast(value.message)
+				end
+			end)
+		end
+	end
+end
+
 -- ---------------------------------------------------------------- builder UI
 
 local function showPage(name: string)
@@ -408,8 +473,10 @@ local function showPage(name: string)
 	end
 	if name == "Peta" then
 		refreshPlaces()
-	else
+	elseif name == "Misi" then
 		refreshMissions()
+	else
+		refreshMenu()
 	end
 end
 
@@ -551,7 +618,7 @@ local function buildGui()
 		phone.Visible = false
 	end)
 
-	for index, name in { "Peta", "Misi" } do
+	for index, name in { "Peta", "Misi", "Menu" } do
 		local page = Instance.new("Frame")
 		page.Name = name
 		page.Position = UDim2.fromOffset(8, 40)
@@ -564,9 +631,13 @@ local function buildGui()
 		local tab = button({
 			Name = "Tab" .. name,
 			AnchorPoint = Vector2.new(0, 1),
-			Position = UDim2.new((index - 1) * 0.5, if index == 1 then 8 else 4, 1, -8),
-			Size = UDim2.new(0.5, -12, 0, 36),
-			Text = if name == "Peta" then "🗺️ Peta" else "🎯 Misi",
+			Position = UDim2.new((index - 1) / 3, 6, 1, -8),
+			Size = UDim2.new(1 / 3, -10, 0, 36),
+			TextSize = 13,
+			Text = if name == "Peta"
+				then "🗺️ Peta"
+				elseif name == "Misi" then "🎯 Misi"
+				else "📲 Menu",
 		})
 		corner(tab, 10)
 		tab.Parent = screen
@@ -657,11 +728,17 @@ function PhoneController.setDestination(name: string, icon: string, position: Ve
 	setGps({ name = name, icon = icon, position = position })
 end
 
+-- Daftarkan pintasan di halaman Menu HP (dipanggil controller lain saat start()).
+function PhoneController.addApp(icon: string, name: string, open: () -> ())
+	table.insert(apps, { icon = icon, name = name, open = open })
+end
+
 function PhoneController.init()
 	buildGui()
 end
 
 function PhoneController.start()
+	PhoneController.addApp("🏠", "Rumahku", HouseUiController.open)
 	phoneButton.Activated:Connect(function()
 		phone.Visible = not phone.Visible
 		if phone.Visible then

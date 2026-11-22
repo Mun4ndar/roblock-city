@@ -543,6 +543,11 @@ function HouseUiController.getHomePosition(): Vector3?
 	return Vector3.new(view.pos[1] or 0, view.pos[2] or 0, view.pos[3] or 0)
 end
 
+-- Buka menu Rumah (dipakai pintasan di HP).
+function HouseUiController.open()
+	setOpen(true)
+end
+
 function HouseUiController.init()
 	buildGui()
 end

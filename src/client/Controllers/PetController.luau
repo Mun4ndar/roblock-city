@@ -291,6 +291,11 @@ function PetController.init()
 end
 
 function PetController.start()
+	local PhoneController = require(script.Parent:WaitForChild("PhoneController")) :: any
+	PhoneController.addApp("🐾", "Hewan", function()
+		panel.Visible = true
+		refresh()
+	end)
 	openButton.Activated:Connect(function()
 		panel.Visible = not panel.Visible
 		refresh()

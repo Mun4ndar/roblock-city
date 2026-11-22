@@ -262,6 +262,11 @@ function FashionController.init()
 end
 
 function FashionController.start()
+	local PhoneController = require(script.Parent:WaitForChild("PhoneController")) :: any
+	PhoneController.addApp("👕", "Lemari Baju", function()
+		panel.Visible = true
+		refresh()
+	end)
 	ProximityPromptService.PromptTriggered:Connect(function(prompt: ProximityPrompt)
 		if prompt:GetAttribute(FashionConfig.ATTR_PROMPT) then
 			panel.Visible = true

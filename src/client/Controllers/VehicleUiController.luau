@@ -363,6 +363,11 @@ function VehicleUiController.init()
 end
 
 function VehicleUiController.start()
+	-- pintasan Garasi di HP (di-require di sini supaya tidak saling menunggu saat dimuat)
+	local PhoneController = require(script.Parent:WaitForChild("PhoneController")) :: any
+	PhoneController.addApp("🚗", "Garasi", function()
+		setOpen(true, false)
+	end)
 	openButton.Activated:Connect(function()
 		setOpen(not panel.Visible, false)
 	end)
