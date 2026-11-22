@@ -32,6 +32,7 @@ PlaneConfig.IDLE_SECONDS = 180 -- pesawat kosong selama ini dikembalikan
 PlaneConfig.BOUNDS_MIN = Vector3.new(-2300, 0, -2300)
 PlaneConfig.BOUNDS_MAX = Vector3.new(3000, 0, 2300)
 
+PlaneConfig.PROPELLER_NAME = "Baling" -- nama mesh baling-baling di templat (porosnya sumbu Z part)
 PlaneConfig.TAG_PLANE = "Plane"
 PlaneConfig.ATTR_OWNER = "OwnerUserId"
 PlaneConfig.ATTR_SPEED = "Speed" -- atribut model: kecepatan saat ini (untuk tampilan client)

@@ -83,7 +83,17 @@ local function buildPlane(owner: Player): Plane
 				clone.CanCollide = false
 				clone.CanTouch = false
 				clone.CanQuery = false
-				weld(clone)
+				if clone.Name == PlaneConfig.PROPELLER_NAME then
+					-- Baling-baling memakai Weld biasa supaya client bisa memutarnya (lihat PlaneController).
+					local spin = Instance.new("Weld")
+					spin.Name = "Putar"
+					spin.Part0 = hull
+					spin.Part1 = clone
+					spin.C0 = hull.CFrame:ToObjectSpace(clone.CFrame)
+					spin.Parent = clone
+				else
+					weld(clone)
+				end
 				clone.Parent = model
 			end
 		end

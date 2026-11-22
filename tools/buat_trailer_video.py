@@ -19,7 +19,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REC = os.path.join(ROOT, "marketing", "rekaman")
 OUT = os.path.join(ROOT, "marketing", "trailer_roblock_city.mp4")
 FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
-ENCODE = ["-c:v", "libx264", "-preset", "medium", "-crf", "21", "-pix_fmt", "yuv420p", "-r", str(FPS), "-an"]
+ENCODE = ["-c:v", "libx264", "-preset", "medium", "-crf", "24", "-pix_fmt", "yuv420p", "-r", str(FPS), "-an"]
 
 # ("video", berkas, mulai detik, lama detik, teks) atau ("gambar", berkas sumber, lama, teks, zoom, fokus awal, fokus akhir)
 PLAN = [
@@ -27,8 +27,9 @@ PLAN = [
     ("video", "a_kota.mp4", 1.6, 3.8, "Selamat datang di kota yang ramah untuk semua!"),
     ("gambar", "pekerjaan_dekat.jpg", 2.2, "Pilih pekerjaanmu: polisi, pemadam, dokter, pilot...", (1.22, 1.1), (0.32, 0.62), (0.68, 0.62)),
     ("video", "d_mobil.mp4", 5.3, 2.6, "Kendarai mobil dan motor impianmu"),
-    ("video", "b_pesawat.mp4", 3.4, 4.6, "Jadi pilot dan lepas landas!"),
-    ("video", "c_terbang.mp4", 2.0, 4.6, "Terbang di atas kota"),
+    ("video", "b_pesawat.mp4", 4.6, 4.5, "Jadi pilot dan lepas landas!"),
+    ("video", "c_terbang.mp4", 1.2, 2.6, "Terbang di atas kota"),
+    ("video", "c_terbang.mp4", 10.6, 2.2, "Terbang di atas kota"),
     ("video", "e_perahu.mp4", 5.6, 3.0, "Sewa perahu di Pulau Pantai"),
     ("gambar", "hewan.jpg", 2.2, "Ajak hewan peliharaan jalan-jalan", (1.32, 1.2), (0.28, 0.48), (0.72, 0.48)),
     ("video", "f_taman.mp4", 2.2, 3.0, "Beli rumah, berkebun, dan selesaikan misi harian"),
