@@ -231,7 +231,7 @@ local function applyPaint(house: House, hd: HouseData?)
 		for _, part in parts do
 			if color == nil then
 				part.Color = house.original[part]
-			elseif part.Name == "Garage" then
+			elseif part.Name == "Garage" or part.Name == "ShellGarage" then
 				part.Color = color:Lerp(Color3.new(1, 1, 1), 0.25)
 			else
 				part.Color = color
@@ -516,8 +516,18 @@ local function registerHouse(model: Model)
 		interior = nil,
 		sign = nil,
 	}
-	local slotByName =
-		{ Body = "wall", Garage = "wall", RoofFront = "roof", RoofBack = "roof", Door = "door" }
+	-- Shell* = part rumah modern dari map/StyleHouses.luau (part lama tetap ada tapi disembunyikan).
+	local slotByName = {
+		Body = "wall",
+		Garage = "wall",
+		RoofFront = "roof",
+		RoofBack = "roof",
+		Door = "door",
+		ShellWall = "wall",
+		ShellGarage = "wall",
+		ShellRoof = "roof",
+		ShellDoor = "door",
+	}
 	for _, child in model:GetChildren() do
 		local slot = slotByName[child.Name]
 		if slot and child:IsA("BasePart") then
