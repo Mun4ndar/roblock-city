@@ -83,6 +83,12 @@ Urutan load ada di `ORDER` pada `init.server.luau` / `init.client.luau`; tambahk
 - **FashionService**: Toko Baju (depan ROBLOCK Mall). Setelan = topi + jaket yang dirakit UniformService dan
   tampil saat pemain tidak sedang bekerja. Daftar setelan di `src/shared/FashionConfig.luau` (`OUTFITS`).
   Tersimpan di `fashion`; panelnya `FashionController`.
+- **BoatService**: perahu motor sewaan di pantai resor (papan "SEWA PERAHU"). Perahu mengapung di air
+  Terrain, fisikanya milik server, arah dibaca dari VehicleSeat. Perahu berhenti sendiri di pantai,
+  dermaga, dan tepi laut peta. Angka di `src/shared/BoatConfig.luau`; bentuknya mesh Blender di
+  `ServerStorage.AsetKapal.perahu` (`assets/blender/perahu.fbx`).
+- **Motor**: kendaraan dengan `body.bike = true` di VehicleConfig (skuter "lincah"): jok berurutan, dua roda
+  tampak, roda fisika tetap empat dan tersembunyi. Templatnya `ReplicatedStorage.Assets.CarShells.lincah`.
 - **BusinessService**: usaha Kafe di kasir Kafe Mall (dalam ROBLOCK Mega Mall). Buka kafe, naik tingkat,
   layani pelanggan (bonus, ada jeda), ambil hasil. Pemasukan tiap menit hanya selama pemilik bermain dan
   ditampung sampai batas laci. Angka di `src/shared/BusinessConfig.luau` (`LEVELS`). Tersimpan di

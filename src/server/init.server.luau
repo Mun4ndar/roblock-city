@@ -20,6 +20,7 @@ local ORDER = {
 	"PetService",
 	"FashionService",
 	"BusinessService",
+	"BoatService",
 	"NpcService",
 	"DebugService",
 }

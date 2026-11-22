@@ -164,12 +164,15 @@ function refresh()
 		swatch.BackgroundColor3 = pet.body
 		corner(swatch, 12)
 		swatch.Parent = row
-		label(swatch, {
-			Size = UDim2.fromScale(1, 1),
-			Text = pet.icon,
-			TextSize = 24,
-			TextXAlignment = Enum.TextXAlignment.Center,
-		})
+		label(
+			swatch,
+			{
+				Size = UDim2.fromScale(1, 1),
+				Text = pet.icon,
+				TextSize = 24,
+				TextXAlignment = Enum.TextXAlignment.Center,
+			}
+		)
 		label(row, {
 			Position = UDim2.fromOffset(58, 0),
 			Size = UDim2.new(1, -200, 1, 0),
@@ -245,13 +248,16 @@ local function buildGui()
 	scale = Instance.new("UIScale")
 	scale.Parent = panel
 	panel.Parent = gui
-	label(panel, {
-		Position = UDim2.fromOffset(18, 10),
-		Size = UDim2.new(1, -80, 0, 36),
-		Font = Enum.Font.FredokaOne,
-		TextSize = 26,
-		Text = "🐾 Hewan Peliharaan",
-	})
+	label(
+		panel,
+		{
+			Position = UDim2.fromOffset(18, 10),
+			Size = UDim2.new(1, -80, 0, 36),
+			Font = Enum.Font.FredokaOne,
+			TextSize = 26,
+			Text = "🐾 Hewan Peliharaan",
+		}
+	)
 	button(panel, {
 		Name = "Close",
 		AnchorPoint = Vector2.new(1, 0),

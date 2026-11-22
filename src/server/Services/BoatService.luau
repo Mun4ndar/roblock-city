@@ -4,10 +4,6 @@
 -- Perahu mengapung di air Terrain; gerak dan beloknya diatur server (fisika milik server), jadi
 -- client hanya mengirim arah lewat VehicleSeat. Bentuk perahu: mesh buatan Blender di
 -- ServerStorage.AsetKapal.perahu (assets/blender/perahu.fbx); tanpa templat, perahu tampil kotak.
---
--- BELUM AKTIF: service ini belum didaftarkan di ORDER (init.server.luau). Uji pertama membuat
--- Studio macet tepat saat perahu muncul dan penyebabnya belum ditemukan. Uji ulang bertahap
--- (perahu tanpa constraint dulu, lalu LinearVelocity, lalu AngularVelocity) sebelum diaktifkan.
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -153,16 +149,15 @@ local function buildBoat(owner: Player): Boat
 	attachment.Name = "Drive"
 	attachment.Parent = hull
 
-	-- Gerak di bidang datar perahu (maju + nol ke samping); naik-turun tetap ikut air.
+	-- Gerak maju-mundur searah perahu dan nol ke samping; naik-turun tetap ikut air.
 	local move = Instance.new("LinearVelocity")
 	move.Name = "Move"
 	move.Attachment0 = attachment
 	move.RelativeTo = Enum.ActuatorRelativeTo.Attachment0
-	move.VelocityConstraintMode = Enum.VelocityConstraintMode.Plane
-	move.PrimaryTangentAxis = Vector3.new(0, 0, -1)
-	move.SecondaryTangentAxis = Vector3.new(1, 0, 0)
-	move.PlaneVelocity = Vector2.zero
-	move.MaxForce = 60000
+	move.VelocityConstraintMode = Enum.VelocityConstraintMode.Vector
+	move.ForceLimitMode = Enum.ForceLimitMode.PerAxis
+	move.MaxAxesForce = Vector3.new(60000, 0, 60000) -- sumbu tegak bebas: perahu tetap mengapung
+	move.VectorVelocity = Vector3.zero
 	move.Parent = hull
 
 	-- Belok terhadap sumbu tegak; sekaligus menahan perahu supaya tidak oleng atau terbalik.
@@ -197,7 +192,7 @@ local function removeBoat(player: Player)
 	end
 end
 
--- true jika di titik itu bukan air (pasir, dermaga, perahu lain): perahu tidak boleh maju ke sana.
+-- true jika di titik itu bukan air (pasir, dermaga, perahu lain, tepi peta): perahu tidak boleh maju ke sana.
 local function isBlocked(boat: Boat, offsetZ: number): boolean
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
@@ -212,10 +207,13 @@ local function isBlocked(boat: Boat, offsetZ: number): boolean
 	local origin = (boat.hull.CFrame * CFrame.new(0, 0, offsetZ)).Position
 	local hit = Workspace:Raycast(
 		Vector3.new(origin.X, BoatConfig.WATER_Y + 5, origin.Z),
-		Vector3.new(0, -9, 0),
+		Vector3.new(0, -12, 0),
 		params
 	)
-	return hit ~= nil and hit.Material ~= Enum.Material.Water
+	-- tanpa hasil = di luar tepi laut peta: juga tidak boleh
+	return hit == nil
+		or hit.Material ~= Enum.Material.Water
+		or hit.Position.Y < BoatConfig.WATER_Y - 1.5
 end
 
 local function step(boat: Boat, dt: number)
@@ -229,8 +227,10 @@ local function step(boat: Boat, dt: number)
 	end
 	boat.checkIn -= dt
 	if boat.checkIn <= 0 then
-		boat.checkIn = 0.25
+		boat.checkIn = 0.1
+		-- makin kencang, makin jauh ke depan yang diperiksa
 		boat.blockedFront = isBlocked(boat, -9)
+			or isBlocked(boat, -9 - math.max(boat.speed, 0) * 0.4)
 		boat.blockedBack = isBlocked(boat, 9)
 	end
 	local target = if throttle > 0
@@ -246,9 +246,13 @@ local function step(boat: Boat, dt: number)
 	end
 	local change = BoatConfig.ACCELERATION * dt
 	boat.speed += math.clamp(target - boat.speed, -change, change)
-	boat.move.PlaneVelocity = Vector2.new(boat.speed, 0)
-	-- belok hanya saat melaju; saat mundur arahnya terbalik seperti perahu sungguhan
+	boat.move.VectorVelocity = Vector3.new(0, 0, -boat.speed)
+	-- belok penuh saat melaju (saat mundur arahnya terbalik); saat diam masih bisa berputar pelan
+	-- supaya perahu yang mentok di pantai atau tepi laut bisa diarahkan lagi
 	local grip = math.clamp(boat.speed / 12, -1, 1)
+	if math.abs(grip) < 0.35 then
+		grip = if grip < -0.05 then -0.35 else 0.35
+	end
 	boat.turn.AngularVelocity = Vector3.new(0, -steer * BoatConfig.TURN_RATE * grip, 0)
 end
 
@@ -357,7 +361,11 @@ function BoatService.start()
 	end)
 	RunService.Heartbeat:Connect(function(dt: number)
 		for player, boat in boats do
-			if boat.model.Parent == nil or boat.idle > BoatConfig.IDLE_SECONDS then
+			if
+				boat.model.Parent == nil
+				or boat.idle > BoatConfig.IDLE_SECONDS
+				or boat.hull.Position.Y < BoatConfig.WATER_Y - 30
+			then
 				removeBoat(player)
 			else
 				step(boat, dt)
