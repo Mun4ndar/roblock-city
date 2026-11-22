@@ -19,7 +19,7 @@ local MIN_HEIGHT = 9 -- hanya bangunan yang punya badan setinggi ini
 local MAX_ASPECT = 4 -- part yang terlalu pipih memanjang dibiarkan kotak (sudutnya jadi lonjong)
 local FIN_HEIGHT = 40 -- sirip tegak hanya untuk gedung tinggi
 -- Kawasan yang dirias. Rumah perumahan punya gayanya sendiri (StyleHouses), jadi tidak ikut.
-local ZONES = { "Downtown", "Residential", "Beach", "Airport", "Countryside" }
+local ZONES = { "Downtown", "Residential", "Beach", "Airport", "Countryside", "Neighborhoods" }
 -- Pelat blok kota (trotoar + halaman rumput di atasnya) diberi sudut bulat kecil; sudut yang terpotong
 -- ditambal aspal supaya menyatu dengan persimpangan. Templat: ServerStorage.AsetRumah.bulatKecil.
 local SLABS = { "^Blok%d+$", "Block$", "^Halaman%d+$" }
@@ -34,6 +34,8 @@ local NAMES = {
 	"^Roof$",
 	"^Lumbung$",
 	"^Rumah$",
+	"^GroundFloor$",
+	"^UpperFloor$",
 }
 
 local function matches(name: string): boolean
@@ -62,7 +64,11 @@ return function(): number
 		local zone = map:FindFirstChild(zoneName)
 		if zone then
 			for _, d in zone:GetDescendants() do
-				if d:IsA("Model") then
+				-- rumah perumahan (Rumah1..89) punya gayanya sendiri dari StyleHouses
+				if
+					d:IsA("Model")
+					and not (zoneName == "Neighborhoods" and d.Name:match("^Rumah%d+$"))
+				then
 					table.insert(models, d)
 				end
 			end

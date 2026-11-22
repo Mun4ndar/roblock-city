@@ -51,6 +51,8 @@ local SHELL_REPLACES = {
 	RearWindow = true,
 	Pillar = true,
 	Stripe = true,
+	Box = true,
+	BoxDoor = true,
 }
 
 local function findShell(id: string): Instance?
