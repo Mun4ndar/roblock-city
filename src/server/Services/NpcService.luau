@@ -14,6 +14,9 @@ local Workspace = game:GetService("Workspace")
 
 local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local JobConfig = require(Shared:WaitForChild("JobConfig"))
+local Format = require(Shared:WaitForChild("Format"))
+
+local EconomyService = require(script.Parent:WaitForChild("EconomyService"))
 local VehicleBuilder = require(Shared:WaitForChild("VehicleBuilder"))
 
 local NpcService = {}
@@ -848,6 +851,312 @@ local function live(model: Model, places: { Vector3 }, seats: { Seat }, group: a
 	end
 end
 
+-- ---------------------------------------------------------------- penjual bakso keliling
+
+-- Mang Ujang mendorong gerobak bakso keliling kota kecil, lalu mangkal sebentar di tiap tempat.
+-- Saat mangkal, pemain bisa membeli semangkuk bakso di gerobaknya (harga dicek server).
+local BAKSO = {
+	price = 10,
+	walkSpeed = 7,
+	stopSeconds = { 35, 55 },
+	stops = { "tamanPerumahan", "rumahSakit", "toko", "kafe", "balaiKota", "damkar" },
+	buyCooldown = 4,
+	eatSeconds = 12,
+}
+
+local function buildCart(root: BasePart): (Model, ProximityPrompt, TextLabel)
+	local cart = Instance.new("Model")
+	cart.Name = "GerobakBakso"
+	local floorY = -(root.Size.Y / 2 + (root.Parent :: any).Humanoid.HipHeight) -- tanah relatif ke root
+	local base = root.CFrame * CFrame.new(0, floorY, -4.4)
+	local blue, white, wood = rgb(40, 110, 200), rgb(246, 246, 240), rgb(150, 104, 66)
+	local function piece(
+		name: string,
+		size: Vector3,
+		cf: CFrame,
+		color: Color3,
+		material: Enum.Material?,
+		shape: Enum.PartType?
+	): Part
+		local p = Instance.new("Part")
+		p.Name = name
+		p.Size = size
+		p.CFrame = base * cf
+		p.Color = color
+		p.Material = material or Enum.Material.SmoothPlastic
+		p.Shape = shape or Enum.PartType.Block
+		p.TopSurface = Enum.SurfaceType.Smooth
+		p.BottomSurface = Enum.SurfaceType.Smooth
+		p.Massless = true
+		p.CanCollide = false
+		p.CanTouch = false
+		p.CanQuery = false
+		p.CollisionGroup = GROUP_NPC
+		local weld = Instance.new("WeldConstraint")
+		weld.Part0 = root
+		weld.Part1 = p
+		weld.Parent = p
+		p.Parent = cart
+		return p
+	end
+	local body = piece("Badan", Vector3.new(3.4, 2, 4.6), CFrame.new(0, 2.5, 0), blue)
+	piece("Bingkai", Vector3.new(3.6, 0.25, 4.8), CFrame.new(0, 3.6, 0), white)
+	piece("Garis", Vector3.new(3.44, 0.5, 4.64), CFrame.new(0, 2.5, 0), rgb(226, 54, 54))
+	for _, sx in { -1, 1 } do
+		piece(
+			"Roda",
+			Vector3.new(0.4, 2.4, 2.4),
+			CFrame.new(sx * 1.9, 1.2, 0.4),
+			rgb(34, 36, 42),
+			nil,
+			Enum.PartType.Cylinder
+		)
+		piece(
+			"Velg",
+			Vector3.new(0.46, 1, 1),
+			CFrame.new(sx * 1.9, 1.2, 0.4),
+			rgb(200, 204, 212),
+			Enum.Material.Metal,
+			Enum.PartType.Cylinder
+		)
+		piece(
+			"Gagang",
+			Vector3.new(0.22, 0.22, 2.6),
+			CFrame.new(sx * 1.3, 3.2, 3.5),
+			wood,
+			Enum.Material.Wood
+		)
+		for _, sz in { -2.1, 2.1 } do
+			piece("TiangAtap", Vector3.new(0.2, 3, 0.2), CFrame.new(sx * 1.6, 5.2, sz), white)
+		end
+	end
+	piece(
+		"PalangGagang",
+		Vector3.new(2.8, 0.22, 0.22),
+		CFrame.new(0, 3.2, 4.7),
+		wood,
+		Enum.Material.Wood
+	)
+	piece("KakiDepan", Vector3.new(0.3, 1.5, 0.3), CFrame.new(0, 0.75, -2), rgb(60, 62, 70))
+	piece("Atap", Vector3.new(4.2, 0.3, 5.2), CFrame.new(0, 6.8, 0), blue)
+	piece("TepiAtap", Vector3.new(4.4, 0.2, 5.4), CFrame.new(0, 6.6, 0), white)
+	-- etalase kaca berisi bakso, panci berasap, dan mangkuk
+	local glass = piece(
+		"Etalase",
+		Vector3.new(3, 1.6, 2),
+		CFrame.new(0, 4.55, -1.1),
+		rgb(200, 230, 245),
+		Enum.Material.Glass
+	)
+	glass.Transparency = 0.6
+	for index, offset in
+		{
+			Vector3.new(-0.8, 0, 0),
+			Vector3.new(0, 0, 0.3),
+			Vector3.new(0.8, 0, -0.2),
+			Vector3.new(-0.3, 0.55, 0),
+			Vector3.new(0.4, 0.55, 0.2),
+		}
+	do
+		local ball = piece(
+			"Bakso" .. index,
+			Vector3.new(0.6, 0.6, 0.6),
+			CFrame.new(offset.X, 4.1 + offset.Y, -1.1 + offset.Z),
+			rgb(170, 140, 120),
+			nil,
+			Enum.PartType.Ball
+		)
+		ball.CastShadow = false
+	end
+	local pot = piece(
+		"Panci",
+		Vector3.new(1.3, 1.6, 1.6),
+		CFrame.new(0, 4.4, 1.2) * CFrame.Angles(0, 0, math.rad(90)),
+		rgb(196, 200, 208),
+		Enum.Material.Metal,
+		Enum.PartType.Cylinder
+	)
+	local steam = Instance.new("ParticleEmitter")
+	steam.Texture = "rbxasset://textures/particles/smoke_main.dds"
+	steam.Rate = 5
+	steam.Lifetime = NumberRange.new(1.2, 1.8)
+	steam.Speed = NumberRange.new(1.2, 2)
+	steam.SpreadAngle = Vector2.new(12, 12)
+	steam.EmissionDirection = Enum.NormalId.Right -- silinder diputar: sumbu X-nya mengarah ke atas
+	steam.Size = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.5),
+		NumberSequenceKeypoint.new(1, 1.6),
+	})
+	steam.Transparency =
+		NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.6), NumberSequenceKeypoint.new(1, 1) })
+	steam.Parent = pot
+	for i = 0, 2 do
+		piece(
+			"Mangkuk",
+			Vector3.new(0.3, 0.8, 0.8),
+			CFrame.new(-1 + i * 1, 3.9, 2) * CFrame.Angles(0, 0, math.rad(90)),
+			white,
+			nil,
+			Enum.PartType.Cylinder
+		)
+	end
+	-- tulisan di kedua sisi
+	for _, face in { Enum.NormalId.Left, Enum.NormalId.Right } do
+		local gui = Instance.new("SurfaceGui")
+		gui.Face = face
+		gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+		gui.PixelsPerStud = 40
+		local label = Instance.new("TextLabel")
+		label.Size = UDim2.fromScale(1, 1)
+		label.BackgroundTransparency = 1
+		label.Font = Enum.Font.FredokaOne
+		label.TextScaled = true
+		label.TextColor3 = Color3.new(1, 1, 1)
+		label.Text = "BAKSO"
+		label.Parent = gui
+		gui.Parent = body
+	end
+	local board = Instance.new("BillboardGui")
+	board.Name = "Papan"
+	board.Size = UDim2.fromScale(9, 1.6)
+	board.StudsOffset = Vector3.new(0, 6, 0)
+	board.MaxDistance = 80
+	local status = Instance.new("TextLabel")
+	status.Size = UDim2.fromScale(1, 1)
+	status.BackgroundTransparency = 1
+	status.Font = Enum.Font.FredokaOne
+	status.TextScaled = true
+	status.TextColor3 = Color3.new(1, 1, 1)
+	status.TextStrokeTransparency = 0.3
+	status.Text = "Bakso Mang Ujang"
+	status.Parent = board
+	board.Parent = body
+	body.CanQuery = true -- supaya tombol beli bisa dipakai
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.Name = "BeliBakso"
+	prompt.ActionText = "Beli bakso " .. Format.money(BAKSO.price)
+	prompt.ObjectText = "Mang Ujang"
+	prompt.HoldDuration = 0.3
+	prompt.MaxActivationDistance = 12
+	prompt.RequiresLineOfSight = false
+	prompt.Enabled = false
+	prompt.Parent = body
+	return cart, prompt, status
+end
+
+-- Mangkuk bakso di tangan pemain selama beberapa detik (hanya hiasan).
+local function giveBowl(player: Player)
+	local character = player.Character
+	local hand = if character
+		then character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm")
+		else nil
+	if character == nil or hand == nil or not hand:IsA("BasePart") then
+		return
+	end
+	local old = character:FindFirstChild("MangkukBakso")
+	if old then
+		old:Destroy()
+	end
+	local bowl = Instance.new("Part")
+	bowl.Name = "MangkukBakso"
+	bowl.Shape = Enum.PartType.Cylinder
+	bowl.Size = Vector3.new(0.5, 1.1, 1.1)
+	bowl.Color = rgb(246, 246, 240)
+	bowl.Massless = true
+	bowl.CanCollide = false
+	bowl.CanTouch = false
+	bowl.CanQuery = false
+	bowl.CFrame = hand.CFrame
+		* CFrame.new(0, -hand.Size.Y / 2 - 0.3, -0.4)
+		* CFrame.Angles(0, 0, math.rad(90))
+	local weld = Instance.new("WeldConstraint")
+	weld.Part0 = hand
+	weld.Part1 = bowl
+	weld.Parent = bowl
+	bowl.Parent = character
+	task.delay(BAKSO.eatSeconds, function()
+		bowl:Destroy()
+	end)
+end
+
+local function startBaksoVendor()
+	local stops: { Vector3 } = {}
+	for _, key in BAKSO.stops do
+		local position = placePosition(key)
+		if position then
+			table.insert(stops, position)
+		end
+	end
+	local model = buildNpc(7) -- perawakan Pak Umar; namanya diganti
+	if model == nil or #stops < 2 then
+		return
+	end
+	model.Name = "MangUjang"
+	local humanoid = model:FindFirstChildOfClass("Humanoid")
+	local root = model.PrimaryPart
+	if humanoid == nil or root == nil then
+		return
+	end
+	humanoid.DisplayName = "Mang Ujang"
+	humanoid.WalkSpeed = BAKSO.walkSpeed
+	model:PivotTo(CFrame.new(stops[1] + Vector3.new(4, 3, 4)))
+	local cart, prompt, status = buildCart(root)
+	cart.Parent = model
+	model.Parent = folder
+	pcall(function()
+		root:SetNetworkOwner(nil)
+	end)
+	animate(humanoid)
+
+	local lastBuy: { [Player]: number } = {}
+	prompt.Triggered:Connect(function(player: Player)
+		local now = os.clock()
+		if lastBuy[player] and now - lastBuy[player] < BAKSO.buyCooldown then
+			return
+		end
+		local character = player.Character
+		local playerRoot = if character then character.PrimaryPart else nil
+		if playerRoot == nil or (playerRoot.Position - root.Position).Magnitude > 24 then
+			return
+		end
+		lastBuy[player] = now
+		if not EconomyService.trySpend(player, BAKSO.price, "food:bakso") then
+			EconomyService.notify(
+				player,
+				"Uangmu belum cukup. Semangkuk bakso " .. Format.money(BAKSO.price) .. "."
+			)
+			return
+		end
+		giveBowl(player)
+		EconomyService.notify(player, "Bakso hangat dari Mang Ujang. Selamat makan!")
+	end)
+	Players.PlayerRemoving:Connect(function(player: Player)
+		lastBuy[player] = nil
+	end)
+
+	task.spawn(function()
+		local index = 1
+		while model.Parent ~= nil do
+			-- mangkal
+			prompt.Enabled = true
+			status.Text = "Bakso Mang Ujang · mangkal"
+			task.wait(random:NextNumber(BAKSO.stopSeconds[1], BAKSO.stopSeconds[2]))
+			-- keliling ke tempat berikutnya
+			prompt.Enabled = false
+			status.Text = "Bakso Mang Ujang · keliling"
+			index = index % #stops + 1
+			if root.Position.Y < -30 then
+				model:PivotTo(CFrame.new(stops[index] + Vector3.new(4, 3, 4)))
+			end
+			walkTo(
+				model,
+				humanoid,
+				stops[index] + Vector3.new(random:NextNumber(-4, 4), 3, random:NextNumber(3, 6))
+			)
+		end
+	end)
+end
+
 function NpcService.init()
 	PhysicsService:RegisterCollisionGroup(GROUP_NPC)
 	folder = Instance.new("Folder")
@@ -903,6 +1212,7 @@ function NpcService.start()
 			task.wait(0.2)
 		end
 	end
+	startBaksoVendor()
 end
 
 return NpcService
