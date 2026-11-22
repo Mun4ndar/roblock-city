@@ -27,6 +27,10 @@ Net.Names = table.freeze({
 	HouseItem = "HouseItem", -- RemoteFunction: (yardSlot: number, itemId: string, "" = kosongkan) -> HouseResult
 	HouseGoHome = "HouseGoHome", -- RemoteFunction: () -> HouseResult (pulang ke depan rumah)
 	MissionClaim = "MissionClaim", -- RemoteFunction: (missionId: string) -> { ok, message }
+	FarmBuySeed = "FarmBuySeed", -- RemoteFunction: (cropId: string) -> { ok, message } (beli 1 bibit)
+	FarmPlant = "FarmPlant", -- RemoteFunction: (plotIndex: number, cropId: string) -> { ok, message }
+	FarmHarvest = "FarmHarvest", -- RemoteFunction: (plotIndex: number) -> { ok, message }
+	FarmSell = "FarmSell", -- RemoteFunction: () -> { ok, message } (jual semua hasil panen)
 })
 
 local function getFolder(): Folder

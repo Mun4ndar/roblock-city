@@ -53,6 +53,7 @@ local function defaultData(): PlayerData
 		jobs = { current = "", stats = {} },
 		house = { id = 0, tier = "", boughtAt = 0, paint = {}, items = {} },
 		missions = { day = 0, progress = {}, claimed = {} },
+		farm = { plots = {}, seeds = {}, crops = {} },
 	}
 end
 

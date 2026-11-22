@@ -63,6 +63,15 @@ Urutan load ada di `ORDER` pada `init.server.luau` / `init.client.luau`; tambahk
   `ShellBody` dan `ShellGlass`) kalau ada; saat ini Serasi dan Kilat. Sumbernya `assets/blender/*.fbx`
   (dibuat dengan skrip di `roblock_cars.blend`), diunggah sebagai aset Model lalu disisipkan ke folder itu.
   Templat tersimpan di place, bukan di repo; tanpa templat mobil tampil dengan bodi kotak.
+- **NpcService**: warga kota (rig R15 buatan sendiri dengan baju, rambut/topi, ransel dari part) yang berjalan
+  acak antar tempat lewat PathfindingService. Kelompok dan jumlahnya ada di tabel `GROUPS`. Warga tidak
+  bertabrakan dengan kendaraan.
+- **FarmService**: perkebunan. Beli bibit dan jual hasil panen di Pasar Tani, tanam dan panen di 8 petak pribadi
+  Kebun Warga (dibangun `map/BuildFarm.luau`). Tanaman dan harganya di `src/shared/FarmConfig.luau`
+  (**menambah tanaman = menambah entri di `CROPS`**). Waktu tumbuh memakai jam server, jadi tanaman tetap
+  tumbuh saat pemain keluar. Tersimpan di data pemain (`farm`); tanaman digambar `FarmController` di client.
+- Mobil **Elegan** memakai templat `CarShells.elegan` beratribut `Preserve`, dibuat dari model resmi Roblox "Car"
+  (Creator Store, gratis, aset 14215126016; skripnya tidak dipakai, hanya mesh bodi dan roda).
 - **DebugService**: alat uji, hanya aktif di Studio. Dari command bar server:
   `game.ServerStorage.Debug:Invoke("money", pemain, 5000)` atau `game.ServerStorage.Debug:Invoke("clock", 21)`.
 - `src/client/Util/UiScale.luau` mengecilkan HUD di layar kecil; elemen HUD baru cukup memanggil `UiScale.attach`.
@@ -132,6 +141,7 @@ require(MB.BuildDealer)()
 require(MB.StyleWorld)()       -- rias tampilan; setelah semua pembangun (lihat "Tampilan")
 require(MB.StyleTrees)()       -- pohon mesh di taman; setelah StyleWorld
 require(MB.BuildInteriors)()   -- lobi Rumah Sakit dan ruang tunggu Bandara (kapan saja)
+require(MB.BuildFarm)()        -- Pasar Tani dan Kebun Warga (setelah BuildCountryside)
 ```
 
 Setiap skrip hanya mengganti foldernya sendiri di `Workspace.Map`. Modul bantu: `MapKit` (part, jalan, pohon,

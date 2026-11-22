@@ -77,6 +77,8 @@ local SHIRTS = {
 }
 local PANTS =
 	{ rgb(50, 60, 90), rgb(90, 70, 50), rgb(60, 60, 66), rgb(40, 90, 120), rgb(200, 190, 170) }
+local SHOES =
+	{ rgb(40, 40, 46), rgb(245, 245, 240), rgb(120, 80, 50), rgb(220, 70, 70), rgb(60, 110, 200) }
 local HAIRS =
 	{ rgb(40, 30, 26), rgb(90, 60, 40), rgb(20, 20, 24), rgb(180, 130, 70), rgb(120, 120, 126) }
 
@@ -97,8 +99,40 @@ local function near(position: Vector3): Vector3
 	return position + Vector3.new(random:NextNumber(-7, 7), 3, random:NextNumber(-7, 7))
 end
 
+-- Part hiasan yang menempel di bagian tubuh (rambut, topi, ransel, ...).
+local function attach(
+	model: Model,
+	to: BasePart,
+	size: Vector3,
+	offset: CFrame,
+	color: Color3,
+	shape: Enum.PartType,
+	material: Enum.Material
+)
+	local part = Instance.new("Part")
+	part.Name = "Hiasan"
+	part.Shape = shape
+	part.Size = size
+	part.Color = color
+	part.Material = material
+	part.Massless = true
+	part.CanCollide = false
+	part.CanQuery = false
+	part.CanTouch = false
+	part.CastShadow = false
+	part.CFrame = to.CFrame * offset
+	local weld = Instance.new("WeldConstraint")
+	weld.Part0 = to
+	weld.Part1 = part
+	weld.Parent = part
+	part.Parent = model
+end
+
 local function buildNpc(index: number): Model?
 	local description = Instance.new("HumanoidDescription")
+	description.HeightScale = random:NextNumber(0.88, 1.06)
+	description.WidthScale = random:NextNumber(0.9, 1.05)
+	description.HeadScale = random:NextNumber(0.98, 1.08)
 	local skin, shirt, pants = pick(SKINS), pick(SHIRTS), pick(PANTS)
 	description.HeadColor = skin
 	description.LeftArmColor = skin
@@ -131,23 +165,167 @@ local function buildNpc(index: number): Model?
 			child:Destroy()
 		end
 	end
-	-- rambut sederhana dari part
-	local hair = Instance.new("Part")
-	hair.Name = "Rambut"
-	hair.Shape = Enum.PartType.Ball
-	hair.Size = Vector3.new(1.45, 1.45, 1.45)
-	hair.Color = pick(HAIRS)
-	hair.Material = Enum.Material.SmoothPlastic
-	hair.Massless = true
-	hair.CanCollide = false
-	hair.CanQuery = false
-	hair.CanTouch = false
-	hair.CFrame = head.CFrame * CFrame.new(0, 0.32, 0.12)
-	local weld = Instance.new("WeldConstraint")
-	weld.Part0 = head
-	weld.Part1 = hair
-	weld.Parent = hair
-	hair.Parent = model
+	-- Pakaian: lengan pendek, celana, sepatu (warna per bagian tubuh, bukan satu warna polos).
+	local bodyColors = model:FindFirstChildOfClass("BodyColors")
+	if bodyColors then
+		bodyColors:Destroy()
+	end
+	local shoes = pick(SHOES)
+	local dress = random:NextNumber() < 0.3 -- sebagian warga memakai terusan
+	for _, d in model:GetChildren() do
+		if d:IsA("BasePart") then
+			local n = d.Name
+			if n:match("Foot$") then
+				d.Color = shoes
+			elseif n:match("UpperArm$") or n == "UpperTorso" then
+				d.Color = shirt
+			elseif n == "LowerTorso" or n:match("UpperLeg$") then
+				d.Color = if dress then shirt else pants
+			elseif n:match("LowerLeg$") then
+				d.Color = if dress then skin else pants
+			elseif n ~= "HumanoidRootPart" then
+				d.Color = skin
+			end
+		end
+	end
+	local torso = model:FindFirstChild("UpperTorso")
+	local hairColor = pick(HAIRS)
+	local smooth = Enum.Material.SmoothPlastic
+	local ball, block, cylinder = Enum.PartType.Ball, Enum.PartType.Block, Enum.PartType.Cylinder
+	-- Rambut/topi: empat gaya dari part.
+	local style = random:NextInteger(1, 4)
+	if style == 1 then -- rambut pendek
+		attach(
+			model,
+			head,
+			Vector3.new(1.42, 1.3, 1.42),
+			CFrame.new(0, 0.36, 0.08),
+			hairColor,
+			ball,
+			smooth
+		)
+	elseif style == 2 then -- rambut panjang
+		attach(
+			model,
+			head,
+			Vector3.new(1.46, 1.36, 1.46),
+			CFrame.new(0, 0.34, 0.1),
+			hairColor,
+			ball,
+			smooth
+		)
+		attach(
+			model,
+			head,
+			Vector3.new(1.3, 1.5, 0.45),
+			CFrame.new(0, -0.35, 0.58),
+			hairColor,
+			block,
+			smooth
+		)
+	elseif style == 3 then -- sanggul / kuncir
+		attach(
+			model,
+			head,
+			Vector3.new(1.42, 1.3, 1.42),
+			CFrame.new(0, 0.36, 0.08),
+			hairColor,
+			ball,
+			smooth
+		)
+		attach(
+			model,
+			head,
+			Vector3.new(0.7, 0.7, 0.7),
+			CFrame.new(0, 0.95, 0.45),
+			hairColor,
+			ball,
+			smooth
+		)
+	else -- topi bertepi
+		local hat = pick(SHIRTS)
+		attach(
+			model,
+			head,
+			Vector3.new(0.55, 1.4, 1.4),
+			CFrame.new(0, 0.72, 0) * CFrame.Angles(0, 0, math.pi / 2),
+			hat,
+			cylinder,
+			smooth
+		)
+		attach(
+			model,
+			head,
+			Vector3.new(0.12, 1.9, 1.9),
+			CFrame.new(0, 0.5, -0.25) * CFrame.Angles(0, 0, math.pi / 2),
+			hat,
+			cylinder,
+			smooth
+		)
+		attach(
+			model,
+			head,
+			Vector3.new(1.3, 0.5, 0.3),
+			CFrame.new(0, 0.1, 0.55),
+			hairColor,
+			block,
+			smooth
+		)
+	end
+	if torso and torso:IsA("BasePart") then
+		local extra = random:NextNumber()
+		if extra < 0.3 then -- ransel
+			attach(
+				model,
+				torso,
+				Vector3.new(1.5, 1.6, 0.7),
+				CFrame.new(0, 0.05, 0.85),
+				pick(SHIRTS),
+				block,
+				Enum.Material.Fabric
+			)
+			attach(
+				model,
+				torso,
+				Vector3.new(1.1, 0.5, 0.3),
+				CFrame.new(0, -0.3, 1.25),
+				pick(PANTS),
+				block,
+				Enum.Material.Fabric
+			)
+		elseif extra < 0.55 then -- jaket terbuka: garis tengah berwarna lain
+			attach(
+				model,
+				torso,
+				Vector3.new(0.5, 1.5, 0.08),
+				CFrame.new(0, 0, -0.52),
+				rgb(245, 245, 240),
+				block,
+				smooth
+			)
+		elseif extra < 0.75 then -- saku / lencana kecil
+			attach(
+				model,
+				torso,
+				Vector3.new(0.5, 0.45, 0.08),
+				CFrame.new(0.5, 0.35, -0.52),
+				pick(PANTS),
+				block,
+				smooth
+			)
+		end
+	end
+	if random:NextNumber() < 0.2 then -- kacamata
+		attach(
+			model,
+			head,
+			Vector3.new(1.1, 0.26, 0.1),
+			CFrame.new(0, 0.12, -0.62),
+			rgb(30, 30, 36),
+			block,
+			smooth
+		)
+	end
 	for _, d in model:GetDescendants() do
 		if d:IsA("BasePart") then
 			d.CollisionGroup = GROUP_NPC

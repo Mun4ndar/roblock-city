@@ -14,6 +14,7 @@ local ORDER = {
 	"JobUiController",
 	"HouseUiController",
 	"PhoneController",
+	"FarmController",
 }
 
 local loaded: { any } = {}

@@ -18,6 +18,14 @@ export type PlayerData = {
 	house: HouseData,
 	-- Misi harian (lihat MissionConfig).
 	missions: MissionData,
+	-- Kebun pemain (lihat FarmConfig).
+	farm: FarmData,
+}
+
+export type FarmData = {
+	plots: { [string]: { crop: string, plantedAt: number } }, -- nomor petak (teks) -> tanaman
+	seeds: { [string]: number }, -- id tanaman -> jumlah bibit
+	crops: { [string]: number }, -- id tanaman -> jumlah hasil panen
 }
 
 export type MissionData = {
