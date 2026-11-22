@@ -140,25 +140,19 @@ function refresh()
 		hat.BackgroundColor3 = outfit.look.hatColor
 		corner(hat, 6)
 		hat.Parent = jacket
-		label(
-			jacket,
-			{
-				Size = UDim2.fromScale(1, 1),
-				Text = outfit.icon,
-				TextSize = 20,
-				TextXAlignment = Enum.TextXAlignment.Center,
-			}
-		)
-		label(
-			row,
-			{
-				Position = UDim2.fromOffset(58, 0),
-				Size = UDim2.new(1, -200, 1, 0),
-				Font = Enum.Font.FredokaOne,
-				TextSize = 17,
-				Text = outfit.name,
-			}
-		)
+		label(jacket, {
+			Size = UDim2.fromScale(1, 1),
+			Text = outfit.icon,
+			TextSize = 20,
+			TextXAlignment = Enum.TextXAlignment.Center,
+		})
+		label(row, {
+			Position = UDim2.fromOffset(58, 0),
+			Size = UDim2.new(1, -200, 1, 0),
+			Font = Enum.Font.FredokaOne,
+			TextSize = 17,
+			Text = outfit.name,
+		})
 		local text, color, textColor =
 			"Beli " .. Format.money(outfit.price), COLORS.buy, COLORS.text
 		if wearing then
@@ -209,26 +203,20 @@ local function buildGui()
 	scale = Instance.new("UIScale")
 	scale.Parent = panel
 	panel.Parent = gui
-	label(
-		panel,
-		{
-			Position = UDim2.fromOffset(18, 10),
-			Size = UDim2.new(1, -80, 0, 36),
-			Font = Enum.Font.FredokaOne,
-			TextSize = 26,
-			Text = "👕 Toko Baju",
-		}
-	)
-	label(
-		panel,
-		{
-			Position = UDim2.fromOffset(18, 44),
-			Size = UDim2.new(1, -36, 0, 18),
-			TextSize = 12,
-			TextColor3 = rgb(110, 120, 135),
-			Text = "Setelan terlihat saat kamu tidak sedang bekerja.",
-		}
-	)
+	label(panel, {
+		Position = UDim2.fromOffset(18, 10),
+		Size = UDim2.new(1, -80, 0, 36),
+		Font = Enum.Font.FredokaOne,
+		TextSize = 26,
+		Text = "👕 Toko Baju",
+	})
+	label(panel, {
+		Position = UDim2.fromOffset(18, 44),
+		Size = UDim2.new(1, -36, 0, 18),
+		TextSize = 12,
+		TextColor3 = rgb(110, 120, 135),
+		Text = "Setelan terlihat saat kamu tidak sedang bekerja.",
+	})
 	button(panel, {
 		Name = "Close",
 		AnchorPoint = Vector2.new(1, 0),
