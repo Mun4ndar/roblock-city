@@ -99,6 +99,243 @@ local function near(position: Vector3): Vector3
 	return position + Vector3.new(random:NextNumber(-7, 7), 3, random:NextNumber(-7, 7))
 end
 
+-- Enam belas warga, masing-masing karakter sendiri (bukan warna acak). Menambah warga baru =
+-- menambah entri. style: pendek/panjang/sanggul/kribo/hijab/peci/caping/botak/topi.
+-- extra: ransel/jaket/dasi/celemek/syal/saku.
+type Character = {
+	name: string,
+	skin: Color3,
+	shirt: Color3,
+	pants: Color3,
+	shoes: Color3,
+	hair: Color3,
+	accent: Color3,
+	style: string,
+	extra: string?,
+	height: number,
+	width: number,
+	dress: boolean?,
+	glasses: boolean?,
+	beard: boolean?,
+}
+local BLACK, BROWN, GREY = rgb(30, 26, 26), rgb(96, 62, 40), rgb(170, 170, 176)
+local CHARACTERS: { Character } = {
+	{
+		name = "PakBudi",
+		skin = rgb(224, 172, 120),
+		shirt = rgb(245, 245, 240),
+		pants = rgb(44, 52, 78),
+		shoes = BLACK,
+		hair = BLACK,
+		accent = rgb(200, 50, 50),
+		style = "pendek",
+		extra = "dasi",
+		height = 1.04,
+		width = 1,
+		glasses = true,
+	},
+	{
+		name = "BuSari",
+		skin = rgb(240, 190, 140),
+		shirt = rgb(150, 100, 200),
+		pants = rgb(150, 100, 200),
+		shoes = rgb(245, 245, 240),
+		hair = BLACK,
+		accent = rgb(40, 170, 170),
+		style = "hijab",
+		height = 0.97,
+		width = 0.95,
+		dress = true,
+	},
+	{
+		name = "Dimas",
+		skin = rgb(224, 172, 120),
+		shirt = rgb(255, 200, 40),
+		pants = rgb(40, 90, 150),
+		shoes = rgb(220, 70, 70),
+		hair = BLACK,
+		accent = rgb(220, 60, 60),
+		style = "topi",
+		extra = "ransel",
+		height = 0.84,
+		width = 0.92,
+	},
+	{
+		name = "NenekIjah",
+		skin = rgb(214, 160, 116),
+		shirt = rgb(140, 84, 60),
+		pants = rgb(140, 84, 60),
+		shoes = BROWN,
+		hair = GREY,
+		accent = rgb(230, 200, 120),
+		style = "sanggul",
+		extra = "syal",
+		height = 0.9,
+		width = 0.98,
+		dress = true,
+		glasses = true,
+	},
+	{
+		name = "MasJoko",
+		skin = rgb(168, 116, 76),
+		shirt = rgb(70, 140, 80),
+		pants = rgb(110, 84, 56),
+		shoes = BROWN,
+		hair = BLACK,
+		accent = rgb(226, 196, 120),
+		style = "caping",
+		height = 1.02,
+		width = 1.04,
+		beard = true,
+	},
+	{
+		name = "KakRina",
+		skin = rgb(255, 214, 170),
+		shirt = rgb(255, 140, 180),
+		pants = rgb(60, 90, 150),
+		shoes = rgb(245, 245, 240),
+		hair = BROWN,
+		accent = rgb(245, 245, 240),
+		style = "panjang",
+		extra = "jaket",
+		height = 0.98,
+		width = 0.93,
+	},
+	{
+		name = "PakUmar",
+		skin = rgb(200, 150, 104),
+		shirt = rgb(240, 240, 232),
+		pants = rgb(90, 96, 104),
+		shoes = BLACK,
+		hair = GREY,
+		accent = BLACK,
+		style = "peci",
+		extra = "saku",
+		height = 1.03,
+		width = 1.02,
+		beard = true,
+	},
+	{
+		name = "Lala",
+		skin = rgb(255, 214, 170),
+		shirt = rgb(255, 214, 80),
+		pants = rgb(255, 214, 80),
+		shoes = rgb(255, 140, 180),
+		hair = BROWN,
+		accent = rgb(255, 140, 180),
+		style = "sanggul",
+		height = 0.82,
+		width = 0.9,
+		dress = true,
+	},
+	{
+		name = "BangTogar",
+		skin = rgb(120, 80, 52),
+		shirt = rgb(240, 130, 50),
+		pants = rgb(50, 54, 62),
+		shoes = rgb(245, 245, 240),
+		hair = BLACK,
+		accent = rgb(50, 54, 62),
+		style = "kribo",
+		extra = "saku",
+		height = 1.06,
+		width = 1.1,
+	},
+	{
+		name = "ChefWati",
+		skin = rgb(240, 190, 140),
+		shirt = rgb(250, 250, 246),
+		pants = rgb(60, 60, 66),
+		shoes = BLACK,
+		hair = BROWN,
+		accent = rgb(250, 250, 246),
+		style = "pendek",
+		extra = "celemek",
+		height = 0.96,
+		width = 1.02,
+	},
+	{
+		name = "KakYusuf",
+		skin = rgb(168, 116, 76),
+		shirt = rgb(64, 190, 100),
+		pants = rgb(200, 190, 170),
+		shoes = rgb(60, 110, 200),
+		hair = BLACK,
+		accent = rgb(60, 110, 200),
+		style = "topi",
+		extra = "ransel",
+		height = 1.06,
+		width = 0.96,
+	},
+	{
+		name = "BuAni",
+		skin = rgb(224, 172, 120),
+		shirt = rgb(90, 150, 235),
+		pants = rgb(50, 60, 90),
+		shoes = BLACK,
+		hair = BLACK,
+		accent = rgb(255, 150, 180),
+		style = "hijab",
+		extra = "jaket",
+		height = 0.95,
+		width = 1,
+	},
+	{
+		name = "OmHendra",
+		skin = rgb(240, 190, 140),
+		shirt = rgb(200, 60, 60),
+		pants = rgb(60, 60, 66),
+		shoes = BROWN,
+		hair = BLACK,
+		accent = rgb(60, 60, 66),
+		style = "botak",
+		height = 1,
+		width = 1.1,
+		glasses = true,
+		beard = true,
+	},
+	{
+		name = "Tia",
+		skin = rgb(120, 80, 52),
+		shirt = rgb(40, 170, 170),
+		pants = rgb(240, 240, 235),
+		shoes = rgb(220, 70, 70),
+		hair = BLACK,
+		accent = rgb(255, 184, 0),
+		style = "kribo",
+		extra = "syal",
+		height = 0.94,
+		width = 0.92,
+	},
+	{
+		name = "PakMade",
+		skin = rgb(200, 150, 104),
+		shirt = rgb(130, 80, 160),
+		pants = rgb(70, 60, 56),
+		shoes = BLACK,
+		hair = GREY,
+		accent = rgb(240, 200, 90),
+		style = "pendek",
+		extra = "saku",
+		height = 1,
+		width = 1.04,
+	},
+	{
+		name = "Sinta",
+		skin = rgb(255, 214, 170),
+		shirt = rgb(220, 60, 80),
+		pants = rgb(220, 60, 80),
+		shoes = BLACK,
+		hair = BLACK,
+		accent = rgb(245, 245, 240),
+		style = "panjang",
+		height = 0.97,
+		width = 0.92,
+		dress = true,
+		glasses = true,
+	},
+}
+
 -- Part hiasan yang menempel di bagian tubuh (rambut, topi, ransel, ...).
 local function attach(
 	model: Model,
@@ -130,10 +367,12 @@ end
 
 local function buildNpc(index: number): Model?
 	local description = Instance.new("HumanoidDescription")
-	description.HeightScale = random:NextNumber(0.88, 1.06)
-	description.WidthScale = random:NextNumber(0.9, 1.05)
-	description.HeadScale = random:NextNumber(0.98, 1.08)
-	local skin, shirt, pants = pick(SKINS), pick(SHIRTS), pick(PANTS)
+	local who = CHARACTERS[(index - 1) % #CHARACTERS + 1]
+	description.HeightScale = who.height
+	description.WidthScale = who.width
+	description.DepthScale = who.width
+	description.HeadScale = if who.height < 0.9 then 1.1 else 1
+	local skin, shirt, pants = who.skin, who.shirt, who.pants
 	description.HeadColor = skin
 	description.LeftArmColor = skin
 	description.RightArmColor = skin
@@ -147,7 +386,7 @@ local function buildNpc(index: number): Model?
 		warn("[Npc] gagal membuat warga: " .. tostring(model))
 		return nil
 	end
-	model.Name = "Warga" .. tostring(index)
+	model.Name = who.name
 	local humanoid = model:FindFirstChildOfClass("Humanoid")
 	local head = model:FindFirstChild("Head")
 	if humanoid == nil or head == nil or not head:IsA("BasePart") then
@@ -170,8 +409,8 @@ local function buildNpc(index: number): Model?
 	if bodyColors then
 		bodyColors:Destroy()
 	end
-	local shoes = pick(SHOES)
-	local dress = random:NextNumber() < 0.3 -- sebagian warga memakai terusan
+	local shoes = who.shoes
+	local dress = who.dress == true -- terusan / gamis
 	for _, d in model:GetChildren() do
 		if d:IsA("BasePart") then
 			local n = d.Name
@@ -189,12 +428,12 @@ local function buildNpc(index: number): Model?
 		end
 	end
 	local torso = model:FindFirstChild("UpperTorso")
-	local hairColor = pick(HAIRS)
+	local hairColor = who.hair
 	local smooth = Enum.Material.SmoothPlastic
 	local ball, block, cylinder = Enum.PartType.Ball, Enum.PartType.Block, Enum.PartType.Cylinder
 	-- Rambut/topi: empat gaya dari part.
-	local style = random:NextInteger(1, 4)
-	if style == 1 then -- rambut pendek
+	local style = who.style
+	if style == "pendek" then
 		attach(
 			model,
 			head,
@@ -204,7 +443,7 @@ local function buildNpc(index: number): Model?
 			ball,
 			smooth
 		)
-	elseif style == 2 then -- rambut panjang
+	elseif style == "panjang" then
 		attach(
 			model,
 			head,
@@ -223,7 +462,7 @@ local function buildNpc(index: number): Model?
 			block,
 			smooth
 		)
-	elseif style == 3 then -- sanggul / kuncir
+	elseif style == "sanggul" then
 		attach(
 			model,
 			head,
@@ -242,8 +481,77 @@ local function buildNpc(index: number): Model?
 			ball,
 			smooth
 		)
+	elseif style == "kribo" then
+		attach(
+			model,
+			head,
+			Vector3.new(2, 1.8, 2),
+			CFrame.new(0, 0.5, 0.1),
+			hairColor,
+			ball,
+			smooth
+		)
+	elseif style == "hijab" then -- kerudung: menutup kepala dan bahu
+		attach(
+			model,
+			head,
+			Vector3.new(1.6, 1.55, 1.6),
+			CFrame.new(0, 0.12, 0.14),
+			who.accent,
+			ball,
+			Enum.Material.Fabric
+		)
+		attach(
+			model,
+			head,
+			Vector3.new(1.7, 0.9, 1.5),
+			CFrame.new(0, -0.75, 0.12),
+			who.accent,
+			block,
+			Enum.Material.Fabric
+		)
+	elseif style == "peci" then
+		attach(
+			model,
+			head,
+			Vector3.new(0.6, 1.25, 1.25),
+			CFrame.new(0, 0.82, 0) * CFrame.Angles(0, 0, math.pi / 2),
+			who.accent,
+			cylinder,
+			smooth
+		)
+		attach(
+			model,
+			head,
+			Vector3.new(1.3, 0.4, 0.3),
+			CFrame.new(0, 0.2, 0.55),
+			hairColor,
+			block,
+			smooth
+		)
+	elseif style == "caping" then -- topi petani lebar
+		attach(
+			model,
+			head,
+			Vector3.new(0.2, 2.8, 2.8),
+			CFrame.new(0, 0.62, 0) * CFrame.Angles(0, 0, math.pi / 2),
+			who.accent,
+			cylinder,
+			smooth
+		)
+		attach(
+			model,
+			head,
+			Vector3.new(0.45, 1.5, 1.5),
+			CFrame.new(0, 0.9, 0) * CFrame.Angles(0, 0, math.pi / 2),
+			who.accent,
+			cylinder,
+			smooth
+		)
+	elseif style == "botak" then
+		-- tanpa rambut
 	else -- topi bertepi
-		local hat = pick(SHIRTS)
+		local hat = who.accent
 		attach(
 			model,
 			head,
@@ -273,8 +581,8 @@ local function buildNpc(index: number): Model?
 		)
 	end
 	if torso and torso:IsA("BasePart") then
-		local extra = random:NextNumber()
-		if extra < 0.3 then -- ransel
+		local extra = who.extra
+		if extra == "ransel" then
 			attach(
 				model,
 				torso,
@@ -293,7 +601,55 @@ local function buildNpc(index: number): Model?
 				block,
 				Enum.Material.Fabric
 			)
-		elseif extra < 0.55 then -- jaket terbuka: garis tengah berwarna lain
+		elseif extra == "dasi" then
+			attach(
+				model,
+				torso,
+				Vector3.new(0.32, 1.2, 0.08),
+				CFrame.new(0, 0.1, -0.52),
+				who.accent,
+				block,
+				smooth
+			)
+		elseif extra == "celemek" then
+			attach(
+				model,
+				torso,
+				Vector3.new(1.5, 1.5, 0.1),
+				CFrame.new(0, -0.1, -0.53),
+				who.accent,
+				block,
+				Enum.Material.Fabric
+			)
+			attach(
+				model,
+				head,
+				Vector3.new(0.8, 1.2, 1.2),
+				CFrame.new(0, 0.95, 0) * CFrame.Angles(0, 0, math.pi / 2),
+				who.accent,
+				cylinder,
+				smooth
+			) -- topi koki
+		elseif extra == "syal" then
+			attach(
+				model,
+				torso,
+				Vector3.new(1.9, 0.4, 1.2),
+				CFrame.new(0, 0.72, 0),
+				who.accent,
+				block,
+				Enum.Material.Fabric
+			)
+			attach(
+				model,
+				torso,
+				Vector3.new(0.4, 1, 0.12),
+				CFrame.new(0.4, 0.2, -0.56),
+				who.accent,
+				block,
+				Enum.Material.Fabric
+			)
+		elseif extra == "jaket" then
 			attach(
 				model,
 				torso,
@@ -303,7 +659,7 @@ local function buildNpc(index: number): Model?
 				block,
 				smooth
 			)
-		elseif extra < 0.75 then -- saku / lencana kecil
+		elseif extra == "saku" then
 			attach(
 				model,
 				torso,
@@ -315,7 +671,18 @@ local function buildNpc(index: number): Model?
 			)
 		end
 	end
-	if random:NextNumber() < 0.2 then -- kacamata
+	if who.beard then -- janggut / kumis
+		attach(
+			model,
+			head,
+			Vector3.new(0.95, 0.4, 0.14),
+			CFrame.new(0, -0.4, -0.58),
+			hairColor,
+			block,
+			smooth
+		)
+	end
+	if who.glasses then
 		attach(
 			model,
 			head,
