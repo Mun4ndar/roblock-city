@@ -175,7 +175,8 @@ require(MB.StyleBeach)()       -- kursi pantai (paket gratis Tidewalk Sampler) d
 require(MB.StyleHouses)()      -- rumah modern (mesh Blender) menggantikan tampilan 89 rumah perumahan
 require(MB.StyleRocks)()       -- batu mesh menggantikan batu kotak di Map.Scenery (setelah StyleWorld)
 require(MB.StyleRound)()       -- bangunan bersudut bulat + gedung kaca bersirip (pusat kota, kota kecil, pantai, bandara)
-require(MB.StyleNature)()      -- PALING AKHIR: tekstur rumput/kayu dan pohon rindang bergaya templat desa resmi Roblox
+require(MB.StyleNature)()      -- tekstur rumput/kayu dan pohon rindang bergaya templat desa resmi Roblox
+require(MB.StyleFountains)()   -- PALING AKHIR (setelah BuildInteriors): air mancur bertingkat (mesh Blender, partikel, suara)
 ```
 
 Setiap skrip hanya mengganti foldernya sendiri di `Workspace.Map`. Modul bantu: `MapKit` (part, jalan, pohon,
