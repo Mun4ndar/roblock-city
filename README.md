@@ -142,6 +142,7 @@ require(MB.StyleWorld)()       -- rias tampilan; setelah semua pembangun (lihat 
 require(MB.StyleTrees)()       -- pohon mesh di taman; setelah StyleWorld
 require(MB.BuildInteriors)()   -- lobi Rumah Sakit dan ruang tunggu Bandara (kapan saja)
 require(MB.BuildFarm)()        -- Pasar Tani dan Kebun Warga (setelah BuildCountryside)
+require(MB.StyleBeach)()       -- kursi pantai (paket gratis Tidewalk Sampler) dan perahu nelayan
 ```
 
 Setiap skrip hanya mengganti foldernya sendiri di `Workspace.Map`. Modul bantu: `MapKit` (part, jalan, pohon,
