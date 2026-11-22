@@ -1,17 +1,22 @@
 --!strict
 --[[
-	ROBLOCK CITY: teras Kafe Kota (pusat kota), tempat usaha kafe pemain (lihat BusinessService).
+	ROBLOCK CITY: teras dua kafe.
 
-	Membangun teras kayu di depan gedung Kafe Kota: empat meja berpayung dengan kursi berlengan dan
-	cangkir kopi, konter kasir (titiknya harus sama dengan BusinessConfig.POSITION), papan menu, dan
-	pot tanaman. Kursinya berisi Seat, jadi pemain bisa duduk dan warga (NpcService, grup "KafeKota")
-	duduk minum kopi di sana.
+	1. Kafe Kota (pusat kota), tempat usaha kafe pemain (lihat BusinessService): teras kayu di depan
+	   gedung dengan empat meja berpayung, kursi berlengan, cangkir kopi, konter kasir (titiknya harus
+	   sama dengan BusinessConfig.POSITION), papan menu, dan pot tanaman. Hasil: Workspace.Map.KafeKota.
+	2. Cafe Startduck (kota kecil): papan nama gedung kafe diganti, patung bebek kuning di atap,
+	   lambang bebek, tenda bergaris, dan teras tiga meja di sisi timur gedung (trotoar depannya
+	   sempit). Hasil: Workspace.Map.Startduck. Nama dan lambangnya buatan sendiri.
+
+	Kursinya berisi Seat, jadi pemain bisa duduk dan warga (NpcService, grup "KafeKota" dan
+	"Startduck") duduk memegang cangkir di sana.
 
 	Kursi berlengan memakai mesh dari model gratis Creator Store "Coffee Shop Cafe Store Building"
 	(em0lii0); hanya mesh kursinya yang diambil, semua skripnya dibuang. Templatnya di
 	ServerStorage.AsetPihakKetiga.KursiKafe; tanpa templat, kursi dibuat dari part biasa.
 
-	Hasil di Workspace.Map.KafeKota; aman dijalankan ulang.
+	Aman dijalankan ulang.
 ]]
 
 local ServerStorage = game:GetService("ServerStorage")
@@ -19,12 +24,11 @@ local Workspace = game:GetService("Workspace")
 
 local rgb = Color3.fromRGB
 
--- Depan gedung Kafe Kota: dinding depan di z = -559 menghadap +Z, pintu di x = 20, tanah y = 1,1.
 local ORIGIN = CFrame.new(20, 1.1, -559)
 local DECK_DEPTH = 17
 local DECK_WIDTH = 36
-local COUNTER = Vector3.new(8, 0, 3.6) -- relatif ke ORIGIN; = BusinessConfig.POSITION (28, 1.1, -555.4)
-local CHAIR_YAW = math.rad(180) -- putaran mesh kursi supaya bagian depannya menghadap -Z lokal
+local COUNTER = Vector3.new(8, 0, 3.6)
+local CHAIR_YAW = math.rad(180)
 
 local WOOD = rgb(150, 104, 66)
 local DARK = rgb(60, 46, 38)
@@ -52,7 +56,6 @@ local function part(
 	return p
 end
 
--- Silinder tegak (sumbu Y): Roblox membuat silinder sepanjang sumbu X, jadi diputar.
 local function cylinder(
 	parent: Instance,
 	name: string,
@@ -90,7 +93,6 @@ local function text(target: BasePart, face: Enum.NormalId, value: string, color:
 	gui.Parent = target
 end
 
--- Kursi menghadap -Z lokal `cf` (titik di lantai teras).
 local function chair(parent: Instance, cf: CFrame, template: Instance?)
 	local model = Instance.new("Model")
 	model.Name = "KursiKafe"
@@ -144,7 +146,6 @@ local function tableSet(parent: Instance, cf: CFrame, color: Color3, template: I
 	cylinder(set, "KakiMeja", 0.7, 0.2, cf * CFrame.new(0, 0.1, 0), DARK, Enum.Material.Metal)
 	cylinder(set, "TiangMeja", 0.16, 2.3, cf * CFrame.new(0, 1.35, 0), DARK, Enum.Material.Metal)
 	cylinder(set, "DaunMeja", 1.7, 0.22, cf * CFrame.new(0, 2.6, 0), WOOD, Enum.Material.Wood)
-	-- payung
 	cylinder(
 		set,
 		"TiangPayung",
@@ -171,7 +172,6 @@ local function tableSet(parent: Instance, cf: CFrame, color: Color3, template: I
 	cylinder(set, "KancingPayung", 0.3, 0.3, cf * CFrame.new(0, 9.65, 0), CREAM).CanCollide = false
 	cup(set, cf * CFrame.new(-0.8, 2.71, 0.1))
 	cup(set, cf * CFrame.new(0.8, 2.71, -0.1))
-	-- dua kursi berhadapan di kiri dan kanan meja
 	chair(set, cf * CFrame.new(-3.3, 0, 0) * CFrame.Angles(0, math.rad(-90), 0), template)
 	chair(set, cf * CFrame.new(3.3, 0, 0) * CFrame.Angles(0, math.rad(90), 0), template)
 	set.Parent = parent
@@ -198,6 +198,156 @@ local function planter(parent: Instance, cf: CFrame)
 	leaves.CanCollide = false
 end
 
+-- ---------------------------------------------------------------- Cafe Startduck (kota kecil)
+
+-- Bola lonjong (untuk patung bebek): Part dengan SpecialMesh bulat.
+local function blob(parent: Instance, name: string, size: Vector3, cf: CFrame, color: Color3): Part
+	local p = part(parent, name, size, cf, color)
+	p.CanCollide = false
+	local mesh = Instance.new("SpecialMesh")
+	mesh.MeshType = Enum.MeshType.Sphere
+	mesh.Parent = p
+	return p
+end
+
+-- Patung bebek kuning memegang cangkir; `cf` = titik di atap, bebek menghadap -Z lokal.
+local function duck(parent: Instance, cf: CFrame)
+	local yellow, orange = rgb(255, 208, 60), rgb(245, 140, 40)
+	local model = Instance.new("Model")
+	model.Name = "PatungBebek"
+	cylinder(model, "Alas", 3.4, 0.8, cf * CFrame.new(0, 0.4, 0), CREAM, Enum.Material.Marble)
+	blob(model, "Badan", Vector3.new(5.2, 4.4, 6.4), cf * CFrame.new(0, 3.0, 0.4), yellow)
+	blob(
+		model,
+		"Ekor",
+		Vector3.new(2.2, 2, 2.6),
+		cf * CFrame.new(0, 4.2, 3.2) * CFrame.Angles(math.rad(35), 0, 0),
+		yellow
+	)
+	blob(model, "Kepala", Vector3.new(3.6, 3.6, 3.6), cf * CFrame.new(0, 6.3, -1.6), yellow)
+	blob(model, "Paruh", Vector3.new(2, 0.8, 1.8), cf * CFrame.new(0, 5.9, -3.5), orange)
+	for _, sx in { -1, 1 } do
+		blob(
+			model,
+			"Mata",
+			Vector3.new(0.6, 0.7, 0.4),
+			cf * CFrame.new(sx * 0.85, 6.9, -3.15),
+			rgb(30, 28, 34)
+		)
+		blob(
+			model,
+			"Sayap",
+			Vector3.new(0.9, 2.6, 3.6),
+			cf * CFrame.new(sx * 2.5, 3.2, 0.6) * CFrame.Angles(0, 0, math.rad(sx * -12)),
+			rgb(250, 190, 50)
+		)
+		blob(model, "Kaki", Vector3.new(1.4, 0.5, 2), cf * CFrame.new(sx * 1.1, 1.0, -1.6), orange)
+	end
+	-- cangkir kopi besar di depan bebek
+	cylinder(model, "CangkirBesar", 1.0, 1.5, cf * CFrame.new(2.6, 1.55, -2.6), CREAM).CanCollide =
+		false
+	cylinder(model, "KopiBesar", 0.85, 0.1, cf * CFrame.new(2.6, 2.32, -2.6), rgb(86, 54, 34)).CanCollide =
+		false
+	model.Parent = parent
+end
+
+-- Gedung kafe kota kecil: depan di z = 428,5 menghadap +Z, atap y = 18, trotoar y = 1.
+-- Trotoar depan sempit, jadi teras ada di sisi timur gedung (trotoar lebar di pojok simpang).
+local function startduck(map: Instance, template: Instance?)
+	local old = map:FindFirstChild("Startduck")
+	if old then
+		old:Destroy()
+	end
+	local f = Instance.new("Folder")
+	f.Name = "Startduck"
+	local brown, yellow = rgb(96, 62, 40), rgb(255, 214, 90)
+
+	-- papan nama gedung lama: ganti tulisannya
+	local residential = map:FindFirstChild("Residential")
+	local buildings = residential and residential:FindFirstChild("Buildings")
+	local downtown = buildings and buildings:FindFirstChild("Downtown")
+	local kafe = downtown and downtown:FindFirstChild("Kafe")
+	local sign = kafe and kafe:FindFirstChild("Sign")
+	if sign and sign:IsA("BasePart") then
+		sign.Size = Vector3.new(19, 3, 0.4)
+		sign.Color = brown
+		local label = sign:FindFirstChildWhichIsA("TextLabel", true)
+		if label then
+			label.Text = "CAFE STARTDUCK"
+			label.TextColor3 = yellow
+		end
+	end
+
+	-- bebek di atap, menghadap jalan (+Z)
+	duck(f, CFrame.new(184, 18, 423) * CFrame.Angles(0, math.pi, 0))
+
+	-- lambang bundar di dinding depan (bebek, bukan lambang merek mana pun)
+	local logo = cylinder(
+		f,
+		"Lambang",
+		2.1,
+		0.3,
+		CFrame.new(175.6, 13.2, 428.4) * CFrame.Angles(math.rad(90), 0, 0),
+		yellow
+	)
+	logo.CanCollide = false
+	local plate =
+		part(f, "LambangTeks", Vector3.new(3, 3, 0.1), CFrame.new(175.6, 13.2, 428.62), yellow)
+	plate.Transparency = 1
+	plate.CanCollide = false
+	text(plate, Enum.NormalId.Back, "\u{1F986}", brown)
+
+	-- tenda bergaris di atas etalase
+	for i = 0, 8 do
+		local stripe = part(
+			f,
+			"Tenda",
+			Vector3.new(2.2, 0.25, 3.4),
+			CFrame.new(175.2 + i * 2.2, 7.4, 430) * CFrame.Angles(math.rad(14), 0, 0),
+			if i % 2 == 0 then brown else CREAM,
+			Enum.Material.Fabric
+		)
+		stripe.CanCollide = false
+	end
+	planter(f, CFrame.new(173, 1, 430.4))
+	planter(f, CFrame.new(195, 1, 430.4))
+	local menu = part(
+		f,
+		"PapanMenu",
+		Vector3.new(3, 4.4, 0.3),
+		CFrame.new(190.4, 3.2, 431.6) * CFrame.Angles(math.rad(-12), math.rad(-15), 0),
+		DARK
+	)
+	text(menu, Enum.NormalId.Back, "KOPI\nCOKELAT\nKUE", CREAM)
+
+	-- teras di sisi timur: lantai kayu, tiga meja berpayung, pagar ke arah jalan
+	local floor = CFrame.new(201, 1.2, 418)
+	part(
+		f,
+		"Teras",
+		Vector3.new(11.6, 0.2, 21),
+		CFrame.new(201, 1.1, 418),
+		WOOD,
+		Enum.Material.WoodPlanks
+	)
+	local colors = { yellow, rgb(214, 120, 60), rgb(250, 242, 226) }
+	for index, z in { -6.6, 0, 6.6 } do
+		tableSet(f, floor * CFrame.new(0, 0, z), colors[index], template)
+	end
+	part(f, "Pagar", Vector3.new(0.3, 0.3, 21), floor * CFrame.new(5.6, 2.2, 0), CREAM)
+	for i = 0, 4 do
+		part(
+			f,
+			"TiangPagar",
+			Vector3.new(0.3, 2.2, 0.3),
+			floor * CFrame.new(5.6, 1.1, -10.3 + i * 5.15),
+			CREAM
+		)
+	end
+
+	f.Parent = map
+end
+
 return function(): number
 	local map = Workspace:FindFirstChild("Map")
 	if map == nil then
@@ -214,8 +364,6 @@ return function(): number
 	local f = Instance.new("Folder")
 	f.Name = "KafeKota"
 	local o = ORIGIN
-
-	-- lantai teras dan pagar rendah di tepi depan
 	local half = DECK_DEPTH / 2
 	part(
 		f,
@@ -227,7 +375,6 @@ return function(): number
 	)
 	local floor = o * CFrame.new(0, 0.3, 0)
 	for _, sx in { -1, 1 } do
-		-- pagar di depan, menyisakan jalan masuk selebar 8 di tengah
 		local length = DECK_WIDTH / 2 - 4
 		part(
 			f,
@@ -248,8 +395,6 @@ return function(): number
 		planter(f, floor * CFrame.new(sx * (DECK_WIDTH / 2 - 1.6), 0, DECK_DEPTH - 1.8))
 		planter(f, floor * CFrame.new(sx * 5.4, 0, DECK_DEPTH - 1.8))
 	end
-
-	-- empat meja: dua di kiri pintu, dua di kanan (jalan ke pintu di tengah tetap lapang)
 	local spots = {
 		Vector3.new(-11, 0, 5),
 		Vector3.new(-11, 0, 12),
@@ -259,8 +404,6 @@ return function(): number
 	for index, spot in spots do
 		tableSet(f, floor * CFrame.new(spot), UMBRELLAS[index], template)
 	end
-
-	-- konter kasir di kanan pintu, menghadap teras
 	local c = floor * CFrame.new(COUNTER.X, 0, COUNTER.Z - 1.4)
 	part(
 		f,
@@ -304,8 +447,6 @@ return function(): number
 	local board =
 		part(f, "PapanKasir", Vector3.new(8.4, 1.8, 0.3), c * CFrame.new(0, 8.6, -0.8), DARK)
 	text(board, Enum.NormalId.Back, "KASIR KAFE", rgb(255, 214, 120))
-
-	-- papan menu berdiri di dekat jalan masuk
 	local menu = part(
 		f,
 		"PapanMenu",
@@ -316,7 +457,8 @@ return function(): number
 		DARK
 	)
 	text(menu, Enum.NormalId.Back, "KOPI\nTEH\nDONAT", CREAM)
-
 	f.Parent = map
-	return #f:GetDescendants()
+	startduck(map, template)
+	local made = map:FindFirstChild("Startduck")
+	return #f:GetDescendants() + (if made then #made:GetDescendants() else 0)
 end

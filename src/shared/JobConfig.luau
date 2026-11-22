@@ -132,7 +132,7 @@ JobConfig.PLACES = {
 	-- Kota kecil (Perumahan)
 	rumahSakit = place("Rumah Sakit", 40, 1, 433),
 	toko = place("Toko", 138, 1, 433),
-	kafe = place("Kafe", 184, 1, 433),
+	kafe = place("Cafe Startduck", 184, 1, 433),
 	damkar = place("Pemadam Kebakaran", 132, 1, 467),
 	bengkel = place("Bengkel", 186, 1, 467),
 	bengkelServis = place("Halaman Bengkel", 186, 1, 518, 90),

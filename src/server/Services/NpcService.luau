@@ -66,6 +66,16 @@ local GROUPS = {
 		sitSeconds = { 30, 70 },
 		cup = true,
 	},
+	{
+		-- Pengunjung Cafe Startduck di kota kecil (teras di sisi timur gedung).
+		name = "Startduck",
+		count = 3,
+		places = { "kafe", "toko" },
+		seatsIn = "Startduck",
+		relaxChance = 0.85,
+		sitSeconds = { 30, 70 },
+		cup = true,
+	},
 }
 
 local rgb = Color3.fromRGB

@@ -181,7 +181,7 @@ require(MB.StyleRocks)()       -- batu mesh menggantikan batu kotak di Map.Scene
 require(MB.StyleRound)()       -- bangunan bersudut bulat + gedung kaca bersirip (pusat kota, kota kecil, pantai, bandara)
 require(MB.StyleNature)()      -- tekstur rumput/kayu dan pohon rindang bergaya templat desa resmi Roblox
 require(MB.StyleFountains)()   -- setelah BuildInteriors: air mancur bertingkat (mesh Blender, partikel, suara)
-require(MB.BuildCafe)()        -- teras Kafe Kota: meja, kursi, kasir usaha kafe (kapan saja)
+require(MB.BuildCafe)()        -- teras Kafe Kota (kasir usaha kafe) dan Cafe Startduck (patung bebek); kapan saja
 require(MB.FixTrees)()         -- PALING AKHIR: pohon di jalan, pembatas tengah, dan parkiran dipindah ke CadanganPeta
 ```
 
