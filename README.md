@@ -145,6 +145,7 @@ require(MB.BuildFarm)()        -- Pasar Tani dan Kebun Warga (setelah BuildCount
 require(MB.StyleBeach)()       -- kursi pantai (paket gratis Tidewalk Sampler) dan perahu nelayan
 require(MB.StyleHouses)()      -- rumah modern (mesh Blender) menggantikan tampilan 89 rumah perumahan
 require(MB.StyleRocks)()       -- batu mesh menggantikan batu kotak di Map.Scenery (setelah StyleWorld)
+require(MB.StyleRound)()       -- bangunan bersudut bulat + gedung kaca bersirip (pusat kota, kota kecil, pantai, bandara)
 ```
 
 Setiap skrip hanya mengganti foldernya sendiri di `Workspace.Map`. Modul bantu: `MapKit` (part, jalan, pohon,
