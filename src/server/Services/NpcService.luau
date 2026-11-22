@@ -861,6 +861,9 @@ local BAKSO = {
 	stopSeconds = { 35, 55 },
 	stops = { "tamanPerumahan", "rumahSakit", "toko", "kafe", "balaiKota", "damkar" },
 	buyCooldown = 4,
+	-- ketukan "tek-tek" saat keliling: "Rock Impacts 19 (SFX)" dari ProSoundEffects (gratis di Creator Store)
+	knockSound = "rbxassetid://9118623491",
+	knockEvery = 2.6, -- detik antar dua ketukan
 	eatSeconds = 12,
 }
 
@@ -1132,6 +1135,29 @@ local function startBaksoVendor()
 	end)
 	Players.PlayerRemoving:Connect(function(player: Player)
 		lastBuy[player] = nil
+	end)
+
+	-- Suara "tek-tek": dua ketukan pendek berulang selama gerobak berkeliling (diam saat mangkal).
+	local knock = Instance.new("Sound")
+	knock.Name = "TekTek"
+	knock.SoundId = BAKSO.knockSound
+	knock.Volume = 0.7
+	knock.PlaybackSpeed = 1.5
+	knock.RollOffMode = Enum.RollOffMode.InverseTapered
+	knock.RollOffMinDistance = 10
+	knock.RollOffMaxDistance = 90
+	knock.Parent = prompt.Parent
+	task.spawn(function()
+		while model.Parent ~= nil do
+			if prompt.Enabled then
+				task.wait(1)
+			else
+				knock:Play()
+				task.wait(0.24)
+				knock:Play()
+				task.wait(BAKSO.knockEvery)
+			end
+		end
 	end)
 
 	task.spawn(function()

@@ -178,6 +178,10 @@ MissionConfig.EXTRA_PLACES = {
 		position = Vector3.new(28, 1, -553),
 		icon = "☕",
 	},
+	indomart = { name = "Indomart", position = Vector3.new(180, 1, 106), icon = "🏪" },
+	sevenEleven = { name = "7-Eleven", position = Vector3.new(296, 1, 106), icon = "🛒" },
+	warung = { name = "Warung Kelontong", position = Vector3.new(-200, 1, 106), icon = "🏠" },
+	masjid = { name = "Masjid Al Munawaroh", position = Vector3.new(563, 1, -20), icon = "🕌" },
 	pasarTani = { name = "Pasar Tani & Kebun", position = Vector3.new(-660, 1, 334), icon = "🌽" },
 }
 

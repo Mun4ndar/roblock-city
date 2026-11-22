@@ -182,6 +182,7 @@ require(MB.StyleRound)()       -- bangunan bersudut bulat + gedung kaca bersirip
 require(MB.StyleNature)()      -- tekstur rumput/kayu dan pohon rindang bergaya templat desa resmi Roblox
 require(MB.StyleFountains)()   -- setelah BuildInteriors: air mancur bertingkat (mesh Blender, partikel, suara)
 require(MB.BuildCafe)()        -- teras Kafe Kota (kasir usaha kafe) dan Cafe Startduck (patung bebek); kapan saja
+require(MB.BuildShops)()       -- model Creator Store pilihan pemilik: Indomart, 7-Eleven, Warung, Masjid, Rumah Sakit SAMU
 require(MB.FixTrees)()         -- PALING AKHIR: pohon di jalan, pembatas tengah, dan parkiran dipindah ke CadanganPeta
 ```
 
