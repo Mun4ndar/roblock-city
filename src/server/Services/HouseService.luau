@@ -330,7 +330,9 @@ local function setSign(house: House, owner: Player?)
 	label.TextScaled = true
 	label.TextColor3 = Color3.new(1, 1, 1)
 	label.TextStrokeTransparency = 0.3
-	label.Text = "Rumah " .. owner.DisplayName
+	label.Text = (if owner:GetAttribute("VIP") == true then "⭐ " else "")
+		.. "Rumah "
+		.. owner.DisplayName
 	label.Parent = gui
 	gui.Parent = door
 	house.sign = gui

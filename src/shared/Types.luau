@@ -20,6 +20,8 @@ export type PlayerData = {
 	missions: MissionData,
 	-- Kebun pemain (lihat FarmConfig).
 	farm: FarmData,
+	-- ID pembelian Robux yang sudah diberikan (lihat ShopService), supaya tidak dobel.
+	receipts: { string },
 }
 
 export type FarmData = {
@@ -54,7 +56,8 @@ export type JobProgress = {
 
 export type OwnedVehicle = {
 	boughtAt: number, -- os.time() saat dibeli
-	-- modifikasi (cat, velg, dll.) ditambahkan di sini nanti
+	paint: number?, -- indeks VehicleConfig.PAINTS; nil/0 = warna asli
+	rim: number?, -- indeks VehicleConfig.RIMS; nil/0 = velg asli
 }
 
 -- Balasan semua remote kendaraan.

@@ -112,10 +112,13 @@ local function claimDailyReward(player: Player): DailyRewardResult
 		}
 	end
 	data.lastDailyReward = os.time()
-	EconomyService.addMoney(player, Config.DAILY_REWARD_AMOUNT, "daily_reward")
+	-- Pemilik Game Pass VIP (atribut diisi ShopService) mendapat hadiah harian dua kali lipat.
+	local amount = Config.DAILY_REWARD_AMOUNT
+		* (if player:GetAttribute("VIP") == true then 2 else 1)
+	EconomyService.addMoney(player, amount, "daily_reward")
 	return {
 		ok = true,
-		message = "Hore! Kamu dapat " .. Format.money(Config.DAILY_REWARD_AMOUNT),
+		message = "Hore! Kamu dapat " .. Format.money(amount),
 		secondsLeft = Config.DAILY_REWARD_COOLDOWN,
 	}
 end

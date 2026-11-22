@@ -16,6 +16,8 @@ Net.Names = table.freeze({
 	VehicleSpawn = "VehicleSpawn", -- RemoteFunction: (vehicleId: string) -> VehicleResult
 	VehicleDespawn = "VehicleDespawn", -- RemoteFunction: () -> VehicleResult
 	VehicleFlip = "VehicleFlip", -- RemoteEvent: client -> server, tanpa argumen (balikkan mobil sendiri)
+	VehicleMod = "VehicleMod", -- RemoteFunction: (pilihan: "paint:3" / "rim:2") -> VehicleResult (mobil yang sedang dikeluarkan)
+	ShopPrompt = "ShopPrompt", -- RemoteFunction: (kunci produk atau "vip") -> { ok, message }; Roblox yang menampilkan jendela beli
 	JobSelect = "JobSelect", -- RemoteFunction: (jobId: string, "" = berhenti) -> JobResult
 	JobStep = "JobStep", -- RemoteFunction: (taskId: number, stepIndex: number) -> JobResult
 	JobSkip = "JobSkip", -- RemoteFunction: () -> JobResult (minta tugas lain)

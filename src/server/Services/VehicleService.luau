@@ -78,6 +78,11 @@ local function publishOwned(player: Player)
 	end
 	table.sort(ids)
 	player:SetAttribute(VehicleConfig.ATTR_OWNED, table.concat(ids, ","))
+	local mods = {}
+	for id, owned in data.vehicles do
+		mods[id] = { paint = owned.paint or 0, rim = owned.rim or 0 }
+	end
+	player:SetAttribute(VehicleConfig.ATTR_MODS, game:GetService("HttpService"):JSONEncode(mods))
 end
 
 local function isNearDealer(root: BasePart): boolean
@@ -260,6 +265,82 @@ local function findSpawnCFrame(root: BasePart, def: VehicleDef): (CFrame?, strin
 	return nil, reason
 end
 
+-- Warnai mobil menurut modifikasi tersimpan (part beratribut Paint = "body" / "rim").
+local function applyMods(model: Model, def: VehicleDef, owned: Types.OwnedVehicle)
+	local paint = if owned.paint then VehicleConfig.PAINTS[owned.paint] else nil
+	local rim = if owned.rim then VehicleConfig.RIMS[owned.rim] else nil
+	for _, d in model:GetDescendants() do
+		if d:IsA("BasePart") then
+			local role = d:GetAttribute("Paint")
+			if role == "body" then
+				d.Color = paint or def.color
+			elseif role == "rim" and rim then
+				d.Color = rim
+			end
+		end
+	end
+end
+
+-- Modifikasi mobil yang sedang dikeluarkan. choice = "paint:3" atau "rim:2" (0 = asli, gratis).
+local function modVehicle(player: Player, choice: any): VehicleResult
+	local model = spawned[player]
+	local data = DataService.getData(player)
+	if data == nil or model == nil or model.Parent == nil then
+		return result(false, "Keluarkan dulu mobilmu, lalu bawa ke Bengkel.")
+	end
+	local def = VehicleConfig.get(model:GetAttribute(VehicleConfig.ATTR_VEHICLE_ID))
+	local owned = if def then data.vehicles[def.id] else nil
+	if def == nil or owned == nil then
+		return result(false, "Mobil dinas tidak bisa dimodifikasi.")
+	end
+	if
+		(model:GetPivot().Position - VehicleConfig.MOD_POSITION).Magnitude > VehicleConfig.MOD_RANGE
+	then
+		return result(false, "Bawa mobilmu ke Halaman Bengkel dulu ya.")
+	end
+	local kind: string?, text: string? = nil, nil
+	if type(choice) == "string" then
+		kind, text = choice:match("^(%a+):(%d+)$")
+	end
+	local index = tonumber(text)
+	local list = if kind == "paint"
+		then VehicleConfig.PAINTS
+		elseif kind == "rim" then VehicleConfig.RIMS
+		else nil
+	if list == nil or index == nil or index > #list then
+		return result(false, "Pilihan modifikasi tidak dikenal.")
+	end
+	local current = if kind == "paint" then owned.paint or 0 else owned.rim or 0
+	if current == index then
+		return result(true, "Itu sudah terpasang.")
+	end
+	local price = if kind == "paint" then VehicleConfig.PAINT_PRICE else VehicleConfig.RIM_PRICE
+	if
+		index ~= 0 and not EconomyService.trySpend(player, price, "vehicle:mod:" .. tostring(kind))
+	then
+		return result(false, "Uangmu belum cukup. Harganya " .. Format.money(price) .. ".")
+	end
+	if kind == "paint" then
+		owned.paint = if index == 0 then nil else index
+	else
+		owned.rim = if index == 0 then nil else index
+	end
+	if kind == "rim" and index == 0 then
+		-- velg asli: paling mudah dengan mengeluarkan ulang mobilnya nanti; sementara pakai warna bawaan
+		for _, d in model:GetDescendants() do
+			if d:IsA("BasePart") and d:GetAttribute("Paint") == "rim" then
+				d.Color = Color3.fromRGB(200, 204, 212)
+			end
+		end
+	end
+	applyMods(model, def, owned)
+	publishOwned(player)
+	if index == 0 then
+		return result(true, "Tampilan asli dikembalikan.")
+	end
+	return result(true, if kind == "paint" then "Cat baru terpasang!" else "Velg baru terpasang!")
+end
+
 local function spawnVehicle(player: Player, vehicleId: any): VehicleResult
 	local def = VehicleConfig.get(vehicleId)
 	if def == nil then
@@ -303,6 +384,11 @@ local function spawnVehicle(player: Player, vehicleId: any): VehicleResult
 
 	local model = VehicleBuilder.build(def)
 	model:SetAttribute(VehicleConfig.ATTR_OWNER, player.UserId)
+	local ownedData = DataService.getData(player)
+	local owned = if ownedData then ownedData.vehicles[def.id] else nil
+	if owned then
+		applyMods(model, def, owned)
+	end
 	model:PivotTo(cframe)
 	hookSeats(model, player, def)
 	model.Parent = vehicleFolder
@@ -521,6 +607,40 @@ function VehicleService.init()
 
 	Net.func(Net.Names.VehicleBuy).OnServerInvoke = wrap("Buy", buyVehicle)
 	Net.func(Net.Names.VehicleSpawn).OnServerInvoke = wrap("Spawn", spawnVehicle)
+	Net.func(Net.Names.VehicleMod).OnServerInvoke = wrap("Mod", modVehicle)
+
+	-- titik bengkel modifikasi: tombol "Modifikasi mobil" di Halaman Bengkel
+	local shop = Instance.new("Part")
+	shop.Name = "BengkelModifikasi"
+	shop.Anchored = true
+	shop.CanCollide = false
+	shop.CanQuery = false
+	shop.Transparency = 1
+	shop.Size = Vector3.new(2, 2, 2)
+	shop.Position = VehicleConfig.MOD_POSITION + Vector3.new(0, 4, 0)
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.ActionText = "Modifikasi mobil"
+	prompt.ObjectText = "Bengkel"
+	prompt.HoldDuration = 0.2
+	prompt.MaxActivationDistance = 28
+	prompt.RequiresLineOfSight = false
+	prompt:SetAttribute(VehicleConfig.ATTR_MOD_PROMPT, true)
+	prompt.Parent = shop
+	local sign = Instance.new("BillboardGui")
+	sign.Size = UDim2.fromScale(14, 2.4)
+	sign.StudsOffset = Vector3.new(0, 7, 0)
+	sign.MaxDistance = 120
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.fromScale(1, 1)
+	label.BackgroundTransparency = 1
+	label.Font = Enum.Font.FredokaOne
+	label.TextScaled = true
+	label.TextColor3 = Color3.fromRGB(255, 214, 80)
+	label.TextStrokeTransparency = 0.2
+	label.Text = "Modifikasi Mobil"
+	label.Parent = sign
+	sign.Parent = shop
+	shop.Parent = Workspace
 	Net.func(Net.Names.VehicleDespawn).OnServerInvoke = wrap(
 		"Despawn",
 		function(player: Player): VehicleResult

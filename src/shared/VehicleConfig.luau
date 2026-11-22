@@ -70,6 +70,34 @@ VehicleConfig.ATTR_VEHICLE_ID = "VehicleId"
 VehicleConfig.ATTR_OWNER = "OwnerUserId"
 VehicleConfig.ATTR_OWNED = "OwnedVehicles" -- atribut Player: id dipisah koma
 VehicleConfig.ATTR_DEALER_PROMPT = "DealerVehicleId" -- atribut ProximityPrompt pajangan
+VehicleConfig.ATTR_MODS = "VehicleMods" -- atribut Player: JSON { [id] = { paint, rim } }
+VehicleConfig.ATTR_MOD_PROMPT = "VehicleModShop" -- atribut ProximityPrompt di bengkel modifikasi
+
+-- Modifikasi di Bengkel (Halaman Bengkel, kota kecil). Indeks 0 = warna asli pabrik.
+-- Menambah pilihan = menambah warna di daftar ini.
+VehicleConfig.MOD_POSITION = Vector3.new(186, 1, 518)
+VehicleConfig.MOD_RANGE = 60 -- mobil harus sedekat ini dari bengkel
+VehicleConfig.PAINT_PRICE = 150
+VehicleConfig.RIM_PRICE = 100
+VehicleConfig.PAINTS = {
+	Color3.fromRGB(226, 54, 54),
+	Color3.fromRGB(245, 140, 40),
+	Color3.fromRGB(250, 208, 60),
+	Color3.fromRGB(70, 180, 100),
+	Color3.fromRGB(40, 170, 170),
+	Color3.fromRGB(52, 120, 220),
+	Color3.fromRGB(130, 90, 200),
+	Color3.fromRGB(240, 120, 170),
+	Color3.fromRGB(245, 245, 245),
+	Color3.fromRGB(40, 42, 50),
+}
+VehicleConfig.RIMS = {
+	Color3.fromRGB(200, 204, 212),
+	Color3.fromRGB(40, 42, 50),
+	Color3.fromRGB(240, 196, 80),
+	Color3.fromRGB(226, 54, 54),
+	Color3.fromRGB(52, 120, 220),
+}
 
 VehicleConfig.LIST = {
 	{

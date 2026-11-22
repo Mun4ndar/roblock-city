@@ -8,6 +8,7 @@ local ORDER = {
 	"DayNightController",
 	"VehicleController",
 	"VehicleUiController",
+	"VehicleModController",
 	"BeaconController",
 	"VehicleEffectsController",
 	"JobController",
