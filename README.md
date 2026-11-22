@@ -94,6 +94,9 @@ Urutan load ada di `ORDER` pada `init.server.luau` / `init.client.luau`; tambahk
   pesawat lewat; `landed` = harus sudah mendarat), diperiksa JobService.
 - **Toko Koin**: ID produk dan Game Pass di `src/shared/ShopConfig.luau`. Panelnya `ShopController`
   (menu HP "Toko Koin" dan kios di atrium mall); harga yang tampil dibaca dari Roblox.
+- **Peta kecil** (`MinimapController`): kanan bawah, utara di atas, ketuk untuk ganti jangkauan. Jalan dan
+  daratan dibaca dari `src/shared/MapData.luau`, yang dibuat otomatis dari `Workspace.Map` di Studio
+  (part beraspal + sampel Terrain); buat ulang kalau tata jalan berubah.
 - **Motor**: kendaraan dengan `body.bike = true` di VehicleConfig (skuter "lincah"): jok berurutan, dua roda
   tampak, roda fisika tetap empat dan tersembunyi. Templatnya `ReplicatedStorage.Assets.CarShells.lincah`.
 - **BusinessService**: usaha Kafe di kasir Kafe Mall (dalam ROBLOCK Mega Mall). Buka kafe, naik tingkat,
@@ -176,7 +179,8 @@ require(MB.StyleHouses)()      -- rumah modern (mesh Blender) menggantikan tampi
 require(MB.StyleRocks)()       -- batu mesh menggantikan batu kotak di Map.Scenery (setelah StyleWorld)
 require(MB.StyleRound)()       -- bangunan bersudut bulat + gedung kaca bersirip (pusat kota, kota kecil, pantai, bandara)
 require(MB.StyleNature)()      -- tekstur rumput/kayu dan pohon rindang bergaya templat desa resmi Roblox
-require(MB.StyleFountains)()   -- PALING AKHIR (setelah BuildInteriors): air mancur bertingkat (mesh Blender, partikel, suara)
+require(MB.StyleFountains)()   -- setelah BuildInteriors: air mancur bertingkat (mesh Blender, partikel, suara)
+require(MB.FixTrees)()         -- PALING AKHIR: pohon di jalan, pembatas tengah, dan parkiran dipindah ke CadanganPeta
 ```
 
 Setiap skrip hanya mengganti foldernya sendiri di `Workspace.Map`. Modul bantu: `MapKit` (part, jalan, pohon,

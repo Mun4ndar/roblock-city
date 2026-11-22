@@ -703,6 +703,11 @@ function PhoneController.setDestination(name: string, icon: string, position: Ve
 end
 
 -- Daftarkan pintasan di halaman Menu HP (dipanggil controller lain saat start()).
+-- Tujuan GPS yang sedang aktif (untuk peta kecil), atau nil.
+function PhoneController.getGpsTarget(): Vector3?
+	return if destination then destination.position else nil
+end
+
 function PhoneController.addApp(icon: string, name: string, open: () -> ())
 	table.insert(apps, { icon = icon, name = name, open = open })
 end

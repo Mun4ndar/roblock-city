@@ -172,7 +172,7 @@ local function updateScale()
 	if camera then
 		local size = camera.ViewportSize
 		panelScale.Scale = math.clamp(math.min(size.X / 500, size.Y / 470), 0.55, 1)
-		trackerScale.Scale = math.clamp(math.min(size.X / 760, size.Y / 420), 0.7, 1)
+		trackerScale.Scale = math.clamp(math.min(size.X / 760, size.Y / 420), 0.75, 1)
 	end
 end
 
@@ -302,18 +302,18 @@ local function buildCard(def: JobDef, order: number, parent: Instance): Card
 end
 
 local function buildTracker()
-	-- Panel tugas di tengah atas, tepat di bawah panel uang. Ketuk untuk membuka menu.
+	-- Panel tugas ringkas di tengah paling atas (uang ada di pojok kanan). Ketuk untuk membuka menu.
 	tracker = Instance.new("TextButton")
 	tracker.Name = "TaskTracker"
 	tracker.AnchorPoint = Vector2.new(0.5, 0)
-	tracker.Position = UDim2.new(0.5, 0, 0, 64)
+	tracker.Position = UDim2.new(0.5, 0, 0, 2)
 	UiScale.attach(tracker)
 	UiScale.onChange(function(value: number)
-		tracker.Position = UDim2.new(0.5, 0, 0, 8 + 56 * value)
+		tracker.Position = UDim2.new(0.5, 0, 0, 2 + 0 * value)
 	end)
-	tracker.Size = UDim2.fromOffset(380, 58)
+	tracker.Size = UDim2.fromOffset(330, 44)
 	tracker.BackgroundColor3 = COLORS.panel
-	tracker.BackgroundTransparency = 0.08
+	tracker.BackgroundTransparency = 0.3
 	tracker.AutoButtonColor = false
 	tracker.Text = ""
 	tracker.Visible = false
@@ -329,20 +329,20 @@ local function buildTracker()
 
 	trackerTitle = label({
 		Name = "Title",
-		Position = UDim2.fromOffset(12, 5),
-		Size = UDim2.new(1, -96, 0, 22),
+		Position = UDim2.fromOffset(10, 3),
+		Size = UDim2.new(1, -78, 0, 18),
 		Font = Enum.Font.FredokaOne,
-		TextSize = 17,
+		TextSize = 14,
 		TextTruncate = Enum.TextTruncate.AtEnd,
 		Text = "",
 	})
 	trackerTitle.Parent = tracker
 	trackerStep = label({
 		Name = "Step",
-		Position = UDim2.fromOffset(12, 27),
-		Size = UDim2.new(1, -96, 0, 26),
-		TextSize = 13,
-		TextWrapped = true,
+		Position = UDim2.fromOffset(10, 21),
+		Size = UDim2.new(1, -78, 0, 20),
+		TextSize = 12,
+		TextTruncate = Enum.TextTruncate.AtEnd,
 		TextYAlignment = Enum.TextYAlignment.Top,
 		Text = "",
 	})
@@ -351,7 +351,7 @@ local function buildTracker()
 	trackerArrow = Instance.new("Frame")
 	trackerArrow.Name = "Arrow"
 	trackerArrow.AnchorPoint = Vector2.new(0.5, 0.5)
-	trackerArrow.Position = UDim2.new(1, -44, 0, 20)
+	trackerArrow.Position = UDim2.new(1, -36, 0, 15)
 	trackerArrow.Size = UDim2.fromOffset(28, 28)
 	trackerArrow.BackgroundTransparency = 1
 	for _, bar in { { 14, 15, 22, 0 }, { 9, 9, 14, 40 }, { 19, 9, 14, -40 } } do
@@ -369,10 +369,10 @@ local function buildTracker()
 	trackerDistance = label({
 		Name = "Distance",
 		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.new(1, -44, 0, 36),
-		Size = UDim2.fromOffset(80, 18),
+		Position = UDim2.new(1, -36, 0, 27),
+		Size = UDim2.fromOffset(70, 15),
 		Font = Enum.Font.FredokaOne,
-		TextSize = 14,
+		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Center,
 		Text = "",
 	})

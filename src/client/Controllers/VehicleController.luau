@@ -9,6 +9,7 @@
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
 
 local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local Net = require(Shared:WaitForChild("Net"))
@@ -36,8 +37,10 @@ local VehicleController = {}
 local DRIVE_SIGN = -1
 local STEER_SIGN = -1
 local COAST_DECEL = 14 -- stud/dtk^2 saat gas dilepas
-local MAX_LATERAL_ACCEL = 150 -- batas belok supaya tidak terguling di kecepatan tinggi
-local STEER_RATE = 150 -- derajat/detik, kecepatan setir berputar
+local MAX_LATERAL_ACCEL = 70 -- batas belok: makin kencang makin kecil sudut setirnya
+local STEER_RATE = 85 -- derajat/detik, kecepatan setir berputar saat pelan
+local STEER_RETURN = 2.2 -- setir kembali lurus lebih cepat daripada berbelok
+local STEER_CURVE = 1.6 -- > 1: gerakan kecil thumbstick/tombol berbelok lebih halus
 local FLIP_AFTER = 1.5 -- detik terbalik sebelum minta dibalikkan
 
 local driving: Driving? = nil
@@ -107,7 +110,8 @@ local function step(dt: number)
 	-- Gas + belok bersamaan (W+D atau thumbstick miring) memberi 0,7 pada tiap sumbu
 	-- karena vektor gerak dinormalkan; kalikan supaya tetap bisa gas/belok penuh.
 	local throttle = math.clamp(d.seat.ThrottleFloat * 1.42, -1, 1)
-	local steer = math.clamp(d.seat.SteerFloat * 1.42, -1, 1)
+	local steerRaw = math.clamp(d.seat.SteerFloat * 1.42, -1, 1)
+	local steer = math.sign(steerRaw) * math.abs(steerRaw) ^ STEER_CURVE
 	local speed = chassis.AssemblyLinearVelocity:Dot(chassis.CFrame.LookVector)
 	local radius = def.body.wheelRadius
 
@@ -137,7 +141,12 @@ local function step(dt: number)
 	local limit =
 		math.deg(math.atan(def.body.wheelbase * MAX_LATERAL_ACCEL / math.max(speed * speed, 1)))
 	local wanted = STEER_SIGN * steer * math.min(def.steerAngle, limit)
-	local maxStep = STEER_RATE * dt
+	-- Setir berputar lebih pelan saat kencang supaya mobil tidak mudah oleng di HP.
+	local rate = STEER_RATE * math.clamp(1 - math.abs(speed) / 140, 0.4, 1)
+	if math.abs(wanted) < math.abs(d.steerAngle) then
+		rate *= STEER_RETURN
+	end
+	local maxStep = rate * dt
 	d.steerAngle += math.clamp(wanted - d.steerAngle, -maxStep, maxStep)
 	for _, att in d.steers do
 		att.Orientation = Vector3.new(0, d.steerAngle, 0)
@@ -220,8 +229,78 @@ local function startDriving(seat: VehicleSeat)
 	stepConnection = RunService.PreSimulation:Connect(step)
 end
 
+-- Selama duduk di kendaraan (mobil, perahu, pesawat), tombol "Naik/Kemudikan" kendaraan itu
+-- disembunyikan di layar pemain ini supaya tidak mengganggu. Dikembalikan saat turun.
+local hiddenPrompts: { ProximityPrompt } = {}
+local lastSeat: BasePart? = nil
+
+local function showPrompts()
+	for _, prompt in hiddenPrompts do
+		if prompt.Parent then
+			prompt.Enabled = true
+		end
+	end
+	table.clear(hiddenPrompts)
+end
+
+local function hidePrompts(model: Instance)
+	showPrompts()
+	for _, d in model:GetDescendants() do
+		if d:IsA("ProximityPrompt") and d.Name == "EnterPrompt" and d.Enabled then
+			d.Enabled = false
+			table.insert(hiddenPrompts, d)
+		end
+	end
+end
+
+-- Turun dari kendaraan: karakter dipindah berdiri tegak di samping kendaraan, tidak terjatuh.
+local function standBeside(humanoid: Humanoid, seat: BasePart)
+	local character = humanoid.Parent
+	local root = if character then character:FindFirstChild("HumanoidRootPart") else nil
+	local model = seat.Parent
+	if root == nil or not root:IsA("BasePart") or model == nil or not model:IsA("Model") then
+		return
+	end
+	local pivot = model:GetPivot()
+	local half = model:GetExtentsSize().X / 2
+	local localSeat = pivot:PointToObjectSpace(seat.Position)
+	local side = if localSeat.X < 0 then -1 else 1
+	local look = Vector3.new(pivot.LookVector.X, 0, pivot.LookVector.Z)
+	if look.Magnitude < 0.1 then
+		look = Vector3.new(0, 0, -1)
+	end
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { model, character :: Instance }
+	local target: Vector3? = nil
+	for _, trySide in { side, -side } do
+		local out = pivot.RightVector * trySide * (half - math.abs(localSeat.X) + 3)
+		local from = seat.Position + Vector3.new(0, 2.5, 0)
+		if Workspace:Raycast(from, out, params) == nil then
+			target = from + out
+			break
+		end
+	end
+	local position = target or (seat.Position + Vector3.new(0, 6, 0)) -- kedua sisi terhalang: naik ke atas
+	root.AssemblyLinearVelocity = Vector3.zero
+	root.AssemblyAngularVelocity = Vector3.zero
+	root.CFrame = CFrame.lookAt(position, position + look.Unit)
+	humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+end
+
 local function onSeatChanged(humanoid: Humanoid)
 	local seat = humanoid.SeatPart
+	if seat and seat.Parent then
+		lastSeat = seat
+		hidePrompts(seat.Parent)
+	else
+		showPrompts()
+		local previous = lastSeat
+		lastSeat = nil
+		if previous and previous.Parent and humanoid.Health > 0 then
+			task.defer(standBeside, humanoid, previous)
+		end
+	end
 	if
 		seat
 		and seat:IsA("VehicleSeat")
@@ -238,6 +317,9 @@ local function onCharacter(character: Model)
 	stopDriving()
 	local humanoid = character:WaitForChild("Humanoid", 10)
 	if humanoid and humanoid:IsA("Humanoid") then
+		-- karakter tidak perlu tersandung/terguling di game ini
+		humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+		humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
 		humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
 			onSeatChanged(humanoid)
 		end)
