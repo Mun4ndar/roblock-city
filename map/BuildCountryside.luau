@@ -33,8 +33,12 @@ local RIVER = {
 local RIVER_W = 36
 local LAKE = V2(-960, -472) -- di luar kaki gunung supaya tidak jadi gua
 local LAKE_R = 48
-local COUNTRY_ROAD =
-	{ V2(-950, -262), V2(-1060, -160), V2(-1110, 0), V2(-1150, 150), V2(-1100, 300), V2(-740, 300) }
+-- Titik belok dibulatkan (radius 60) supaya jalan desa melengkung mulus, tidak patah-patah.
+local COUNTRY_ROAD = Kit.smooth(
+	{ V2(-950, -262), V2(-1060, -160), V2(-1110, 0), V2(-1150, 150), V2(-1100, 300), V2(-740, 300) },
+	60,
+	8
+)
 
 local WOOD = col(150, 105, 70)
 
@@ -303,7 +307,24 @@ end
 
 local function buildRoads(zone: Instance)
 	local f = Kit.folder("Roads")
-	Kit.road(COUNTRY_ROAD, { width = 28, lanes = 2, parent = f, name = "JalanDesa" })
+	local countryRoad =
+		Kit.road(COUNTRY_ROAD, { width = 28, lanes = 2, parent = f, name = "JalanDesa" })
+	-- Potong tanah bukit di atas badan jalan (plus bahu lebar): tepi potongan terrain dirender
+	-- melandai, jadi tanpa bahu lebar rumput tampak menutupi aspal.
+	for _, seg in countryRoad:GetDescendants() do
+		if
+			seg:IsA("BasePart")
+			and seg.Size.X > 20
+			and seg.Size.Z > 4
+			and seg.CFrame.UpVector.Y > 0.99
+		then
+			workspace.Terrain:FillBlock(
+				seg.CFrame * CFrame.new(0, 13 - seg.Position.Y, 0),
+				Vector3.new(seg.Size.X + 28, 30, seg.Size.Z + 6),
+				Enum.Material.Air
+			)
+		end
+	end
 	-- jembatan: pagar di tempat jalan menyeberangi sungai
 	local crossings = {
 		{ COUNTRY_ROAD, 28 },

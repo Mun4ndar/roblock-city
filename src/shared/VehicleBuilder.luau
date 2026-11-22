@@ -42,6 +42,23 @@ local WHEEL_PHYSICS = PhysicalProperties.new(1.2, 1.7, 0, 100, 100)
 local BODY_PHYSICS = PhysicalProperties.new(0.7, 0.25, 0, 1, 100)
 local CHASSIS_PHYSICS = PhysicalProperties.new(3, 0.25, 0, 1, 100)
 
+-- Part bodi kotak yang digantikan bodi mesh (lihat akhir build()).
+local SHELL_REPLACES = {
+	Lower = true,
+	Cabin = true,
+	Roof = true,
+	Windshield = true,
+	RearWindow = true,
+	Pillar = true,
+	Stripe = true,
+}
+
+local function findShell(id: string): Instance?
+	local assets = game:GetService("ReplicatedStorage"):FindFirstChild("Assets")
+	local shells = if assets then assets:FindFirstChild("CarShells") else nil
+	return if shells then shells:FindFirstChild(id) else nil
+end
+
 function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 	local static = options ~= nil and options.static == true
 	local paint = if options and options.color then options.color else def.color
@@ -508,6 +525,50 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 				* CFrame.Angles(0, math.pi / 2, math.rad(20)),
 			Color = DARK,
 		})
+	end
+
+	-- ------------------------------------------------------------ bodi mesh (opsional)
+	-- Kalau ada templat ReplicatedStorage.Assets.CarShells.<id> (mesh buatan Blender, sumbernya di
+	-- assets/blender), bodi kotak disembunyikan dan diganti mesh itu. Lampu, bumper, roda, kursi,
+	-- dan tabrakan tetap dari bodi kotak. Tanpa templat, mobil tampil dengan bodi kotak seperti biasa.
+	local shellSource = findShell(def.id)
+	local shellBody = if shellSource then shellSource:FindFirstChild("ShellBody") else nil
+	if shellSource and shellBody and shellBody:IsA("BasePart") then
+		for _, old in bodyFolder:GetChildren() do
+			if old:IsA("BasePart") and SHELL_REPLACES[old.Name] then
+				old.Transparency = 1
+				old.CastShadow = false
+			end
+		end
+		local target = CFrame.new(0, y0 + shellBody.Size.Y / 2, 0)
+		for _, piece in shellSource:GetChildren() do
+			if piece:IsA("MeshPart") then
+				local clone = piece:Clone()
+				clone.CFrame = target * shellBody.CFrame:ToObjectSpace(piece.CFrame)
+				clone.Anchored = false
+				clone.Massless = true
+				clone.CanCollide = false
+				clone.CanTouch = false
+				clone.CanQuery = false
+				clone.DoubleSided = true
+				clone.CustomPhysicalProperties = BODY_PHYSICS
+				clone.CollisionGroup = VehicleBuilder.GROUP_BODY
+				if piece.Name == "ShellGlass" then
+					clone.Color = Color3.fromRGB(70, 96, 120)
+					clone.Material = Enum.Material.Glass
+					clone.Transparency = 0.35
+					clone.Reflectance = 0.15
+					clone.CastShadow = false
+				else
+					clone.Color = paint
+					clone.Material = Enum.Material.SmoothPlastic
+					clone.Reflectance = 0.08
+					clone:SetAttribute("Paint", "body")
+				end
+				weld(clone)
+				clone.Parent = bodyFolder
+			end
+		end
 	end
 
 	return model

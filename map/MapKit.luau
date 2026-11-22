@@ -132,6 +132,38 @@ export type RoadOpts = {
 	color: Color3?,
 }
 
+-- Membulatkan tikungan polyline: tiap titik belok diganti busur beradius `radius`
+-- (dibagi `steps` ruas). Titik awal dan akhir tidak berubah. Dipakai supaya jalan
+-- tidak terlihat patah-patah.
+function Kit.smooth(points: { Vector2 }, radius: number, steps: number): { Vector2 }
+	local out = { points[1] }
+	for i = 2, #points - 1 do
+		local a, v, b = points[i - 1], points[i], points[i + 1]
+		local d1, d2 = (a - v).Unit, (b - v).Unit
+		local turn = math.pi - math.acos(math.clamp(d1:Dot(d2), -1, 1))
+		if turn < math.rad(3) then
+			table.insert(out, v)
+			continue
+		end
+		local half = math.tan(turn / 2)
+		local t = math.min(radius * half, (a - v).Magnitude * 0.45, (b - v).Magnitude * 0.45)
+		local r = t / half
+		local center = v + (d1 + d2).Unit * (r / math.cos(turn / 2))
+		local from = v + d1 * t - center
+		local sign = if d1.X * d2.Y - d1.Y * d2.X > 0 then -1 else 1
+		for s = 0, steps do
+			local angle = sign * turn * s / steps
+			local c, sn = math.cos(angle), math.sin(angle)
+			table.insert(
+				out,
+				center + Vector2.new(from.X * c - from.Y * sn, from.X * sn + from.Y * c)
+			)
+		end
+	end
+	table.insert(out, points[#points])
+	return out
+end
+
 -- Jalan aspal mengikuti polyline (Vector2 = X,Z). Sambungan ditutup piringan silinder.
 function Kit.road(points: { Vector2 }, opt: RoadOpts): Folder
 	local w = opt.width or 32
