@@ -210,8 +210,9 @@ end
 
 -- ---------------------------------------------------------------- spawn
 
--- Mencari tempat kosong di dekat pemain. Mengembalikan CFrame titik tanah
--- (depan = arah hadap pemain) atau nil + alasan.
+-- Mencari tempat kosong di dekat pemain: delapan arah, dari dekat ke jauh, dan dua arah hadap
+-- (kendaraan panjang seperti bus sering hanya muat sejajar jalan). Kendaraan lama pemain, warga,
+-- dan hewan tidak dianggap penghalang. Mengembalikan CFrame titik tanah atau nil + alasan.
 local function findSpawnCFrame(root: BasePart, def: VehicleDef): (CFrame?, string?)
 	local look = root.CFrame.LookVector * Vector3.new(1, 0, 1)
 	if look.Magnitude < 0.1 then
@@ -224,16 +225,48 @@ local function findSpawnCFrame(root: BasePart, def: VehicleDef): (CFrame?, strin
 	rayParams.FilterType = Enum.RaycastFilterType.Exclude
 	rayParams.FilterDescendantsInstances = { root.Parent :: Instance, vehicleFolder }
 
+	local ignore: { Instance } = { root.Parent :: Instance, vehicleFolder }
+	for _, name in { "Warga", "Hewan" } do
+		local folder = Workspace:FindFirstChild(name)
+		if folder then
+			table.insert(ignore, folder)
+		end
+	end
 	local overlap = OverlapParams.new()
 	overlap.FilterType = Enum.RaycastFilterType.Exclude
-	overlap.FilterDescendantsInstances = { root.Parent :: Instance }
+	overlap.FilterDescendantsInstances = ignore
+
+	-- Kendaraan pemain lain tetap penghalang (kendaraan sendiri disimpan sebelum yang baru keluar).
+	local vehicleOverlap = OverlapParams.new()
+	vehicleOverlap.FilterType = Enum.RaycastFilterType.Include
+	vehicleOverlap.FilterDescendantsInstances = { vehicleFolder }
+	local owner = if root.Parent then Players:GetPlayerFromCharacter(root.Parent) else nil
+	local ownModel = if owner then spawned[owner] else nil
 
 	local body = def.body
 	local height = body.lowerHeight + body.cabinHeight
-	local distance = VehicleConfig.SPAWN_DISTANCE
+	local size = Vector3.new(body.width, height, body.length)
 	local reason = "Tempatnya terlalu sempit. Cari tempat yang lapang ya!"
+	local diagonal = 0.7071
+	local directions = {
+		look,
+		right,
+		-right,
+		-look,
+		(look + right) * diagonal,
+		(look - right) * diagonal,
+		(right - look) * diagonal,
+		(-look - right) * diagonal,
+	}
+	local offsets: { Vector3 } = {}
+	for _, extra in { 0, 9, 18, 30 } do
+		local distance = VehicleConfig.SPAWN_DISTANCE + math.max(0, body.length / 2 - 8) + extra
+		for _, direction in directions do
+			table.insert(offsets, direction * distance)
+		end
+	end
 
-	for _, offset in { look * distance, right * distance, -right * distance, -look * distance } do
+	for _, offset in offsets do
 		local origin = root.Position + offset + Vector3.new(0, 5, 0)
 		local hit = Workspace:Raycast(origin, Vector3.new(0, -40, 0), rayParams)
 		if hit == nil then
@@ -247,19 +280,27 @@ local function findSpawnCFrame(root: BasePart, def: VehicleDef): (CFrame?, strin
 			reason = "Tanahnya terlalu miring. Cari tempat yang datar ya!"
 			continue
 		end
-		local ground = CFrame.lookAt(hit.Position, hit.Position + look)
-		local box = ground * CFrame.new(0, body.clearance + height / 2 + 0.6, 0)
-		local blocked = false
-		for _, other in
-			Workspace:GetPartBoundsInBox(box, Vector3.new(body.width, height, body.length), overlap)
-		do
-			if other.CanCollide then
-				blocked = true
-				break
+		for _, facing in { look, right } do
+			local ground = CFrame.lookAt(hit.Position, hit.Position + facing)
+			local box = ground * CFrame.new(0, body.clearance + height / 2 + 0.6, 0)
+			local blocked = false
+			for _, other in Workspace:GetPartBoundsInBox(box, size, overlap) do
+				if other.CanCollide then
+					blocked = true
+					break
+				end
 			end
-		end
-		if not blocked then
-			return ground * CFrame.new(0, 0.4, 0), nil
+			if not blocked then
+				for _, other in Workspace:GetPartBoundsInBox(box, size, vehicleOverlap) do
+					if other.CanCollide and not (ownModel and other:IsDescendantOf(ownModel)) then
+						blocked = true
+						break
+					end
+				end
+			end
+			if not blocked then
+				return ground * CFrame.new(0, 0.4, 0), nil
+			end
 		end
 	end
 	return nil, reason
@@ -341,7 +382,7 @@ local function modVehicle(player: Player, choice: any): VehicleResult
 	return result(true, if kind == "paint" then "Cat baru terpasang!" else "Velg baru terpasang!")
 end
 
-local function spawnVehicle(player: Player, vehicleId: any): VehicleResult
+local function spawnVehicle(player: Player, vehicleId: any, skipCooldown: boolean?): VehicleResult
 	local def = VehicleConfig.get(vehicleId)
 	if def == nil then
 		return result(false, "Kendaraan tidak dikenal.")
@@ -367,9 +408,13 @@ local function spawnVehicle(player: Player, vehicleId: any): VehicleResult
 	if humanoid.SeatPart ~= nil then
 		return result(false, "Turun dulu dari kursi sebelum mengeluarkan mobil.")
 	end
+	-- Ruang dalam gedung ada jauh di atas peta (lihat map/BuildInteriors): tidak ada kendaraan di sana.
+	if root.Position.Y > 1000 then
+		return result(false, "Keluar dulu dari gedung sebelum mengeluarkan kendaraan.")
+	end
 	local now = os.clock()
 	local last = lastSpawn[player]
-	if last and now - last < VehicleConfig.SPAWN_COOLDOWN then
+	if not skipCooldown and last and now - last < VehicleConfig.SPAWN_COOLDOWN then
 		return result(false, "Sebentar ya, mobilnya sedang disiapkan.")
 	end
 
@@ -396,6 +441,22 @@ local function spawnVehicle(player: Player, vehicleId: any): VehicleResult
 	spawned[player] = model
 
 	return result(true, `{def.name} siap! Dekati pintunya lalu tekan "Kemudikan".`)
+end
+
+-- Dipanggil JobService saat pemain memilih pekerjaan: kendaraan dinasnya langsung dikeluarkan di
+-- dekat pemain. Mengembalikan (berhasil, nama kendaraan), atau (false, nil) jika pekerjaan itu
+-- tidak punya kendaraan dinas.
+function VehicleService.spawnForJob(player: Player, jobId: string): (boolean, string?)
+	local def = VehicleConfig.forJob(jobId)
+	if def == nil then
+		return false, nil
+	end
+	local ok, res = pcall(spawnVehicle, player, def.id, true)
+	if not ok then
+		warn("[Vehicle] spawnForJob error: " .. tostring(res))
+		return false, def.name
+	end
+	return (res :: VehicleResult).ok, def.name
 end
 
 -- ---------------------------------------------------------------- beli

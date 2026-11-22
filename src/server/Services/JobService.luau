@@ -459,9 +459,26 @@ local function selectJob(player: Player, jobId: any): JobResult
 	UniformService.refresh(player)
 	assignTask(player)
 	if def then
-		local service = VehicleConfig.forJob(def.id)
-		if service then
-			return result(true, `Kamu sekarang {def.name}! {service.name} ada di menu Pekerjaan.`)
+		-- Kendaraan dinas langsung dikeluarkan di dekat pemain; kalau tempatnya sempit, pemain
+		-- diarahkan ke tombol di menu Pekerjaan.
+		local spawnedOk, vehicleName = VehicleService.spawnForJob(player, def.id)
+		if vehicleName then
+			if spawnedOk then
+				return result(
+					true,
+					`Kamu sekarang {def.name}! {vehicleName} sudah menunggu di dekatmu.`
+				)
+			end
+			return result(
+				true,
+				`Kamu sekarang {def.name}! Cari tempat lapang, lalu tekan "Keluarkan {vehicleName}" di menu Pekerjaan.`
+			)
+		end
+		if def.id == PlaneConfig.JOB then
+			return result(
+				true,
+				`Kamu sekarang {def.name}! Ambil pesawat di papan Pilot di landasan bandara.`
+			)
 		end
 		return result(true, `Kamu sekarang {def.name}! Ikuti penanda kuning.`)
 	end
