@@ -19,8 +19,22 @@ local MIN_HEIGHT = 9 -- hanya bangunan yang punya badan setinggi ini
 local MAX_ASPECT = 4 -- part yang terlalu pipih memanjang dibiarkan kotak (sudutnya jadi lonjong)
 local FIN_HEIGHT = 40 -- sirip tegak hanya untuk gedung tinggi
 -- Kawasan yang dirias. Rumah perumahan punya gayanya sendiri (StyleHouses), jadi tidak ikut.
-local ZONES = { "Downtown", "Residential", "Beach", "Airport" }
-local NAMES = { "^Body%d*$", "^Band$", "^Cap%d*$", "^Lobby$", "^NeonCrown$", "^Roof$" }
+local ZONES = { "Downtown", "Residential", "Beach", "Airport", "Countryside" }
+-- Pelat blok kota (trotoar + halaman rumput di atasnya) diberi sudut bulat kecil; sudut yang terpotong
+-- ditambal aspal supaya menyatu dengan persimpangan. Templat: ServerStorage.AsetRumah.bulatKecil.
+local SLABS = { "^Blok%d+$", "Block$", "^Halaman%d+$" }
+local SLAB_RADIUS = 0.06 -- bagian sisi yang membulat (sama dengan mesh BulatKecil)
+local ASPHALT = Color3.fromRGB(86, 90, 100)
+local NAMES = {
+	"^Body%d*$",
+	"^Band$",
+	"^Cap%d*$",
+	"^Lobby$",
+	"^NeonCrown$",
+	"^Roof$",
+	"^Lumbung$",
+	"^Rumah$",
+}
 
 local function matches(name: string): boolean
 	for _, pattern in NAMES do
@@ -48,7 +62,7 @@ return function(): number
 		local zone = map:FindFirstChild(zoneName)
 		if zone then
 			for _, d in zone:GetDescendants() do
-				if d:IsA("Model") and not d.Name:match("^Rumah%d+$") then
+				if d:IsA("Model") then
 					table.insert(models, d)
 				end
 			end
@@ -118,6 +132,80 @@ return function(): number
 			part.CastShadow = false
 			CollectionService:RemoveTag(part, "NightWindow")
 			count += 1
+		end
+	end
+
+	-- pelat blok kota
+	local small = template and template.Parent:FindFirstChild("bulatKecil")
+	local slabMesh = small and small:FindFirstChild("BulatKecil")
+	if slabMesh and slabMesh:IsA("MeshPart") then
+		local sample = map:FindFirstChild("Simpang", true)
+		local roadColor = if sample and sample:IsA("BasePart") then sample.Color else ASPHALT
+		local roadTop = if sample and sample:IsA("BasePart")
+			then sample.Position.Y + sample.Size.Y / 2
+			else 0.4
+		for _, zoneName in { "Downtown", "Residential" } do
+			local zone = map:FindFirstChild(zoneName)
+			local walks = zone and zone:FindFirstChild("Sidewalks")
+			if not walks then
+				continue
+			end
+			for _, part in walks:GetChildren() do
+				if part:GetAttribute(ATTR) then
+					part:Destroy()
+				end
+			end
+			for _, part in walks:GetChildren() do
+				local isSlab = false
+				for _, pattern in SLABS do
+					if part.Name:match(pattern) then
+						isSlab = true
+					end
+				end
+				if not (isSlab and part:IsA("Part") and part.Shape == Enum.PartType.Block) then
+					continue
+				end
+				local shell = slabMesh:Clone()
+				shell.Name = part.Name .. "Bulat"
+				shell.Size = part.Size
+				shell.CFrame = part.CFrame
+				shell.Color = part.Color
+				shell.Material = part.Material
+				shell.MaterialVariant = part.MaterialVariant
+				shell.Anchored = true
+				shell.CanCollide = false
+				shell.CanTouch = false
+				shell.CanQuery = false
+				shell.CastShadow = false
+				shell:SetAttribute(ATTR, true)
+				shell.Parent = walks
+				part.Transparency = 1
+				part.CastShadow = false
+				count += 1
+				-- tambal aspal di keempat sudut trotoar (bukan halaman rumput di atasnya)
+				if not part.Name:match("^Halaman") then
+					local rx, rz = part.Size.X * SLAB_RADIUS, part.Size.Z * SLAB_RADIUS
+					for _, sx in { -1, 1 } do
+						for _, sz in { -1, 1 } do
+							local patch = Instance.new("Part")
+							patch.Name = "TambalSudut"
+							patch.Anchored = true
+							patch.Size = Vector3.new(rx, 0.4, rz)
+							patch.CFrame = CFrame.new(
+								part.Position.X + sx * (part.Size.X / 2 - rx / 2),
+								roadTop - 0.2,
+								part.Position.Z + sz * (part.Size.Z / 2 - rz / 2)
+							)
+							patch.Color = roadColor
+							patch.Material = Enum.Material.Asphalt
+							patch.TopSurface = Enum.SurfaceType.Smooth
+							patch.CastShadow = false
+							patch:SetAttribute(ATTR, true)
+							patch.Parent = walks
+						end
+					end
+				end
+			end
 		end
 	end
 	return count
