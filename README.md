@@ -87,6 +87,13 @@ Urutan load ada di `ORDER` pada `init.server.luau` / `init.client.luau`; tambahk
   Terrain, fisikanya milik server, arah dibaca dari VehicleSeat. Perahu berhenti sendiri di pantai,
   dermaga, dan tepi laut peta. Angka di `src/shared/BoatConfig.luau`; bentuknya mesh Blender di
   `ServerStorage.AsetKapal.perahu` (`assets/blender/perahu.fbx`).
+- **PlaneService**: pesawat kecil untuk pekerjaan Pilot (papan "PESAWAT PILOT" di tepi landasan bandara).
+  Terbang dibuat mudah: W/S menambah/mengurangi kecepatan, A/D belok, tinggi mengikuti kecepatan; fisika
+  milik server. Angka di `src/shared/PlaneConfig.luau`; mesh di `ServerStorage.AsetPesawat.pesawat`
+  (`assets/blender/pesawat.fbx`). Tugas pilot memakai langkah `fly` di JobConfig (selesai sendiri saat
+  pesawat lewat; `landed` = harus sudah mendarat), diperiksa JobService.
+- **Toko Koin**: ID produk dan Game Pass di `src/shared/ShopConfig.luau`. Panelnya `ShopController`
+  (menu HP "Toko Koin" dan kios di atrium mall); harga yang tampil dibaca dari Roblox.
 - **Motor**: kendaraan dengan `body.bike = true` di VehicleConfig (skuter "lincah"): jok berurutan, dua roda
   tampak, roda fisika tetap empat dan tersembunyi. Templatnya `ReplicatedStorage.Assets.CarShells.lincah`.
 - **BusinessService**: usaha Kafe di kasir Kafe Mall (dalam ROBLOCK Mega Mall). Buka kafe, naik tingkat,

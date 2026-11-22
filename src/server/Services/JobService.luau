@@ -23,6 +23,8 @@ local DataService = require(script.Parent:WaitForChild("DataService"))
 local EconomyService = require(script.Parent:WaitForChild("EconomyService"))
 local UniformService = require(script.Parent:WaitForChild("UniformService"))
 local VehicleService = require(script.Parent:WaitForChild("VehicleService"))
+local PlaneService = require(script.Parent:WaitForChild("PlaneService"))
+local PlaneConfig = require(Shared:WaitForChild("PlaneConfig"))
 
 type JobResult = Types.JobResult
 type JobDef = JobConfig.JobDef
@@ -108,6 +110,9 @@ local function allowedSpeed(player: Player): number
 		local service = VehicleConfig.forJob(data.jobs.current)
 		if service and service.maxSpeed > speed then
 			speed = service.maxSpeed
+		end
+		if data.jobs.current == PlaneConfig.JOB then
+			speed = math.max(speed, PlaneConfig.MAX_SPEED)
 		end
 	end
 	return speed * JobConfig.SPEED_SLACK
@@ -259,6 +264,8 @@ local function buildTask(player: Player, def: JobDef, origin: Vector3): ActiveTa
 			hold = spec.hold,
 			prop = spec.prop,
 			consume = spec.consume == true,
+			fly = spec.fly,
+			landed = spec.landed,
 		})
 	end
 
@@ -380,7 +387,22 @@ local function completeStep(player: Player, taskId: any, stepIndex: any): JobRes
 	if root == nil then
 		return result(false, "Tunggu sampai karaktermu muncul ya.")
 	end
-	if
+	if step.fly then
+		-- Langkah terbang: pemain harus menerbangkan pesawatnya sendiri dan lewat di dekat titiknya
+		-- (tinggi bebas). Untuk mendarat, pesawat harus sudah di darat dan pelan.
+		if not PlaneService.isFlying(player) then
+			return result(false, "Terbangkan pesawatmu dulu ya.")
+		end
+		if flatDistance(root.Position, step.position) > step.fly then
+			return result(false, "Pesawatmu masih terlalu jauh.")
+		end
+		if step.landed then
+			local speed, onGround = PlaneService.getState(player)
+			if not onGround or speed > PlaneConfig.TAKEOFF_SPEED * 0.8 then
+				return result(false, "Pelankan pesawat sampai mendarat dulu ya.")
+			end
+		end
+	elseif
 		flatDistance(root.Position, step.position) > JobConfig.STEP_RADIUS
 		or math.abs(root.Position.Y - step.position.Y) > 60
 	then

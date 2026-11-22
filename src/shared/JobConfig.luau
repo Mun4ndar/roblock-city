@@ -32,6 +32,10 @@ export type StepSpec = {
 	hold: number, -- detik menahan tombol
 	prop: PropKind?, -- hiasan yang muncul di langkah ini (hanya di layar pemain itu)
 	consume: boolean?, -- prop hilang setelah langkah selesai
+	-- Langkah terbang (pekerjaan Pilot): selesai sendiri saat pesawat pemain lewat sedekat ini
+	-- (stud, mendatar) dari titiknya; tidak ada tombol. `landed` = pesawat harus sudah di darat.
+	fly: number?,
+	landed: boolean?,
 }
 
 export type TaskTemplate = {
@@ -76,6 +80,8 @@ export type TaskStepView = {
 	hold: number,
 	prop: PropKind?,
 	consume: boolean,
+	fly: number?,
+	landed: boolean?,
 }
 
 export type TaskView = {
@@ -173,6 +179,8 @@ JobConfig.PLACES = {
 	bandara = place("Terminal Bandara", -975, 0.4, 628),
 	parkirBandara = place("Parkir Bandara", -990, 0.3, 535, 90),
 	parkirBandaraTimur = place("Parkir Bandara Timur", -900, 0.3, 520),
+	papanPilot = place("Landasan Bandara", -1262, 0.4, 1047),
+	landasan = place("Landasan Bandara", -1010, 0.4, 1080),
 	-- Countryside
 	lumbung = place("Lumbung", -830, 0, 365),
 	kincirAngin = place("Kincir Angin", -960, 0, 400),
@@ -196,6 +204,18 @@ local RUMAH = {
 }
 
 JobConfig.POOLS = {
+	-- pemandangan yang dilewati penerbangan wisata (pekerjaan Pilot)
+	wisataUdara = {
+		"mercusuar",
+		"dermaga",
+		"terminalFeri",
+		"menara",
+		"mall",
+		"tamanKota",
+		"balaiKota",
+		"kincirAngin",
+		"perkemahan",
+	},
 	-- halte bus (pekerjaan Sopir Bus)
 	halte = {
 		"tamanPerumahan",
@@ -514,6 +534,96 @@ JobConfig.LIST = {
 						action = "Turunkan murid",
 						text = "Antar murid ke {tempat}",
 						hold = 2,
+					},
+				},
+			},
+		},
+	},
+	{
+		id = "pilot",
+		name = "Pilot",
+		icon = "✈️",
+		color = Color3.fromRGB(70, 150, 230),
+		description = "Terbangkan pesawat wisata keliling Kota ROBLOCK. Ambil pesawat di papan Pilot di tepi landasan bandara.",
+		workplace = "Landasan Bandara",
+		uniform = {
+			hat = "peaked",
+			hatColor = Color3.fromRGB(250, 250, 250),
+			vest = Color3.fromRGB(30, 50, 100),
+			trim = Color3.fromRGB(240, 196, 80),
+			badge = Color3.fromRGB(240, 196, 80),
+		},
+		tasks = {
+			{
+				id = "wisata",
+				title = "Penerbangan wisata",
+				weight = 3,
+				basePay = 80,
+				payPerStud = 0.02,
+				steps = {
+					{
+						place = "papanPilot",
+						action = "Naikkan penumpang",
+						text = "Jemput penumpang di tepi {tempat}",
+						hold = 2,
+						prop = "person",
+						consume = true,
+					},
+					{
+						pool = "wisataUdara",
+						minDist = 500,
+						action = "Terbang",
+						text = "Terbang melewati {tempat}",
+						hold = 0,
+						fly = 110,
+					},
+					{
+						pool = "wisataUdara",
+						minDist = 500,
+						action = "Terbang",
+						text = "Lanjut terbang melewati {tempat}",
+						hold = 0,
+						fly = 110,
+					},
+					{
+						place = "landasan",
+						action = "Mendarat",
+						text = "Pelankan pesawat dan mendarat di {tempat}",
+						hold = 0,
+						fly = 300,
+						landed = true,
+					},
+				},
+			},
+			{
+				id = "antar",
+				title = "Antar penumpang keliling pulau",
+				weight = 1,
+				basePay = 70,
+				payPerStud = 0.02,
+				steps = {
+					{
+						place = "papanPilot",
+						action = "Naikkan penumpang",
+						text = "Jemput penumpang di tepi {tempat}",
+						hold = 2,
+						prop = "person",
+						consume = true,
+					},
+					{
+						place = "mercusuar",
+						action = "Terbang",
+						text = "Terbang ke Pulau Pantai, lewati {tempat}",
+						hold = 0,
+						fly = 110,
+					},
+					{
+						place = "landasan",
+						action = "Mendarat",
+						text = "Kembali dan mendarat di {tempat}",
+						hold = 0,
+						fly = 300,
+						landed = true,
 					},
 				},
 			},

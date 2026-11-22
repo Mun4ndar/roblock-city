@@ -30,9 +30,15 @@ export type Pass = {
 }
 
 ShopConfig.PRODUCTS = {
-	{ key = "koin_kecil", name = "Kantong Koin", coins = 1000, robux = 25, productId = 0 },
-	{ key = "koin_sedang", name = "Peti Koin", coins = 5000, robux = 99, productId = 0 },
-	{ key = "koin_besar", name = "Brankas Koin", coins = 15000, robux = 249, productId = 0 },
+	{ key = "koin_kecil", name = "Kantong Koin", coins = 1000, robux = 25, productId = 3734530264 },
+	{ key = "koin_sedang", name = "Peti Koin", coins = 5000, robux = 99, productId = 3734530503 },
+	{
+		key = "koin_besar",
+		name = "Brankas Koin",
+		coins = 15000,
+		robux = 249,
+		productId = 3734530604,
+	},
 } :: { Product }
 
 ShopConfig.PASSES = {
@@ -41,11 +47,14 @@ ShopConfig.PASSES = {
 		name = "VIP ROBLOCK",
 		description = "Tanda VIP di papan nama rumah dan hadiah harian dua kali lipat.",
 		robux = 199,
-		passId = 0,
+		passId = 2096409895,
 	},
 } :: { [string]: Pass }
 
 ShopConfig.ATTR_VIP = "VIP" -- atribut Player (boolean), diisi server
+ShopConfig.ATTR_PROMPT = "CoinShop" -- atribut ProximityPrompt kios Toko Koin
+-- Kios Toko Koin di atrium ROBLOCK Mega Mall (ruang dalam di y = 2000, lihat map/BuildInteriors.luau)
+ShopConfig.KIOSK_POSITION = Vector3.new(499, 2000, -585)
 ShopConfig.MAX_RECEIPTS = 60 -- jumlah tanda terima terakhir yang diingat per pemain
 
 function ShopConfig.productById(productId: number): Product?

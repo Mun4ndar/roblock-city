@@ -119,6 +119,74 @@ function ShopService.init()
 		warn("[Shop] ShopPrompt error: " .. tostring(value))
 		return { ok = false, message = "Terjadi kesalahan, coba lagi nanti." }
 	end
+
+	-- Kios Toko Koin di atrium mall: hanya membuka panel toko di layar pemain (ShopController).
+	local base = CFrame.new(ShopConfig.KIOSK_POSITION)
+	local kiosk = Instance.new("Folder")
+	kiosk.Name = "KiosTokoKoin"
+	local function part(name: string, size: Vector3, cf: CFrame, color: Color3): Part
+		local p = Instance.new("Part")
+		p.Name = name
+		p.Anchored = true
+		p.Size = size
+		p.CFrame = cf
+		p.Color = color
+		p.Material = Enum.Material.SmoothPlastic
+		p.TopSurface = Enum.SurfaceType.Smooth
+		p.BottomSurface = Enum.SurfaceType.Smooth
+		p.Parent = kiosk
+		return p
+	end
+	local counter = part(
+		"Meja",
+		Vector3.new(6, 3.4, 3),
+		base * CFrame.new(0, 1.7, 0),
+		Color3.fromRGB(240, 170, 30)
+	)
+	part(
+		"AtasMeja",
+		Vector3.new(6.4, 0.3, 3.4),
+		base * CFrame.new(0, 3.55, 0),
+		Color3.fromRGB(250, 250, 250)
+	)
+	for _, sx in { -1, 1 } do
+		part(
+			"Tiang",
+			Vector3.new(0.4, 4.6, 0.4),
+			base * CFrame.new(sx * 2.9, 6, 0),
+			Color3.fromRGB(90, 96, 110)
+		)
+	end
+	local board = part(
+		"Papan",
+		Vector3.new(6.6, 1.8, 0.4),
+		base * CFrame.new(0, 9, 0),
+		Color3.fromRGB(40, 70, 130)
+	)
+	for _, face in { Enum.NormalId.Front, Enum.NormalId.Back } do
+		local gui = Instance.new("SurfaceGui")
+		gui.Face = face
+		gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+		gui.PixelsPerStud = 40
+		local label = Instance.new("TextLabel")
+		label.Size = UDim2.fromScale(1, 1)
+		label.BackgroundTransparency = 1
+		label.Font = Enum.Font.FredokaOne
+		label.TextScaled = true
+		label.TextColor3 = Color3.fromRGB(255, 214, 80)
+		label.Text = "TOKO KOIN"
+		label.Parent = gui
+		gui.Parent = board
+	end
+	local shopPrompt = Instance.new("ProximityPrompt")
+	shopPrompt.ActionText = "Lihat"
+	shopPrompt.ObjectText = "Toko Koin"
+	shopPrompt.HoldDuration = 0.2
+	shopPrompt.MaxActivationDistance = 12
+	shopPrompt.RequiresLineOfSight = false
+	shopPrompt:SetAttribute(ShopConfig.ATTR_PROMPT, true)
+	shopPrompt.Parent = counter
+	kiosk.Parent = game:GetService("Workspace")
 end
 
 function ShopService.start()

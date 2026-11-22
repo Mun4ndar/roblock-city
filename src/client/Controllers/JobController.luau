@@ -43,6 +43,8 @@ local props: { [number]: Model } = {} -- indeks langkah -> prop
 local grounded: { Grounded } = {}
 local busy = false
 local spray: Part? = nil -- semburan air saat menahan tombol di tugas pemadam
+local pilotBoarded: number? = nil -- id tugas pilot yang penumpangnya sudah naik
+local lastFlyTry = 0
 local passengers: { Model } = {} -- penumpang yang terlihat duduk di bus (pekerjaan Sopir Bus)
 
 -- Titik duduk penumpang relatif ke sasis bus (x kiri/kanan, z dari depan ke belakang).
@@ -101,6 +103,28 @@ local function boardPassengers(seed: number)
 			end
 		end
 		model.Parent = vehicle
+		table.insert(passengers, model)
+	end
+end
+
+-- Penumpang pesawat: satu warga di kursi kopilot (terlihat lewat kaca kokpit).
+local function seatInPlane(plane: Instance, hull: BasePart, seed: number)
+	clearPassengers()
+	for index, spot in { Vector3.new(0.95, -2.3, -8.2) } do
+		local model = JobProps.build("person", hull.CFrame * CFrame.new(spot), seed + index * 7)
+		model.Name = "Penumpang"
+		for _, d in model:GetDescendants() do
+			if d:IsA("BasePart") then
+				d.Anchored = false
+				d.Massless = true
+				d.CanCollide = false
+				local weld = Instance.new("WeldConstraint")
+				weld.Part0 = hull
+				weld.Part1 = d
+				weld.Parent = d
+			end
+		end
+		model.Parent = plane
 		table.insert(passengers, model)
 	end
 end
@@ -196,8 +220,28 @@ local function placeMarker(step: TaskStepView)
 			* CFrame.Angles(0, 0, math.rad(90))
 		promptAnchor.CFrame = CFrame.new(step.position.X, y + 3, step.position.Z)
 	end
-	apply(step.position.Y)
-	addGrounded(step.position, apply)
+	local fly = step.fly
+	prompt.Enabled = fly == nil
+	if fly then
+		-- Langkah terbang: lingkaran besar di tanah + tiang cahaya tinggi, tanpa tombol.
+		local ringSize = if step.landed then 60 else math.min(fly * 1.6, 160)
+		marker.Size = Vector3.new(0.4, ringSize, ringSize)
+		pillar.Size = Vector3.new(520, 5, 5)
+		marker.CFrame = CFrame.new(step.position.X, step.position.Y + 0.6, step.position.Z)
+			* CFrame.Angles(0, 0, math.rad(90))
+		pillar.CFrame = CFrame.new(step.position.X, step.position.Y + 260, step.position.Z)
+			* CFrame.Angles(0, 0, math.rad(90))
+		promptAnchor.CFrame = CFrame.new(
+			step.position.X,
+			step.position.Y + (if step.landed then 12 else 150),
+			step.position.Z
+		)
+	else
+		marker.Size = Vector3.new(0.4, 10, 10)
+		pillar.Size = Vector3.new(70, 1.2, 1.2)
+		apply(step.position.Y)
+		addGrounded(step.position, apply)
+	end
 	prompt.ActionText = step.action
 	prompt.ObjectText = step.placeName
 	prompt.HoldDuration = step.hold
@@ -288,6 +332,15 @@ local function onPromptTriggered()
 		JobProps.extinguish(burning)
 	end
 	-- Sopir bus: penumpang naik saat dijemput, turun sebagian di tiap halte berikutnya.
+	-- Pilot: seorang penumpang tampak duduk di kokpit sampai pesawat mendarat lagi.
+	if res.ok and task_.jobId == "pilot" and finished then
+		if finished.prop == "person" then
+			pilotBoarded = task_.id
+		elseif stepIndex >= #task_.steps then
+			pilotBoarded = nil
+			clearPassengers()
+		end
+	end
 	if res.ok and task_.jobId == "sopir" and finished then
 		if finished.prop == "person" then
 			boardPassengers(task_.id)
@@ -302,7 +355,8 @@ local function onPromptTriggered()
 			end
 		end
 	end
-	if res.message ~= "" then
+	-- Langkah terbang dicoba otomatis berulang; penolakannya tidak perlu ditampilkan.
+	if res.message ~= "" and (res.ok or finished == nil or finished.fly == nil) then
 		HudController.toast(res.message)
 	end
 	busy = false
@@ -437,6 +491,34 @@ function JobController.start()
 	while true do
 		task.wait(0.25)
 		local distance = JobController.getDistance()
+		local task_ = currentTask
+		local step = if task_ then task_.steps[task_.index] else nil
+		-- Pilot: penumpang tampak di kokpit selama penerbangan (hanya di layar pilotnya).
+		if task_ == nil or task_.jobId ~= "pilot" then
+			pilotBoarded = nil
+		else
+			local plane = Workspace:FindFirstChild("Plane_" .. player.UserId)
+			local hull = if plane then plane:FindFirstChild("Hull") else nil
+			if pilotBoarded == task_.id and hull and hull:IsA("BasePart") then
+				if #passengers == 0 then
+					seatInPlane(plane :: Instance, hull, task_.id)
+				end
+			elseif #passengers > 0 then
+				clearPassengers()
+			end
+		end
+		-- Langkah terbang selesai sendiri begitu pesawat cukup dekat (server yang memeriksa).
+		if
+			step
+			and step.fly
+			and distance
+			and not busy
+			and distance <= step.fly * 0.95
+			and os.clock() - lastFlyTry > 1
+		then
+			lastFlyTry = os.clock()
+			task.spawn(onPromptTriggered)
+		end
 		if distance then
 			distanceLabel.Text = string.format("%d m", math.floor(distance / 3.5 + 0.5))
 		end

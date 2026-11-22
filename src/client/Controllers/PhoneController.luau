@@ -15,7 +15,6 @@ local Net = require(Shared:WaitForChild("Net"))
 local Format = require(Shared:WaitForChild("Format"))
 local DayNightConfig = require(Shared:WaitForChild("DayNightConfig"))
 local MissionConfig = require(Shared:WaitForChild("MissionConfig"))
-local ShopConfig = require(Shared:WaitForChild("ShopConfig"))
 
 local HudController = require(script.Parent:WaitForChild("HudController"))
 local HouseUiController = require(script.Parent:WaitForChild("HouseUiController"))
@@ -401,7 +400,7 @@ end
 
 -- ---------------------------------------------------------------- halaman Menu (aplikasi)
 
--- Pintasan ke menu lain + Toko Koin. Aplikasi didaftarkan controller lain lewat
+-- Pintasan ke menu lain (termasuk Toko Koin, lihat ShopController). Aplikasi didaftarkan controller lain lewat
 -- PhoneController.addApp, jadi HP tidak perlu mengenal mereka satu per satu.
 local apps: { { icon: string, name: string, open: () -> () } } = {}
 
@@ -435,31 +434,6 @@ local function refreshMenu()
 			phone.Visible = false
 			app.open()
 		end)
-	end
-	-- Toko Koin (Robux): hanya muncul kalau produknya sudah dibuat (ID bukan 0)
-	local order = #apps
-	for _, product in ShopConfig.PRODUCTS do
-		if product.productId ~= 0 then
-			order += 1
-			local b = button({
-				Name = "Buy_" .. product.key,
-				LayoutOrder = order,
-				BackgroundColor3 = COLORS.buy,
-				TextColor3 = COLORS.text,
-				TextSize = 13,
-				Text = "🪙 " .. product.name .. "\n+" .. Format.money(product.coins),
-			})
-			corner(b, 12)
-			b.Parent = page
-			b.Activated:Connect(function()
-				local ok, value = pcall(function(): any
-					return Net.func(Net.Names.ShopPrompt):InvokeServer(product.key)
-				end)
-				if ok and type(value) == "table" and value.message ~= "" then
-					HudController.toast(value.message)
-				end
-			end)
-		end
 	end
 end
 

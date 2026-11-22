@@ -19,6 +19,8 @@ local ORDER = {
 	"PetController",
 	"FashionController",
 	"BusinessController",
+	"ShopController",
+	"PlaneController",
 }
 
 local loaded: { any } = {}
