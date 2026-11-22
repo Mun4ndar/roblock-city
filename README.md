@@ -83,6 +83,10 @@ Urutan load ada di `ORDER` pada `init.server.luau` / `init.client.luau`; tambahk
 - **FashionService**: Toko Baju (depan ROBLOCK Mall). Setelan = topi + jaket yang dirakit UniformService dan
   tampil saat pemain tidak sedang bekerja. Daftar setelan di `src/shared/FashionConfig.luau` (`OUTFITS`).
   Tersimpan di `fashion`; panelnya `FashionController`.
+- **BusinessService**: usaha Kafe di kasir Kafe Mall (dalam ROBLOCK Mega Mall). Buka kafe, naik tingkat,
+  layani pelanggan (bonus, ada jeda), ambil hasil. Pemasukan tiap menit hanya selama pemilik bermain dan
+  ditampung sampai batas laci. Angka di `src/shared/BusinessConfig.luau` (`LEVELS`). Tersimpan di
+  `business`; panelnya `BusinessController` (juga dari HP: "Kafeku").
 - **DebugService**: alat uji, hanya aktif di Studio. Dari command bar server:
   `game.ServerStorage.Debug:Invoke("money", pemain, 5000)` atau `game.ServerStorage.Debug:Invoke("clock", 21)`.
 - `src/client/Util/UiScale.luau` mengecilkan HUD di layar kecil; elemen HUD baru cukup memanggil `UiScale.attach`.

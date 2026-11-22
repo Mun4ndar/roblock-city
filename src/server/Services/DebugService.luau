@@ -4,10 +4,12 @@
 -- sisi server (command bar / alat uji), tidak ada remote ke client.
 --   Debug:Invoke("money", player, jumlah)   -- tambah (+) atau kurangi (-) uang
 --   Debug:Invoke("clock", jam)              -- setel jam dunia (0-24)
+--   Debug:Invoke("clear", player, "business") -- kosongkan satu bagian data (terisi ulang saat masuk lagi)
 
 local RunService = game:GetService("RunService")
 local ServerStorage = game:GetService("ServerStorage")
 
+local DataService = require(script.Parent:WaitForChild("DataService"))
 local EconomyService = require(script.Parent:WaitForChild("EconomyService"))
 local TimeService = require(script.Parent:WaitForChild("TimeService"))
 
@@ -28,6 +30,20 @@ local function handle(command: any, a: any, b: any): any
 		return false
 	elseif command == "clock" and type(a) == "number" then
 		TimeService.setClock(a)
+		return true
+	elseif
+		command == "clear"
+		and typeof(a) == "Instance"
+		and a:IsA("Player")
+		and type(b) == "string"
+		and b ~= "money"
+		and b ~= "version"
+	then
+		local data: any = DataService.getData(a)
+		if data == nil or data[b] == nil then
+			return false
+		end
+		data[b] = nil
 		return true
 	end
 	return "perintah tidak dikenal"

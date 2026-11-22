@@ -26,6 +26,13 @@ export type PlayerData = {
 	pets: PetData,
 	-- Setelan dari Toko Baju (lihat FashionConfig).
 	fashion: FashionData,
+	-- Usaha Kafe (lihat BusinessConfig).
+	business: BusinessData,
+}
+
+export type BusinessData = {
+	level: number, -- 0 = belum punya kafe
+	stored: number, -- uang di laci kasir yang belum diambil
 }
 
 export type FashionData = {

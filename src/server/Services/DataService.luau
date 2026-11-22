@@ -57,6 +57,7 @@ local function defaultData(): PlayerData
 		receipts = {},
 		pets = { owned = {}, active = "", fedAt = 0 },
 		fashion = { owned = {}, active = "" },
+		business = { level = 0, stored = 0 },
 	}
 end
 

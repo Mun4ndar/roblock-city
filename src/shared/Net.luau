@@ -20,6 +20,7 @@ Net.Names = table.freeze({
 	ShopPrompt = "ShopPrompt", -- RemoteFunction: (kunci produk atau "vip") -> { ok, message }; Roblox yang menampilkan jendela beli
 	PetAction = "PetAction", -- RemoteFunction: ("buy"|"equip"|"feed", petId) -> { ok, message }
 	FashionAction = "FashionAction", -- RemoteFunction: ("buy"|"wear", outfitId) -> { ok, message }
+	BusinessAction = "BusinessAction", -- RemoteFunction: ("buy"|"collect"|"serve") -> { ok, message }
 	JobSelect = "JobSelect", -- RemoteFunction: (jobId: string, "" = berhenti) -> JobResult
 	JobStep = "JobStep", -- RemoteFunction: (taskId: number, stepIndex: number) -> JobResult
 	JobSkip = "JobSkip", -- RemoteFunction: () -> JobResult (minta tugas lain)
