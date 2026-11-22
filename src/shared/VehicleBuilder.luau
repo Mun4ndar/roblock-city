@@ -144,7 +144,7 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 	-- ------------------------------------------------------------ bodi bawah
 	part({
 		Name = "Lower",
-		Size = Vector3.new(W, b.lowerHeight, L - 0.8),
+		Size = Vector3.new(if b.bike then 1.8 else W, b.lowerHeight, L - 0.8),
 		CFrame = CFrame.new(0, y0 + b.lowerHeight / 2, 0),
 		Color = paint,
 	}, true, "body")
@@ -191,7 +191,7 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 	end
 
 	-- ------------------------------------------------------------ kabin
-	local cabinW = W - 0.8
+	local cabinW = if b.bike then 1.6 else W - 0.8
 	local zc0, zc1 = zAt(b.cabinFront), zAt(b.cabinBack)
 	local zm0, zm1 = zc0 + b.rakeFront, zc1 - b.rakeBack
 	local glassY = y1 + glassH / 2
@@ -474,7 +474,15 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 		local frontZ = zm0 + 1.7
 		local seatX = W / 4 - 0.1
 		local spots = { Vector3.new(seatX, seatY, frontZ) } -- setir kanan
-		if def.seats >= 2 then
+		if b.bike then
+			-- motor: pengemudi dan pembonceng duduk berurutan di atas jok
+			seatX = 0
+			local saddleY = y1 + b.cabinHeight
+			spots = { Vector3.new(0, saddleY, zc0 + 0.9) }
+			if def.seats >= 2 then
+				table.insert(spots, Vector3.new(0, saddleY, zc0 + 2.7))
+			end
+		elseif def.seats >= 2 then
 			table.insert(spots, Vector3.new(-seatX, seatY, frontZ))
 		end
 		if def.seats >= 4 then
@@ -601,6 +609,14 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 						child.Transparency = 1
 					end
 				end
+				-- Motor: hanya dua roda yang tampak, di tengah. Roda fisika tetap empat (tersembunyi)
+				-- supaya motor tidak terguling; roda tampak menempel ke roda fisika kiri, jadi ikut berputar.
+				if b.bike and wheel.Position.X > 0 then
+					continue
+				end
+				local wheelAt = if b.bike
+					then Vector3.new(0, wheel.Position.Y, wheel.Position.Z)
+					else wheel.Position
 				-- Roda kanan = roda kiri diputar setengah lingkaran.
 				local side = if wheel.Position.X > 0
 					then CFrame.Angles(0, math.pi, 0)
@@ -608,7 +624,7 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 				for _, piece in wheelSource:GetChildren() do
 					if piece:IsA("MeshPart") then
 						local clone = piece:Clone()
-						clone.CFrame = CFrame.new(wheel.Position)
+						clone.CFrame = CFrame.new(wheelAt)
 							* side
 							* wheelRef.CFrame:ToObjectSpace(piece.CFrame)
 						clone.Anchored = static

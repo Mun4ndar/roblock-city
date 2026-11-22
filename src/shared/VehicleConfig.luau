@@ -6,7 +6,7 @@
 -- Satuan: panjang dalam stud, kecepatan stud/detik (1 stud/dtk ~ 1 km/j di speedometer).
 -- Arah depan model = sumbu -Z, titik asal model = tengah mobil di permukaan tanah.
 
-export type BodyStyle = "hatch" | "sedan" | "suv" | "sport" | "van" | "truck"
+export type BodyStyle = "hatch" | "sedan" | "suv" | "sport" | "van" | "truck" | "bike"
 
 export type VehicleBody = {
 	style: BodyStyle,
@@ -30,6 +30,7 @@ export type VehicleBody = {
 	sideText: string?, -- tulisan di sisi bodi / boks
 	box: { height: number, color: Color3 }?, -- boks di belakang kabin (ambulans, truk)
 	ladder: boolean?, -- tangga di atas boks
+	bike: boolean?, -- motor: jok berurutan di tengah, dua roda tampak (roda fisika tetap empat, tersembunyi)
 }
 
 export type VehicleDef = {
@@ -100,6 +101,39 @@ VehicleConfig.RIMS = {
 }
 
 VehicleConfig.LIST = {
+	{
+		-- Tampilan dari templat mesh ReplicatedStorage.Assets.CarShells.lincah (buatan Blender,
+		-- assets/blender/motor_shell.fbx). Ukuran di bawah mengikuti mesh itu.
+		id = "lincah",
+		name = "Lincah",
+		class = "Motor Skuter",
+		description = "Motor skuter mungil untuk berdua. Murah dan gesit di jalan kota!",
+		price = 250,
+		seats = 2,
+		maxSpeed = 58,
+		reverseSpeed = 12,
+		acceleration = 28,
+		brake = 70,
+		steerAngle = 30,
+		color = Color3.fromRGB(64, 190, 170),
+		accent = Color3.fromRGB(250, 250, 250),
+		body = {
+			style = "bike",
+			bike = true,
+			length = 9.2,
+			width = 4.4,
+			clearance = 0.8,
+			lowerHeight = 1.5,
+			cabinHeight = 0.6,
+			cabinFront = 0.5,
+			cabinBack = 0.92,
+			rakeFront = 0.5,
+			rakeBack = 0.5,
+			wheelRadius = 1.2,
+			wheelWidth = 0.7,
+			wheelbase = 6,
+		},
+	},
 	{
 		id = "kancil",
 		name = "Kancil",
