@@ -81,13 +81,13 @@ def thumbnail(name: str, source: str, focus, tagline: str, big_title: bool) -> N
 
 
 def icon() -> None:
-    # potong lebih dekat ke hewan-hewan supaya terbaca di ukuran kecil
-    source = Image.open(os.path.join(SRC, "hero.jpg")).convert("RGB").crop((440, 150, 1000, 710))
+    # lima karakter berseragam (pemadam, dokter, polisi, pilot, kurir); judul di langit
+    source = Image.open(os.path.join(SRC, "pekerjaan.jpg")).convert("RGB").crop((370, 51, 1120, 801))
     image = fit(source, 512, 512)
-    image = shade(image, 0.42, 0.0)
+    image = shade(image, 0.5, 0.0)
     draw = ImageDraw.Draw(image)
-    text(draw, (256, 70), "ROBLOCK", ImageFont.truetype(FONT, 104), WHITE, 7)
-    text(draw, (256, 166), "CITY", ImageFont.truetype(FONT, 104), YELLOW, 7)
+    text(draw, (256, 66), "ROBLOCK", ImageFont.truetype(FONT, 104), WHITE, 7)
+    text(draw, (256, 162), "CITY", ImageFont.truetype(FONT, 104), YELLOW, 7)
     image.convert("RGB").save(os.path.join(OUT, "ikon_512.png"), "PNG")
     print("ok ikon_512.png", image.size)
 
@@ -96,4 +96,5 @@ if __name__ == "__main__":
     icon()
     thumbnail("thumbnail_1_utama.png", "hero.jpg", (0.5, 0.42), "Mobil, motor, pesawat, dan hewan peliharaan!", True)
     thumbnail("thumbnail_2_kota.png", "kota.jpg", (0.5, 0.55), "Jelajahi kota, bekerja, dan beli rumah impianmu", False)
+    thumbnail("thumbnail_4_pekerjaan.png", "pekerjaan_dekat.jpg", (0.5, 0.62), "Jadi polisi, pemadam, dokter, pilot, dan lainnya!", False)
     thumbnail("thumbnail_3_pantai.png", "pantai.jpg", (0.5, 0.5), "Liburan di Pulau Pantai dan sewa perahu", False)
