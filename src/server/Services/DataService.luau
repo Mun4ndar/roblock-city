@@ -55,6 +55,7 @@ local function defaultData(): PlayerData
 		missions = { day = 0, progress = {}, claimed = {} },
 		farm = { plots = {}, seeds = {}, crops = {} },
 		receipts = {},
+		pets = { owned = {}, active = "", fedAt = 0 },
 	}
 end
 

@@ -22,6 +22,14 @@ export type PlayerData = {
 	farm: FarmData,
 	-- ID pembelian Robux yang sudah diberikan (lihat ShopService), supaya tidak dobel.
 	receipts: { string },
+	-- Hewan peliharaan (lihat PetConfig).
+	pets: PetData,
+}
+
+export type PetData = {
+	owned: { [string]: boolean },
+	active: string, -- id hewan yang diajak, "" = tidak ada
+	fedAt: number, -- waktu server terakhir diberi makan
 }
 
 export type FarmData = {

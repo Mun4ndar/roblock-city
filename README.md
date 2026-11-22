@@ -77,6 +77,9 @@ Urutan load ada di `ORDER` pada `init.server.luau` / `init.client.luau`; tambahk
 - **ShopService**: pembelian Robux (Developer Product koin + Game Pass VIP) dengan `ProcessReceipt` yang mencatat
   ID pembelian di `receipts` supaya koin tidak diberikan dua kali. **Belum aktif**: semua ID di
   `src/shared/ShopConfig.luau` masih 0; cara mengaktifkannya tertulis di berkas itu. Belum ada tampilan toko.
+- **PetService**: hewan peliharaan. Beli di Toko Hewan (depan ROBLOCK Mall), satu hewan mengikuti pemilik
+  (AlignPosition, tanpa tabrakan), beri makan supaya senang. Daftar hewan di `src/shared/PetConfig.luau`
+  (**menambah hewan = menambah entri di `PETS`**). Tersimpan di `pets`; panelnya `PetController`.
 - **DebugService**: alat uji, hanya aktif di Studio. Dari command bar server:
   `game.ServerStorage.Debug:Invoke("money", pemain, 5000)` atau `game.ServerStorage.Debug:Invoke("clock", 21)`.
 - `src/client/Util/UiScale.luau` mengecilkan HUD di layar kecil; elemen HUD baru cukup memanggil `UiScale.attach`.
