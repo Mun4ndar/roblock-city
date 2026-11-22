@@ -1,5 +1,5 @@
 --!strict
--- Hewan peliharaan. Beli di Toko Hewan (depan ROBLOCK Mall), pilih satu untuk diajak jalan,
+-- Hewan peliharaan. Beli di Toko Hewan (di dalam ROBLOCK Mega Mall), pilih satu untuk diajak jalan,
 -- beri makan supaya senang. Menambah hewan = menambah entri di PETS (dirakit dari part).
 -- Modul ini ikut ter-replikasi; harga, kepemilikan, dan jarak ke toko dicek server.
 
@@ -23,8 +23,9 @@ export type PetView = {
 	fedAt: number, -- waktu server terakhir diberi makan
 }
 
-PetConfig.SHOP_POSITION = Vector3.new(590, 1.1, -536) -- depan ROBLOCK Mall
-PetConfig.SHOP_RANGE = 40
+-- Kasir Toko Hewan di dalam ROBLOCK Mega Mall (ruang dalam di y = 2000, lihat map/BuildInteriors.luau)
+PetConfig.SHOP_POSITION = Vector3.new(486, 2000, -623)
+PetConfig.SHOP_RANGE = 34
 PetConfig.FEED_PRICE = 15
 PetConfig.HAPPY_SECONDS = 600 -- lama hewan "senang" setelah diberi makan
 PetConfig.ATTR_PLAYER = "Pets"

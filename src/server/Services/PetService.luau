@@ -236,7 +236,7 @@ local function act(player: Player, action: any, petId: any): Result
 			return result(false, "Kamu sudah punya " .. def.name .. ".")
 		end
 		if not nearShop(player) then
-			return result(false, "Datang dulu ke Toko Hewan di depan ROBLOCK Mall ya.")
+			return result(false, "Datang dulu ke Toko Hewan di dalam ROBLOCK Mall ya.")
 		end
 		if not EconomyService.trySpend(player, def.price, "pet:" .. def.id) then
 			return result(false, "Uangmu belum cukup. Harganya " .. Format.money(def.price) .. ".")
@@ -314,7 +314,7 @@ function PetService.init()
 	prompt.ActionText = "Lihat hewan"
 	prompt.ObjectText = "Toko Hewan"
 	prompt.HoldDuration = 0.2
-	prompt.MaxActivationDistance = 22
+	prompt.MaxActivationDistance = 14
 	prompt.RequiresLineOfSight = false
 	prompt:SetAttribute(PetConfig.ATTR_PROMPT, true)
 	prompt.Parent = shop
@@ -331,6 +331,7 @@ function PetService.init()
 	label.TextStrokeTransparency = 0.2
 	label.Text = "🐾 Toko Hewan"
 	label.Parent = sign
+	sign.Enabled = false -- papan nama toko sudah ada di dalam mall
 	sign.Parent = shop
 	shop.Parent = Workspace
 end

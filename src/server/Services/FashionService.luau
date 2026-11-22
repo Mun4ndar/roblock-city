@@ -72,7 +72,7 @@ local function act(player: Player, action: any, id: any): Result
 			or (root.Position - FashionConfig.SHOP_POSITION).Magnitude
 				> FashionConfig.SHOP_RANGE
 		then
-			return result(false, "Datang dulu ke Toko Baju di depan ROBLOCK Mall ya.")
+			return result(false, "Datang dulu ke Toko Baju di dalam ROBLOCK Mall ya.")
 		end
 		if not EconomyService.trySpend(player, outfit.price, "fashion:" .. outfit.id) then
 			return result(
@@ -135,7 +135,7 @@ function FashionService.init()
 	prompt.ActionText = "Lihat baju"
 	prompt.ObjectText = "Toko Baju"
 	prompt.HoldDuration = 0.2
-	prompt.MaxActivationDistance = 22
+	prompt.MaxActivationDistance = 14
 	prompt.RequiresLineOfSight = false
 	prompt:SetAttribute(FashionConfig.ATTR_PROMPT, true)
 	prompt.Parent = shop
@@ -152,6 +152,7 @@ function FashionService.init()
 	label.TextStrokeTransparency = 0.2
 	label.Text = "👕 Toko Baju"
 	label.Parent = sign
+	sign.Enabled = false -- papan nama toko sudah ada di dalam mall
 	sign.Parent = shop
 	shop.Parent = Workspace
 end

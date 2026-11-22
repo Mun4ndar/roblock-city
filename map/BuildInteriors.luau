@@ -1,5 +1,5 @@
 --[[
-	ROBLOCK CITY: isi bangunan umum (lobi Rumah Sakit dan ruang tunggu Bandara).
+	ROBLOCK CITY: isi bangunan umum (lobi Rumah Sakit, ruang tunggu Bandara, dan ROBLOCK Mega Mall).
 
 	Ruang dalam dibangun tepat DI ATAS bangunannya (y = 2000, tidak terlihat dari tanah), supaya posisi
 	mendatar pemain tidak berubah saat masuk: GPS, misi, dan pengawas pekerjaan tetap benar. Jangan taruh di
@@ -530,6 +530,171 @@ local function airport(parent: Instance)
 	f.Parent = parent
 end
 
+--------------------------------------------------------------------------
+-- ROBLOCK Mega Mall (di atas gedung mall pusat kota)
+--------------------------------------------------------------------------
+
+-- Toko di dalam mall. Titik kasir Toko Hewan dan Toko Baju harus sama dengan SHOP_POSITION di
+-- PetConfig / FashionConfig (tombolnya dipasang PetService / FashionService di titik itu).
+local function shop(
+	parent: Instance,
+	origin: CFrame,
+	x: number,
+	title: string,
+	color: Color3,
+	counter: Color3
+)
+	local c = origin * CFrame.new(x, 0, -22)
+	P(parent, "DindingToko", Vector3.new(22, 12, 1), c * CFrame.new(0, 6, -5.4), color)
+	for _, sx in { -1, 1 } do
+		P(parent, "SekatToko", Vector3.new(1, 12, 10), c * CFrame.new(sx * 11, 6, -0.5), color)
+	end
+	P(parent, "Kasir", Vector3.new(10, 3.4, 2.6), c * CFrame.new(0, 1.7, 2), rgb(210, 214, 222))
+	P(parent, "AtasKasir", Vector3.new(10.4, 0.3, 3), c * CFrame.new(0, 3.55, 2), counter)
+	for i = -1, 1 do
+		P(
+			parent,
+			"Rak",
+			Vector3.new(5, 0.4, 2),
+			c * CFrame.new(i * 6.4, 4, -4.2),
+			WOOD,
+			Enum.Material.WoodPlanks
+		)
+		P(
+			parent,
+			"Rak",
+			Vector3.new(5, 0.4, 2),
+			c * CFrame.new(i * 6.4, 7, -4.2),
+			WOOD,
+			Enum.Material.WoodPlanks
+		)
+		P(
+			parent,
+			"Barang",
+			Vector3.new(1.6, 1.6, 1.6),
+			c * CFrame.new(i * 6.4 - 1.2, 5, -4.2),
+			counter,
+			nil,
+			false
+		)
+		P(
+			parent,
+			"Barang",
+			Vector3.new(1.4, 2, 1.4),
+			c * CFrame.new(i * 6.4 + 1.2, 5.2, -4.2),
+			color:Lerp(Color3.new(1, 1, 1), 0.4),
+			nil,
+			false
+		)
+		P(
+			parent,
+			"Barang",
+			Vector3.new(2.4, 1.4, 1.4),
+			c * CFrame.new(i * 6.4, 7.9, -4.2),
+			counter,
+			nil,
+			false
+		)
+	end
+	local board = P(
+		parent,
+		"PapanToko",
+		Vector3.new(20, 2.6, 0.4),
+		c * CFrame.new(0, 13.4, 5),
+		counter,
+		nil,
+		false
+	)
+	text(board, Enum.NormalId.Back, title, WHITE)
+end
+
+local function mall(parent: Instance)
+	local f = Instance.new("Folder")
+	f.Name = "Mall"
+	local o = CFrame.new(525, DEPTH, -603)
+	local w, d, h = 110, 62, 18
+	-- lantai gelap dan sedikit lampu: ruang besar berdinding terang cepat jadi putih silau
+	room(f, o, w, d, h, rgb(120, 126, 140), rgb(214, 206, 192), 3, 1)
+	-- pintu utama mall menghadap selatan
+	doors(
+		f,
+		o,
+		d,
+		"mall",
+		CFrame.new(525, 4.5, -542.6) * CFrame.Angles(0, math.pi, 0),
+		Vector3.new(14, 9, 1)
+	)
+
+	-- empat toko di sisi utara
+	shop(f, o, -39, "TOKO HEWAN", rgb(250, 214, 226), rgb(236, 110, 160))
+	shop(f, o, -13, "TOKO BAJU", rgb(214, 232, 250), rgb(80, 150, 235))
+	shop(f, o, 13, "TOKO MAINAN", rgb(250, 240, 200), rgb(240, 170, 50))
+	shop(f, o, 39, "KAFE MALL", rgb(236, 222, 204), rgb(150, 100, 70))
+
+	-- atrium: air mancur, bangku, tanaman
+	local basin = P(
+		f,
+		"KolamAtrium",
+		Vector3.new(1.4, 16, 16),
+		o * CFrame.new(0, 0.7, 6) * CFrame.Angles(0, 0, math.pi / 2),
+		rgb(214, 218, 226)
+	)
+	basin.Shape = Enum.PartType.Cylinder
+	local water = P(
+		f,
+		"AirAtrium",
+		Vector3.new(0.3, 14, 14),
+		o * CFrame.new(0, 1.35, 6) * CFrame.Angles(0, 0, math.pi / 2),
+		rgb(110, 196, 240),
+		Enum.Material.Glass,
+		false
+	)
+	water.Shape = Enum.PartType.Cylinder
+	local jet = P(
+		f,
+		"PancuranAtrium",
+		Vector3.new(5, 1.2, 1.2),
+		o * CFrame.new(0, 3.6, 6) * CFrame.Angles(0, 0, math.pi / 2),
+		rgb(180, 224, 250),
+		Enum.Material.Glass,
+		false
+	)
+	jet.Shape = Enum.PartType.Cylinder
+	for _, sx in { -1, 1 } do
+		P(
+			f,
+			"BangkuMall",
+			Vector3.new(8, 1.4, 2.6),
+			o * CFrame.new(sx * 16, 0.7, 6),
+			WOOD,
+			Enum.Material.WoodPlanks
+		)
+		plant(f, o * CFrame.new(sx * 24, 0, 6))
+		plant(f, o * CFrame.new(sx * 50, 0, 26))
+	end
+	-- karpet jalur dan papan selamat datang
+	P(
+		f,
+		"KarpetMall",
+		Vector3.new(14, 0.1, 22),
+		o * CFrame.new(0, 0.05, 20),
+		rgb(200, 70, 80),
+		Enum.Material.Fabric,
+		false
+	)
+	local welcome = P(
+		f,
+		"PapanMall",
+		Vector3.new(34, 3.4, 0.4),
+		o * CFrame.new(0, 15, d / 2 - 0.4),
+		rgb(60, 90, 160),
+		nil,
+		false
+	)
+	text(welcome, Enum.NormalId.Front, "ROBLOCK MEGA MALL", rgb(255, 214, 80))
+	f.Parent = parent
+end
+
 return function(): number
 	local map = workspace:FindFirstChild("Map")
 	if not map then
@@ -544,6 +709,7 @@ return function(): number
 	root.Name = "Interiors"
 	hospital(root)
 	airport(root)
+	mall(root)
 	root.Parent = map
 	return #root:GetDescendants()
 end

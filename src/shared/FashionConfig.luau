@@ -19,8 +19,9 @@ export type Outfit = {
 -- Keadaan yang dikirim ke client (atribut Player "Fashion", JSON).
 export type FashionView = { owned: { [string]: boolean }, active: string }
 
-FashionConfig.SHOP_POSITION = Vector3.new(540, 1.1, -536) -- depan ROBLOCK Mall, sebelah Toko Hewan
-FashionConfig.SHOP_RANGE = 40
+-- Kasir Toko Baju di dalam ROBLOCK Mega Mall (ruang dalam di y = 2000, lihat map/BuildInteriors.luau)
+FashionConfig.SHOP_POSITION = Vector3.new(512, 2000, -623)
+FashionConfig.SHOP_RANGE = 34
 FashionConfig.ATTR_PLAYER = "Fashion"
 FashionConfig.ATTR_PROMPT = "FashionShop"
 
