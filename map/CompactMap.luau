@@ -1,5 +1,5 @@
 --[[
-	ROBLOCK CITY: pemadatan peta (dijalankan SEKALI pada 2026-11-24, place v109).
+	ROBLOCK CITY: pemadatan peta (dijalankan SEKALI pada 2026-11-24, place v113; v108 = sebelum pemadatan).
 
 	Pemain kebingungan karena peta terlalu renggang, jadi ruang kosong dipotong:
 	  1. Pulau Pantai dirapatkan ke sisi timur kota. Jalur x 944..1400 (laut + jembatan panjang)
