@@ -168,21 +168,21 @@ MissionConfig.LANDMARKS = {
 } :: { Landmark }
 
 -- Batas dunia yang digambar di peta HP (stud).
-MissionConfig.MAP_BOUNDS = { minX = -1150, maxX = 2300, minZ = -1200, maxZ = 1150 }
+MissionConfig.MAP_BOUNDS = { minX = -1150, maxX = 1850, minZ = -1200, maxZ = 920 }
 
 -- Tempat dealer mobil tidak ada di JobConfig.PLACES, jadi dicatat di sini.
 MissionConfig.EXTRA_PLACES = {
-	dealer = { name = "Dealer Mobil", position = Vector3.new(-67, 1, 511), icon = "🚗" },
+	dealer = { name = "Dealer Mobil", position = Vector3.new(-67, 1, 275), icon = "🚗" },
 	kasirKafe = {
 		name = "Kasir Kafe Kota (usahamu)",
 		position = Vector3.new(28, 1, -553),
 		icon = "☕",
 	},
-	indomart = { name = "Indomart", position = Vector3.new(180, 1, 106), icon = "🏪" },
-	sevenEleven = { name = "7-Eleven", position = Vector3.new(296, 1, 106), icon = "🛒" },
-	warung = { name = "Warung Kelontong", position = Vector3.new(-200, 1, 106), icon = "🏠" },
-	masjid = { name = "Masjid Al Munawaroh", position = Vector3.new(563, 1, -20), icon = "🕌" },
-	pasarTani = { name = "Pasar Tani & Kebun", position = Vector3.new(-660, 1, 334), icon = "🌽" },
+	indomart = { name = "Indomart", position = Vector3.new(138, 1, -191), icon = "🏪" },
+	sevenEleven = { name = "7-Eleven", position = Vector3.new(138, 1, -63), icon = "🛒" },
+	warung = { name = "Warung Kelontong", position = Vector3.new(138, 1, -19), icon = "🏠" },
+	masjid = { name = "Masjid Al Munawaroh", position = Vector3.new(563, 1, -48), icon = "🕌" },
+	pasarTani = { name = "Pasar Tani & Kebun", position = Vector3.new(-660, 1, 98), icon = "🌽" },
 }
 
 -- ---------------------------------------------------------------- util

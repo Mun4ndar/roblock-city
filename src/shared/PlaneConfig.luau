@@ -9,12 +9,12 @@
 local PlaneConfig = {}
 
 PlaneConfig.JOB = "pilot" -- hanya pemain dengan pekerjaan ini yang bisa mengambil pesawat
-PlaneConfig.HANGAR_POSITION = Vector3.new(-1262, 0, 1036) -- papan "PESAWAT PILOT" di tepi landasan
+PlaneConfig.HANGAR_POSITION = Vector3.new(-1262, 0, 800) -- papan "PESAWAT PILOT" di tepi landasan
 PlaneConfig.HANGAR_RANGE = 34
 PlaneConfig.SPAWN_COOLDOWN = 5
 
 -- Ujung barat landasan, menghadap timur. Pemain berikutnya digeser ke belakang garis start.
-PlaneConfig.SPAWN = CFrame.new(-1270, 0.4, 1080) * CFrame.Angles(0, -math.pi / 2, 0)
+PlaneConfig.SPAWN = CFrame.new(-1270, 0.4, 844) * CFrame.Angles(0, -math.pi / 2, 0)
 PlaneConfig.GROUND_Y = 0.4
 
 PlaneConfig.MAX_SPEED = 100 -- stud/detik

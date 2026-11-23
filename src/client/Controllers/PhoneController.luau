@@ -45,9 +45,9 @@ local COLORS = {
 
 -- Daratan di peta skema (stud): pulau utama, bandara, pulau pantai.
 local LAND = {
-	{ x0 = -620, x1 = 1010, z0 = -1160, z1 = 1120, color = COLORS.land },
-	{ x0 = -1120, x1 = -620, z0 = 420, z1 = 800, color = COLORS.land },
-	{ x0 = 1690, x1 = 2240, z0 = -660, z1 = 780, color = COLORS.sand },
+	{ x0 = -620, x1 = 1010, z0 = -1160, z1 = 884, color = COLORS.land },
+	{ x0 = -1120, x1 = -620, z0 = 184, z1 = 564, color = COLORS.land },
+	{ x0 = 1010, x1 = 1790, z0 = -900, z1 = 540, color = COLORS.sand },
 }
 local MAP_WIDTH = 258
 local ARRIVE_DISTANCE = 28

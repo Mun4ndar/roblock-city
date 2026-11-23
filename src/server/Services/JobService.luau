@@ -48,7 +48,7 @@ local completedEvent = Instance.new("BindableEvent")
 -- Terpicu (player, jobId, gaji) setiap satu tugas selesai dan dibayar (dipakai misi).
 JobService.TaskCompleted = completedEvent.Event
 
-local FALLBACK_ORIGIN = Vector3.new(40, 1, 510) -- taman kota kecil (titik spawn)
+local FALLBACK_ORIGIN = Vector3.new(40, 1, 274) -- taman kota kecil (titik spawn)
 local HORIZONTAL = Vector3.new(1, 0, 1)
 
 local taskRemote: RemoteEvent

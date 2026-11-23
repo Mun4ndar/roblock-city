@@ -186,6 +186,13 @@ require(MB.BuildShops)()       -- model Creator Store pilihan pemilik: Indomart,
 require(MB.FixTrees)()         -- PALING AKHIR: pohon di jalan, pembatas tengah, dan parkiran dipindah ke CadanganPeta
 ```
 
+**Peta sudah dipadatkan (2026-11-24).** Sesudah semua skrip di atas, peta di Studio dipotong sekali dengan
+`map/CompactMap.luau`: Pulau Pantai dirapatkan ke sisi timur kota, jalur taman kosong z -216..20 dihapus, toko
+dan masjid dipindah ke lahan kosong, Taman Kota dibangun ulang di (740, 55), dan gunung terrain diganti mesh
+(`Workspace.Map.Gunung`). Akibatnya **koordinat di skrip `map/` di atas adalah koordinat lama**: menjalankan
+ulang sebuah pembangun akan menaruh hasilnya di posisi lama. Ubah koordinatnya dengan `CompactMap.remap(x, z)`
+dulu, atau pulihkan place dari riwayat versi (v108 = sebelum pemadatan). Koordinat di `src/` sudah koordinat baru.
+
 Setiap skrip hanya mengganti foldernya sendiri di `Workspace.Map`. Modul bantu: `MapKit` (part, jalan, pohon,
 lampu), `Buildings` (gedung tinggi, toko, lampu lalu lintas, parkir), `Homes` (rumah, rumah mewah, taman bermain),
 `Streets` (grid jalan bertrotoar).

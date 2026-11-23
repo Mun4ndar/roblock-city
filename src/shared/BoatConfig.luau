@@ -4,13 +4,13 @@
 
 local BoatConfig = {}
 
-BoatConfig.RENT_POSITION = Vector3.new(2108, 0, -150) -- papan sewa di tepi pantai resor
+BoatConfig.RENT_POSITION = Vector3.new(1652, 0, -390) -- papan sewa di tepi pantai resor
 BoatConfig.RENT_RANGE = 30
 BoatConfig.RENT_PRICE = 30
 BoatConfig.RENT_COOLDOWN = 5 -- detik antar sewa
 
 -- Tempat perahu muncul (menghadap ke laut). Tiap pemain mendapat petak sendiri di sepanjang Z.
-BoatConfig.SPAWN = CFrame.new(2162, -2, -150) * CFrame.Angles(0, -math.pi / 2, 0)
+BoatConfig.SPAWN = CFrame.new(1706, -2, -390) * CFrame.Angles(0, -math.pi / 2, 0)
 BoatConfig.SPAWN_SPACING = 14
 BoatConfig.SPAWN_SLOTS = 6
 BoatConfig.WATER_Y = -2
