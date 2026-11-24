@@ -229,7 +229,7 @@ local function startDriving(seat: VehicleSeat)
 	stepConnection = RunService.PreSimulation:Connect(step)
 end
 
--- Selama duduk di kendaraan (mobil, perahu, pesawat), tombol "Naik/Kemudikan" kendaraan itu
+-- Selama duduk di kendaraan (mobil, jet ski, pesawat), tombol "Naik/Kemudikan" kendaraan itu
 -- disembunyikan di layar pemain ini supaya tidak mengganggu. Dikembalikan saat turun.
 local hiddenPrompts: { ProximityPrompt } = {}
 local lastSeat: BasePart? = nil

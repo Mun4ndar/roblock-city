@@ -22,7 +22,7 @@ local ORDER = {
 	"FashionService",
 	"SkinService",
 	"BusinessService",
-	"BoatService",
+	"JetSkiService",
 	"FerryService",
 	"NpcService",
 	"DebugService",
