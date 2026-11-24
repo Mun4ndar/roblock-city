@@ -107,3 +107,11 @@ end
 	slab lebar dipendekkan sepanjang taper, "TaperTengah" (lebar 32), dua "TaperBaji" (WedgePart rebah, tebal
 	0,4) dan dua "TaperGaris" diagonal; garis tepi penghubung dipotong, median Boulevard berakhir di z = -8.
 ]]
+
+--[[
+	2026-11-25: delapan putaran jalan buntu (RoadFixes.PutarBalik1-8) dirapikan lewat execute_luau.
+	Warna dan material cakram disamakan dengan jalan yang menyambung; garis tengah kuning yang masuk
+	lingkaran dihapus; per putaran dibuat folder PutarBalikTepiN berisi garis tepi putih melingkar
+	(radius cakram - 1,5, terbuka di mulut jalan), trotoar melingkar 6 stud (radius + 3, warna trotoar
+	Neighborhoods) dan kerb beton di sekeliling pulau rumput.
+]]
