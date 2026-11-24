@@ -35,6 +35,13 @@ local HOUSE_FIXES: { { n: number, x: number, z: number, yaw: number? } } = {
 -- stud dari pusat rumah (22 stud dari garis tengah jalan = tepi luar trotoar). Halaman 40 disalin dari 41,
 -- rumput Halaman 1 dipangkas di sisi Jalan Melati, batu/bedeng yang masih di trotoar dimundurkan.
 
+-- Simpang Jalan Tulip (z = 724) dengan Jalan Lingkar (2026-11-25, place v139): jalan, trotoar, garis tepi, kerb
+-- dan zebra Tulip menembus belokan lingkar di sudut barat daya dan timur daya. Semua dipotong tepat di tepi
+-- dalam lingkar (dipindai per z), zebra digeser 4 stud ke dalam. Rumah 29/30/36/37 digeser +6, 62/63 +8,
+-- 69 +14, 70 +28 stud ke timur dan rumput halaman 69 dipangkas supaya tidak menimpa lingkar. Audit seluruh
+-- peta lain (zebra melayang, trotoar menembus aspal, garis di luar aspal, ujung jalan tak sejajar) bersih;
+-- hanya transisi lebar 32 -> 48/64 di ujung kota kecil, boulevard, dan penghubung yang disengaja.
+
 local COURT_CENTER = CFrame.new(-390, 0, -18)
 local OLD_COURT_PARTS = { "LapanganBasket", "Area", "TiangRing", "Papan", "Ring", "BolaBasket" }
 
