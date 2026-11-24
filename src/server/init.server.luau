@@ -23,6 +23,7 @@ local ORDER = {
 	"SkinService",
 	"BusinessService",
 	"JetSkiService",
+	"CafePantaiService",
 	"FerryService",
 	"NpcService",
 	"DebugService",
