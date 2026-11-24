@@ -254,6 +254,28 @@ local SPECS: { Spec } = {
 			{ text = "SEKOLAH", size = Vector2.new(14, 1.6), at = Vector3.new(0, 21.9, 20.6), color = rgb(190, 50, 50) },
 		},
 	},
+	{
+		key = "aula",
+		model = "Aula",
+		template = "AulaMentah",
+		origin = Vector3.new(-235, 0, 9),
+		yaw = math.pi / 2, -- depan menghadap -X
+		bboxCenter = Vector3.new(0, 3.6, 8.4),
+		keep = { "Body", "Roof" },
+		look = {
+			AuWall = { rgb(250, 232, 160), SP, 0 },
+			AuStone = { rgb(190, 184, 172), CON, 0 },
+			AuWhite = { rgb(250, 249, 245), SP, 0 },
+			AuRoof = { rgb(196, 78, 66), SP, 0 },
+			AuGold = { rgb(226, 172, 52), MET, 0 },
+			AuGlass = { rgb(130, 195, 225), GLS, 0.3 },
+			AuDark = { rgb(60, 44, 38), WOOD, 0 },
+		},
+		colliders = {},
+		signs = {
+			{ text = "AULA", size = Vector2.new(10, 2.0), at = Vector3.new(0, 27.5, 12.4), color = rgb(255, 235, 170) },
+		},
+	},
 }
 
 local function build(spec: Spec): number
@@ -327,10 +349,12 @@ local function build(spec: Spec): number
 				clone:ClearAllChildren()
 				clone.Name = key :: string
 				-- rotasi bawaan part hasil impor FBX harus dipertahankan (bukan hanya yaw bangunan)
-				-- FBX diimpor dengan rotasi bawaan yang berbeda-beda (0 atau ~180 derajat): jika 0, depan mesh ada di +Z
-				-- lokal, jadi putar 180 derajat di sekitar pusat agar depan = -Z seperti yang lain.
-				local flip = if math.abs(select(2, part.CFrame:ToOrientation())) < 1.5 then math.pi else 0
-				clone.CFrame = center * CFrame.Angles(0, flip, 0) * CFrame.new(part.Position - rawCenter) * part.CFrame.Rotation
+				-- FBX diimpor dengan rotasi bawaan part (kelipatan 90 derajat, bergantung bentuk mesh). Susunan mesh
+				-- relatif terhadap susunan ideal berputar sebesar (rotasi bawaan + 180 derajat); batalkan di pusat.
+				local r0 = select(2, part.CFrame:ToOrientation())
+				local quarter = math.round(r0 / (math.pi / 2)) * (math.pi / 2)
+				local undo = -(quarter + math.pi)
+				clone.CFrame = center * CFrame.Angles(0, undo, 0) * CFrame.new(part.Position - rawCenter) * part.CFrame.Rotation
 				clone.Color, clone.Material, clone.Transparency = look[1] :: Color3, look[2] :: Enum.Material, look[3] :: number
 				clone.Anchored, clone.CanCollide, clone.CanTouch = true, false, false
 				if string.sub(key :: string, -5) == "Glass" then
