@@ -26,7 +26,8 @@ type Spec = {
 	origin: Vector3,
 	yaw: number,
 	bboxCenter: Vector3, -- pusat bbox dalam koordinat Blender
-	keep: { string },
+	keep: { string }, -- part tabrakan lama yang dijadikan tak terlihat
+	keepVisible: { string }?, -- part lama yang dibiarkan apa adanya (mis. Apron)
 	look: { [string]: Look },
 	colliders: { { any } }, -- { nama, x0, x1, y0, y1, z0, z1 } dalam koordinat Blender
 	signs: { Sign },
@@ -150,13 +151,62 @@ local SPECS: { Spec } = {
 			{ text = "PERPUSTAKAAN", size = Vector2.new(22, 3.6), at = Vector3.new(0, 46.85, 23.3), color = rgb(245, 235, 215) },
 		},
 	},
+	{
+		key = "bengkel",
+		model = "Bengkel",
+		template = "BengkelMentah",
+		origin = Vector3.new(186, 1, 249),
+		yaw = 0,
+		bboxCenter = Vector3.new(0, 2.6, 10.206),
+		keep = { "Body", "Roof" },
+		look = {
+			BgWall = { rgb(70, 82, 104), SP, 0 },
+			BgStone = { rgb(170, 168, 164), CON, 0 },
+			BgOrange = { rgb(250, 150, 40), SP, 0 },
+			BgRoof = { rgb(60, 66, 80), SP, 0 },
+			BgDark = { rgb(34, 38, 48), SP, 0 },
+			BgGlass = { rgb(130, 190, 225), GLS, 0.3 },
+			BgDoor = { rgb(190, 196, 204), MET, 0 },
+			BgTire = { rgb(30, 30, 34), SP, 0 },
+			BgRim = { rgb(200, 205, 212), MET, 0 },
+		},
+		colliders = {},
+		signs = {
+			{ text = "BENGKEL", size = Vector2.new(18, 1.3), at = Vector3.new(0, 13.2, 11.2), color = rgb(255, 255, 255) },
+		},
+	},
+	{
+		key = "spbu",
+		model = "SPBU",
+		template = "SpbuMentah",
+		origin = Vector3.new(771, 1, -310),
+		yaw = 0,
+		bboxCenter = Vector3.new(-24.4, 66.75, 10.0),
+		keep = { "Body", "Roof", "Pillar", "Pump", "PumpIsland", "Canopy", "CanopyStripe", "SignPylon" },
+		keepVisible = { "Apron" },
+		look = {
+			BpWall = { rgb(244, 240, 230), SP, 0 },
+			BpStone = { rgb(170, 168, 164), CON, 0 },
+			BpRed = { rgb(220, 50, 52), SP, 0 },
+			BpWhite = { rgb(250, 250, 250), SP, 0 },
+			BpGlass = { rgb(130, 190, 225), GLS, 0.3 },
+			BpDark = { rgb(34, 38, 48), SP, 0 },
+			BpGold = { rgb(250, 200, 60), SP, 0 },
+		},
+		colliders = {},
+		signs = {
+			{ text = "SPBU", size = Vector2.new(17, 3.6), at = Vector3.new(0, 2.6, 14.5), color = rgb(255, 255, 255) },
+		},
+	},
 }
 
 local function build(spec: Spec): number
 	local raw = ServerStorage:FindFirstChild(spec.template)
 	local buildings = Workspace.Map.Downtown.Buildings
 	local blender = Workspace.Map:FindFirstChild("BangunanBlender")
-	local old = (blender and blender:FindFirstChild(spec.model)) or buildings:FindFirstChild(spec.model)
+	local old = (blender and blender:FindFirstChild(spec.model))
+		or buildings:FindFirstChild(spec.model)
+		or Workspace.Map.Residential.Buildings.Downtown:FindFirstChild(spec.model)
 	if raw == nil or old == nil then
 		warn("[BuildBangunanModern] " .. spec.key .. ": template atau model lama tidak ada")
 		return 0
@@ -180,7 +230,9 @@ local function build(spec: Spec): number
 
 	-- buang visual lama, simpan part tabrakan
 	for _, c in old:GetChildren() do
-		if table.find(spec.keep, c.Name) and c:IsA("BasePart") then
+		if spec.keepVisible and table.find(spec.keepVisible, c.Name) then
+			continue
+		elseif table.find(spec.keep, c.Name) and c:IsA("BasePart") then
 			c.Transparency = 1
 			for _, tag in CollectionService:GetTags(c) do
 				CollectionService:RemoveTag(c, tag)
@@ -217,7 +269,10 @@ local function build(spec: Spec): number
 				clone:ClearAllChildren()
 				clone.Name = key :: string
 				-- rotasi bawaan part hasil impor FBX harus dipertahankan (bukan hanya yaw bangunan)
-				clone.CFrame = center * CFrame.new(part.Position - rawCenter) * part.CFrame.Rotation
+				-- FBX diimpor dengan rotasi bawaan yang berbeda-beda (0 atau ~180 derajat): jika 0, depan mesh ada di +Z
+				-- lokal, jadi putar 180 derajat di sekitar pusat agar depan = -Z seperti yang lain.
+				local flip = if math.abs(select(2, part.CFrame:ToOrientation())) < 1.5 then math.pi else 0
+				clone.CFrame = center * CFrame.Angles(0, flip, 0) * CFrame.new(part.Position - rawCenter) * part.CFrame.Rotation
 				clone.Color, clone.Material, clone.Transparency = look[1] :: Color3, look[2] :: Enum.Material, look[3] :: number
 				clone.Anchored, clone.CanCollide, clone.CanTouch = true, false, false
 				if string.sub(key :: string, -5) == "Glass" then
@@ -246,11 +301,11 @@ local function build(spec: Spec): number
 		sign.CanCollide, sign.CanQuery, sign.CanTouch = false, false, false
 		sign.Transparency = 1
 		sign.Size = Vector3.new(s.size.X, s.size.Y, 0.1)
-		sign.CFrame = base * CFrame.new(s.at.X, s.at.Z, -s.at.Y)
+		sign.CFrame = base * CFrame.new(s.at.X, s.at.Z, -s.at.Y) * CFrame.new(0, 0, -0.6) -- sedikit di depan permukaan
 		local gui = Instance.new("SurfaceGui")
 		gui.Face = Enum.NormalId.Front
 		gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-		gui.PixelsPerStud = 50
+		gui.PixelsPerStud = 30
 		gui.Parent = sign
 		local label = Instance.new("TextLabel")
 		label.Size = UDim2.fromScale(1, 1)
