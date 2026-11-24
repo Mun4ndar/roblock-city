@@ -144,3 +144,13 @@ end
 	(depan = -Z lokal, belakang +Z), menghindari slot YARD_SLOTS HouseConfig (z 12 di belakang, samping x -13,5) dan
 	titik yang di dalam 5 stud dari aspal. Rumah mewah dan lahan kosong besar belum dihias.
 ]]
+
+--[[
+	2026-11-25: (1) Toko.Warung dan PelataranWarung digeser +14,5 z (z -94,9..-76,2) karena barang depannya masuk
+	JalanKenangaTimur; teras Startduck dipersempit (x 195..204) supaya pagar tidak masuk NS3_2, meja digeser 0,8 ke barat.
+	Audit seluruh bangunan/kios terhadap aspal (titik sudut + tengah di dalam slab): hanya dua itu yang bermasalah;
+	sisanya lantai dealer, bundaran, jalan setapak (aspal sah). (2) Dekorasi melayang: tanaman hasil penggantian di pulau
+	putar balik (RoundaboutGardens.Taman_PulauPutar berada ~7 stud di atas pulau) diturunkan dengan raycast ke bawah:
+	60 pohon/semak PenggantiBulat, 237 bunga BungaToko, 8 bedeng oval, dan 19 bunga/semak Scenery.Countryside di atas terrain.
+	Audit ulang 3.964 dekorasi: nol melayang > 1,2 stud.
+]]
