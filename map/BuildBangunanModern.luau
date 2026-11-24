@@ -198,6 +198,62 @@ local SPECS: { Spec } = {
 			{ text = "SPBU", size = Vector2.new(17, 3.6), at = Vector3.new(0, 2.6, 14.5), color = rgb(255, 255, 255) },
 		},
 	},
+	{
+		key = "resort",
+		model = "ROBLOCKResort",
+		template = "ResortMentah",
+		origin = Vector3.new(1249, 1, -460),
+		yaw = -math.pi / 2, -- depan menghadap +X (ke kolam)
+		bboxCenter = Vector3.new(0, 5.775, 27.5),
+		keep = { "Body1", "Lobby" },
+		look = {
+			RsWall = { rgb(244, 240, 232), SP, 0 },
+			RsSand = { rgb(224, 208, 170), CON, 0 },
+			RsWhite = { rgb(250, 249, 245), SP, 0 },
+			RsGlass = { rgb(110, 195, 215), GLS, 0.3 },
+			RsDark = { rgb(34, 50, 62), SP, 0 },
+			RsWood = { rgb(176, 128, 80), WOOD, 0 },
+			RsPlanter = { rgb(150, 110, 80), CON, 0 },
+			RsLeaf = { rgb(70, 160, 80), GRASS, 0 },
+			RsTeal = { rgb(30, 170, 180), SP, 0 },
+			RsGold = { rgb(226, 172, 52), MET, 0 },
+		},
+		colliders = {},
+		signs = {
+			{ text = "ROBLOCK RESORT", size = Vector2.new(22, 3.0), at = Vector3.new(0, 19.05, 13.4), color = rgb(255, 255, 255) },
+		},
+	},
+	{
+		key = "sekolah",
+		model = "GedungSekolah",
+		template = "SekolahMentah",
+		origin = Vector3.new(-183, 0, -61),
+		yaw = 0,
+		bboxCenter = Vector3.new(0, 4.8, 23.25),
+		keep = { "Body", "Roof" },
+		look = {
+			ScWall = { rgb(250, 232, 160), SP, 0 },
+			ScStone = { rgb(190, 184, 172), CON, 0 },
+			ScRed = { rgb(210, 70, 62), SP, 0 },
+			ScOrange = { rgb(250, 150, 40), SP, 0 },
+			ScYellow = { rgb(252, 214, 60), SP, 0 },
+			ScGreen = { rgb(90, 190, 90), SP, 0 },
+			ScBlue = { rgb(70, 140, 230), SP, 0 },
+			ScPurple = { rgb(160, 100, 220), SP, 0 },
+			ScRoof = { rgb(196, 78, 66), SP, 0 },
+			ScWhite = { rgb(250, 249, 245), SP, 0 },
+			ScGlass = { rgb(130, 195, 225), GLS, 0.3 },
+			ScDark = { rgb(60, 44, 38), WOOD, 0 },
+			ScGold = { rgb(226, 172, 52), MET, 0 },
+			ScClock = { rgb(255, 252, 240), SP, 0 },
+			ScWhiteFlag = { rgb(250, 249, 245), Enum.Material.Fabric, 0 },
+			ScWood = { rgb(176, 128, 80), WOOD, 0 },
+		},
+		colliders = {},
+		signs = {
+			{ text = "SEKOLAH", size = Vector2.new(14, 1.6), at = Vector3.new(0, 21.9, 20.6), color = rgb(190, 50, 50) },
+		},
+	},
 }
 
 local function build(spec: Spec): number
@@ -207,6 +263,8 @@ local function build(spec: Spec): number
 	local old = (blender and blender:FindFirstChild(spec.model))
 		or buildings:FindFirstChild(spec.model)
 		or Workspace.Map.Residential.Buildings.Downtown:FindFirstChild(spec.model)
+		or Workspace.Map.Beach.Resort:FindFirstChild(spec.model)
+		or Workspace.Map.Neighborhoods.Sekolah:FindFirstChild(spec.model)
 	if raw == nil or old == nil then
 		warn("[BuildBangunanModern] " .. spec.key .. ": template atau model lama tidak ada")
 		return 0
