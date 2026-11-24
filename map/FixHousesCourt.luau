@@ -99,3 +99,11 @@ end
 	- SemakOval (78) dan Rumpun bola Scenery (219) -> SemakBulat (mesh).
 	Ditolak (berskrip atau partikel): 115131518556387, 128322951871227, 134149653672057, 88196712273495, 1353190583.
 ]]
+
+--[[
+	2026-11-25: sambungan lebar jalan diberi taper (potongan miring), dibuat lewat execute_luau.
+	Empat simpang: Boulevard 64 -> NS2_1 32 di (100, 14) taper 24 stud; KeTimur 48 -> EW2_4 32 di (300, 214),
+	KeBarat 48 -> EW2_1 32 di (-100, 214), KeSelatan 48 -> NS2_4 32 di (100, 414), taper 12 stud. Tiap simpang:
+	slab lebar dipendekkan sepanjang taper, "TaperTengah" (lebar 32), dua "TaperBaji" (WedgePart rebah, tebal
+	0,4) dan dua "TaperGaris" diagonal; garis tepi penghubung dipotong, median Boulevard berakhir di z = -8.
+]]
