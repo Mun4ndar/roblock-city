@@ -25,6 +25,10 @@ local HOUSE_FIXES: { { n: number, x: number, z: number, yaw: number? } } = {
 	{ n = 59, x = 735, z = 580 },
 }
 
+-- Sesudah pemadatan beberapa rumah bergeser sehingga berdempetan/menimpa. Kisi aslinya (langkah 55 stud)
+-- dari BuildResidential.buildHouses; tiap rumah dikembalikan ke slotnya (Rumah9-12 = lajur x -316, z -46..119).
+-- Dijalankan 2026-11-25 lewat execute_luau (24 rumah dipindah, Halaman_Rumah ikut), place v134.
+
 local COURT_CENTER = CFrame.new(-390, 0, -18)
 local OLD_COURT_PARTS = { "LapanganBasket", "Area", "TiangRing", "Papan", "Ring", "BolaBasket" }
 
