@@ -115,3 +115,12 @@ end
 	(radius cakram - 1,5, terbuka di mulut jalan), trotoar melingkar 6 stud (radius + 3, warna trotoar
 	Neighborhoods) dan kerb beton di sekeliling pulau rumput.
 ]]
+
+--[[
+	2026-11-25: jalan pegunungan rata dengan tanah. Audit semua 322 slab aspal terhadap tanah (raycast ke Terrain,
+	5 titik melintang tiap 16 stud): JalanDesa, KeCountryside, JalanPasarTani berada di parit potongan terrain
+	(permukaan -2) sehingga jalan melayang 2,4 stud dari dasar. 18 slab diisi Terrain:FillBlock Grass (lebar jalan
+	+ 30, tinggi atas -2 = permukaan 0, lihat catatan "permukaan terlihat 2 stud di atas FillBlock") di bawah jalan.
+	Dilewati: yang dekat jembatan (Dek). Sisa selisih 1 stud di tepi lereng parit dan lantai parkir ParkirUmum
+	(sengaja panggung 1,3 stud).
+]]
