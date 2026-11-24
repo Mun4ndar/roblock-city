@@ -124,3 +124,15 @@ end
 	Dilewati: yang dekat jembatan (Dek). Sisa selisih 1 stud di tepi lereng parit dan lantai parkir ParkirUmum
 	(sengaja panggung 1,3 stud).
 ]]
+
+--[[
+	2026-11-25: pohon pegunungan (235 "Pohon" di Countryside.Hutan) diganti cemara mesh gratis: aset 5392132809
+	(spruce 3 MeshPart, ServerStorage.AsetPihakKetiga.CemaraSpruce) dan 8528830197 (pinus, CemaraPinus, 20%),
+	skala tinggi 20-34, tanpa tabrakan -> Map.Countryside.HutanCemara. Ditolak (berskrip): 76172906742533.
+
+	2026-11-25: simpang akses bandara (JalanTerminal x -712 dengan KeBandara z 614) dibangun ulang di RoadFixes.SimpangBandara:
+	tambalan miring SambungBandara dihapus; sudut luar membulat (persegi 14x12 + cakram R12 pusat (-714,626)); sudut dalam
+	chamfer 8 stud di (-698,590); garis tepi luar melengkung R10,5, garis tepi dalam dipotong, garis kuning ganda
+	melengkung R12 pusat (-700,602); dekorasi liar di sudut dibuang. Dek jembatan tidak disentuh. Audit garis marka
+	Airport/Countryside/Highway/RoadFixes: nol ujung di luar aspal.
+]]
