@@ -8,14 +8,17 @@
 --   * Client hanya meminta jendela beli (remote ShopPrompt); Roblox yang menampilkan harga
 --     dan konfirmasi. Tidak ada harga atau jumlah koin yang dikirim client.
 
+local HttpService = game:GetService("HttpService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
+local ProximityPromptService = game:GetService("ProximityPromptService")
 
 local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local Net = require(Shared:WaitForChild("Net"))
 local Types = require(Shared:WaitForChild("Types"))
 local Format = require(Shared:WaitForChild("Format"))
 local ShopConfig = require(Shared:WaitForChild("ShopConfig"))
+local SkinConfig = require(Shared:WaitForChild("SkinConfig"))
 
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local EconomyService = require(script.Parent:WaitForChild("EconomyService"))
@@ -49,17 +52,48 @@ local function processReceipt(info: { [string]: any }): Enum.ProductPurchaseDeci
 		warn("[Shop] produk tidak dikenal: " .. tostring(info.ProductId))
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
-	if not EconomyService.addMoney(player, product.coins, "shop:" .. product.key) then
-		return Enum.ProductPurchaseDecision.NotProcessedYet
+	if product.coins then
+		if not EconomyService.addMoney(player, product.coins, "shop:" .. product.key) then
+			return Enum.ProductPurchaseDecision.NotProcessedYet
+		end
+		EconomyService.notify(
+			player,
+			"Terima kasih! Kamu mendapat " .. Format.money(product.coins) .. "."
+		)
+	elseif product.skin then
+		-- Skin Toko Skin (lihat SkinConfig): dicatat sebagai milik pemain, bukan koin.
+		local skins: any = data.skins
+		if type(skins) ~= "table" then
+			skins = {}
+			data.skins = skins
+		end
+		if type(skins.owned) ~= "table" then
+			skins.owned = {}
+		end
+		skins.owned[product.key] = true
+		local view = {
+			owned = skins.owned,
+			active = if type(skins.active) == "string" then skins.active else "",
+		}
+		player:SetAttribute(SkinConfig.ATTR_PLAYER, HttpService:JSONEncode(view))
+		EconomyService.notify(player, "Terima kasih! " .. product.name .. " sekarang milikmu.")
+	else
+		-- Produk gadget (ROBLOCK STORE): dicatat sebagai milik pemain, bukan koin.
+		local gadgets: any = data.gadgets
+		if type(gadgets) ~= "table" then
+			gadgets = {}
+			data.gadgets = gadgets
+		end
+		if type(gadgets.owned) ~= "table" then
+			gadgets.owned = {}
+		end
+		gadgets.owned[product.key] = true
+		EconomyService.notify(player, "Terima kasih! " .. product.name .. " sekarang milikmu.")
 	end
 	table.insert(receipts, purchaseId)
 	while #receipts > ShopConfig.MAX_RECEIPTS do
 		table.remove(receipts, 1)
 	end
-	EconomyService.notify(
-		player,
-		"Terima kasih! Kamu mendapat " .. Format.money(product.coins) .. "."
-	)
 	return Enum.ProductPurchaseDecision.PurchaseGranted
 end
 
@@ -197,6 +231,20 @@ function ShopService.start()
 	Players.PlayerRemoving:Connect(function(player: Player)
 		lastCall[player] = nil
 	end)
+	-- Etalase gadget ROBLOCK STORE: ProximityPrompt (atribut ATTR_GADGET = key produk)
+	-- ditaruh BuildShops; server yang membuka jendela belinya.
+	ProximityPromptService.PromptTriggered:Connect(
+		function(proximityPrompt: ProximityPrompt, player: Player)
+			local key = proximityPrompt:GetAttribute(ShopConfig.ATTR_GADGET)
+			if key == nil then
+				return
+			end
+			local ok, value = pcall(prompt, player, key)
+			if ok and value.ok == false and value.message ~= "" then
+				EconomyService.notify(player, value.message)
+			end
+		end
+	)
 	MarketplaceService.PromptGamePassPurchaseFinished:Connect(
 		function(player: Player, passId: number, purchased: boolean)
 			if purchased and passId == ShopConfig.PASSES.vip.passId then

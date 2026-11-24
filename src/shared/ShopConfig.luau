@@ -16,10 +16,14 @@ local ShopConfig = {}
 export type Product = {
 	key: string,
 	name: string,
-	coins: number, -- uang dalam game yang diberikan
+	coins: number?, -- uang dalam game yang diberikan (produk koin)
+	skin: boolean?, -- true = produk skin Toko Skin (lihat SkinConfig, key = id skin)
 	robux: number, -- saran harga (tidak dipakai kode)
 	productId: number, -- 0 = belum dibuat
 }
+
+-- Produk gadget ROBLOCK STORE: tidak punya `coins`, jadi pembelian dicatat di
+-- PlayerData.gadgets.owned (key produk) bukan menambah uang.
 
 export type Pass = {
 	key: string,
@@ -39,6 +43,18 @@ ShopConfig.PRODUCTS = {
 		robux = 249,
 		productId = 3734530604,
 	},
+	-- Gadget ROBLOCK STORE (lihat MapBuilders/BuildShops.luau untuk etalasenya).
+	{ key = "boombox_neon", name = "Boombox Neon", robux = 75, productId = 0 },
+	{ key = "skateboard_rocket", name = "Skateboard Rocket", robux = 49, productId = 0 },
+	{ key = "headset_gamer", name = "Headset Gamer", robux = 35, productId = 0 },
+	{ key = "pedang_cahaya", name = "Pedang Cahaya", robux = 99, productId = 0 },
+	-- Skin Toko Skin (tampilannya di SkinConfig; key = id skin).
+	{ key = "perak", name = "Skin Perak Chrome", skin = true, robux = 75, productId = 0 },
+	{ key = "emas", name = "Skin Bintang Emas", skin = true, robux = 99, productId = 0 },
+	{ key = "robot", name = "Skin Robot Kota", skin = true, robux = 129, productId = 0 },
+	{ key = "neon_biru", name = "Skin Neon Biru", skin = true, robux = 149, productId = 0 },
+	{ key = "kristal_es", name = "Skin Kristal Es", skin = true, robux = 149, productId = 0 },
+	{ key = "lava", name = "Skin Kulit Lava", skin = true, robux = 199, productId = 0 },
 } :: { Product }
 
 ShopConfig.PASSES = {
@@ -53,6 +69,7 @@ ShopConfig.PASSES = {
 
 ShopConfig.ATTR_VIP = "VIP" -- atribut Player (boolean), diisi server
 ShopConfig.ATTR_PROMPT = "CoinShop" -- atribut ProximityPrompt kios Toko Koin
+ShopConfig.ATTR_GADGET = "GadgetShop" -- atribut ProximityPrompt etalase gadget (nilai = key produk)
 -- Kios Toko Koin di atrium ROBLOCK Mega Mall (ruang dalam di y = 2000, lihat map/BuildInteriors.luau)
 ShopConfig.KIOSK_POSITION = Vector3.new(499, 2000, -585)
 ShopConfig.MAX_RECEIPTS = 60 -- jumlah tanda terima terakhir yang diingat per pemain
