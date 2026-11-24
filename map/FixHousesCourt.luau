@@ -136,3 +136,11 @@ end
 	melengkung R12 pusat (-700,602); dekorasi liar di sudut dibuang. Dek jembatan tidak disentuh. Audit garis marka
 	Airport/Countryside/Highway/RoadFixes: nol ujung di luar aspal.
 ]]
+
+--[[
+	2026-11-25 (place v161): halaman belakang 78 rumah dihias -> Workspace.Map.HalamanHiasan/HiasanN: satu pohon
+	(klon PohonRindang tinggi 8-12, digeser ke samping supaya tidak menimpa sayap garasi), tiga semak (SemakBulat),
+	gerombol 4 bunga (BungaToko), satu rumpun rumput, bangku (BangkuTaman, 35%). Posisi dalam bingkai lokal rumah
+	(depan = -Z lokal, belakang +Z), menghindari slot YARD_SLOTS HouseConfig (z 12 di belakang, samping x -13,5) dan
+	titik yang di dalam 5 stud dari aspal. Rumah mewah dan lahan kosong besar belum dihias.
+]]
