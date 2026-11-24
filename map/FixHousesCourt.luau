@@ -88,3 +88,14 @@ end
 	ModernDealer.luau baris "Hedge" (z ~326) sebaiknya membuat deretan SemakBulat juga, bukan balok.
 	Ditolak: aset 14161520172 / 9187118377 (bentuk jelek). Jangan dijalankan ulang tanpa mengecek balok yang tersisa.
 ]]
+
+--[[
+	2026-11-25 (place v147): taman tidak lagi bulat-bulat seperti Minecraft.
+	- Bunga: aset gratis Creator Store 9454164504 (4 bunga, 3 MeshPart tiap bunga) dan 16071638063 (aster) =
+	  ServerStorage.AsetPihakKetiga.BungaToko (Bunga1-4, BungaDaisy); rumput 252805406 (RumputTuft, 18 Part+SpecialMesh).
+	  Semua tanpa skrip. 175 BungaKelopak RealisticFlowers + BungaKelopak ParkRefresh/RoundaboutGardens + 355 balok
+	  Scenery.Bunga diganti gerombol bunga -> Workspace.Map.BungaToko; 70 rumpun rumput di tiga TamanNatural dan Lawn.
+	- Pohon bola (KanopiPohon + BatangPohon, pohon TamanBermain) -> klon PohonRindang (mesh) di Map.PenggantiBulat.
+	- SemakOval (78) dan Rumpun bola Scenery (219) -> SemakBulat (mesh).
+	Ditolak (berskrip atau partikel): 115131518556387, 128322951871227, 134149653672057, 88196712273495, 1353190583.
+]]
