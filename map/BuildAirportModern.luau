@@ -7,8 +7,8 @@
 	  PesawatPenumpangMentah 97741812415503 (PlWhite, PlLivery, PlDark, PlGray, PlTire)
 	  GarbarataMentah 88066069925230 (BrWhite, BrGlass, BrGray, BrYellow, BrDark)
 	  MenaraMentah 140239327509449 (TwWhite, TwRed, TwGlass, TwDark)
-	Koordinat Blender -> Roblox lokal = (x, z, -y); asal mesh dihitung dari kotak pembatas model
-	(tengah kotak di Blender diketahui, lihat BBOX di bawah). Semua aset simetris kiri-kanan.
+	Asal mesh dihitung dari kotak pembatas model (tengah kotak di Blender: lihat BBOX di bawah).
+	Semua aset simetris kiri-kanan (impor FBX Roblox memutar/mencerminkan model).
 
 	Isi: terminal besar (depan menghadap -Z ke jalan terminal, tengah (-975, 464)), 4 pesawat
 	penumpang di gerbang 1-4 (hidung ke terminal, warna maskapai karangan sendiri, statis), 4 garbarata
@@ -55,6 +55,7 @@ local LOOK: { [string]: { any } } = {
 	BrYellow = { rgb(250, 200, 42), Enum.Material.SmoothPlastic, 0, 0 },
 	BrDark = { rgb(55, 60, 70), Enum.Material.SmoothPlastic, 0, 0 },
 	PlWhite = { rgb(250, 250, 252), Enum.Material.SmoothPlastic, 0, 0 },
+	PlLivery = { rgb(62, 150, 232), Enum.Material.SmoothPlastic, 0, 0 }, -- diganti warna maskapai per pesawat
 	PlDark = { rgb(30, 42, 58), Enum.Material.SmoothPlastic, 0, 0 },
 	PlGray = { rgb(208, 213, 220), Enum.Material.SmoothPlastic, 0, 0 },
 	PlTire = { rgb(26, 26, 30), Enum.Material.SmoothPlastic, 0, 0 },
@@ -79,17 +80,24 @@ local function place(
 	name: string,
 	livery: Color3?
 ): Model
+	-- Model hasil impor memutar semua MeshPart (yaw acak, sama untuk semua bagian) dan sumbu Y Blender
+	-- jatuh ke +Z; jadi: batalkan putaran, lalu putar 180 derajat agar depan (+Y Blender) = -Z.
 	local parts: { MeshPart } = {}
 	local mn, mx = V3(1e9, 1e9, 1e9), V3(-1e9, -1e9, -1e9)
+	local inv: CFrame? = nil
 	for _, d in raw:GetDescendants() do
 		if d:IsA("MeshPart") then
+			if inv == nil then
+				inv = d.CFrame.Rotation:Inverse()
+			end
 			table.insert(parts, d)
 			local h = d.Size / 2
-			mn, mx = mn:Min(d.Position - h), mx:Max(d.Position + h)
+			local rel = (inv :: CFrame) * d.Position
+			mn, mx = mn:Min(rel - h), mx:Max(rel + h)
 		end
 	end
 	local c = BBOX[raw.Name]
-	local origin = (mn + mx) / 2 - V3(c.X, c.Z, -c.Y)
+	local origin = (mn + mx) / 2 - V3(c.X, c.Z, c.Y)
 	local model = Instance.new("Model")
 	model.Name = name
 	for _, part in parts do
@@ -97,7 +105,7 @@ local function place(
 		if look then
 			local clone = part:Clone()
 			clone:ClearAllChildren()
-			clone.CFrame = frame * CFrame.new(part.Position - origin)
+			clone.CFrame = frame * CFrame.Angles(0, math.pi, 0) * CFrame.new(((inv :: CFrame) * part.Position) - origin)
 			clone.Color, clone.Material, clone.Transparency, clone.Reflectance =
 				look[1], look[2], look[3], look[4]
 			if part.Name == "PlLivery" and livery then
