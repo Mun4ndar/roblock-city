@@ -98,7 +98,7 @@ local function buySeed(player: Player, cropId: any): Result
 		return result(false, "Bibit tidak dikenal.")
 	end
 	if not nearTagged(player, FarmConfig.TAG_MARKET, FarmConfig.MARKET_DISTANCE) then
-		return result(false, "Datang dulu ke Pasar Tani ya.")
+		return result(false, "Datang dulu ke Toko Bibit atau Gudang Hasil ya.")
 	end
 	local farm = getFarm(data)
 	local owned = farm.seeds[crop.id] or 0
@@ -110,7 +110,7 @@ local function buySeed(player: Player, cropId: any): Result
 	end
 	farm.seeds[crop.id] = owned + 1
 	publish(player, farm)
-	return result(true, "Bibit " .. crop.name .. " dibeli. Tanam di Kebun Warga!")
+	return result(true, "Bibit " .. crop.name .. " dibeli. Tanam di Perkebunan!")
 end
 
 local function plant(player: Player, plotIndex: any, cropId: any): Result
@@ -129,7 +129,7 @@ local function plant(player: Player, plotIndex: any, cropId: any): Result
 	end
 	local owned = farm.seeds[crop.id] or 0
 	if owned < 1 then
-		return result(false, "Kamu belum punya bibit " .. crop.name .. ". Beli di Pasar Tani.")
+		return result(false, "Kamu belum punya bibit " .. crop.name .. ". Beli di Toko Bibit.")
 	end
 	farm.seeds[crop.id] = if owned > 1 then owned - 1 else nil
 	farm.plots[key] = { crop = crop.id, plantedAt = math.floor(Workspace:GetServerTimeNow()) }
@@ -168,10 +168,11 @@ local function harvest(player: Player, plotIndex: any): Result
 	if owned >= FarmConfig.MAX_STACK then
 		return result(false, "Keranjangmu penuh. Jual dulu hasil panen di Pasar Tani.")
 	end
+	local amount = crop.yield or 1
 	farm.plots[key] = nil
-	farm.crops[crop.id] = owned + 1
+	farm.crops[crop.id] = math.min(owned + amount, FarmConfig.MAX_STACK)
 	publish(player, farm)
-	return result(true, "Panen " .. crop.name .. "! Jual di Pasar Tani.")
+	return result(true, `Panen {amount} {crop.name}! Jual di Gudang Hasil atau Pasar Tani.`)
 end
 
 local function sell(player: Player): Result
@@ -180,7 +181,7 @@ local function sell(player: Player): Result
 		return result(false, "Data kamu masih dimuat...")
 	end
 	if not nearTagged(player, FarmConfig.TAG_MARKET, FarmConfig.MARKET_DISTANCE) then
-		return result(false, "Datang dulu ke Pasar Tani ya.")
+		return result(false, "Datang dulu ke Toko Bibit atau Gudang Hasil ya.")
 	end
 	local farm = getFarm(data)
 	local total = 0
@@ -193,12 +194,17 @@ local function sell(player: Player): Result
 	if total <= 0 then
 		return result(false, "Belum ada hasil panen untuk dijual.")
 	end
+	local bonusText = ""
+	if data.jobs.current == FarmConfig.JOB then
+		total = math.floor(total * FarmConfig.JOB_SELL_BONUS)
+		bonusText = " (bonus Petani +25%)"
+	end
 	if not EconomyService.addMoney(player, total, "farm:sell") then
 		return result(false, "Belum bisa menjual sekarang, coba lagi.")
 	end
 	farm.crops = {}
 	publish(player, farm)
-	return result(true, "Hasil panen terjual " .. Format.money(total) .. "!")
+	return result(true, "Hasil panen terjual " .. Format.money(total) .. "!" .. bonusText)
 end
 
 -- ---------------------------------------------------------------- bootstrap

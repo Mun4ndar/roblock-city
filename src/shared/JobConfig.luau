@@ -185,6 +185,14 @@ JobConfig.PLACES = {
 	lumbung = place("Lumbung", -830, 0, 129),
 	kincirAngin = place("Kincir Angin", -960, 0, 164),
 	perkemahan = place("Perkemahan", -865, 3, -400),
+	-- Perkebunan Besar (map/BuildPerkebunan): toko bibit, gudang hasil, dan titik-titik di ladang
+	tokoBibit = place("Toko Bibit", -746, 0.3, 88),
+	gudangTani = place("Gudang Hasil", -775, 0.3, 89),
+	ladangUtara = place("Ladang Utara", -757, 0.6, 134),
+	ladangTengah = place("Ladang Tengah", -757, 0.6, 178),
+	ladangSelatan = place("Ladang Selatan", -757, 0.6, 224),
+	ladangBarat = place("Ladang Barat", -784, 0.6, 156),
+	ladangTimur = place("Ladang Timur", -730, 0.6, 200),
 } :: { [string]: Place }
 
 local RUMAH = {
@@ -204,6 +212,8 @@ local RUMAH = {
 }
 
 JobConfig.POOLS = {
+	-- petak-petak di Perkebunan Besar (pekerjaan Petani)
+	ladang = { "ladangUtara", "ladangTengah", "ladangSelatan", "ladangBarat", "ladangTimur" },
 	-- pemandangan yang dilewati penerbangan wisata (pekerjaan Pilot)
 	wisataUdara = {
 		"mercusuar",
@@ -797,6 +807,88 @@ JobConfig.LIST = {
 						hold = 4,
 						prop = "cat",
 						consume = true,
+					},
+				},
+			},
+		},
+	},
+	{
+		id = "petani",
+		name = "Petani",
+		icon = "🧑‍🌾",
+		color = Color3.fromRGB(86, 160, 80),
+		description = "Ambil bibit di Toko Bibit, tanam dan rawat sayur di Perkebunan Besar, lalu antar hasil panen ke Gudang Hasil. Hasil panen dijual 25% lebih mahal.",
+		workplace = "Toko Bibit Perkebunan",
+		uniform = {
+			hat = "cap",
+			hatColor = Color3.fromRGB(236, 204, 110),
+			vest = Color3.fromRGB(70, 120, 190),
+			trim = Color3.fromRGB(250, 250, 245),
+			badge = Color3.fromRGB(120, 200, 90),
+		},
+		tasks = {
+			{
+				id = "tanam",
+				title = "Tanam bibit",
+				weight = 3,
+				basePay = 35,
+				payPerStud = 0.06,
+				steps = {
+					{
+						place = "tokoBibit",
+						action = "Ambil bibit",
+						text = "Ambil bibit di {tempat}",
+						hold = 1,
+					},
+					{
+						pool = "ladang",
+						minDist = 30,
+						action = "Tanam bibit",
+						text = "Tanam bibit di {tempat}",
+						hold = 3,
+					},
+				},
+			},
+			{
+				id = "siram",
+				title = "Siram tanaman",
+				weight = 2,
+				basePay = 32,
+				payPerStud = 0.06,
+				steps = {
+					{
+						place = "tokoBibit",
+						action = "Ambil ember",
+						text = "Ambil ember air di {tempat}",
+						hold = 1,
+					},
+					{
+						pool = "ladang",
+						minDist = 30,
+						action = "Siram tanaman",
+						text = "Siram tanaman di {tempat}",
+						hold = 3,
+					},
+				},
+			},
+			{
+				id = "panen",
+				title = "Panen dan antar ke gudang",
+				weight = 3,
+				basePay = 45,
+				payPerStud = 0.06,
+				steps = {
+					{
+						pool = "ladang",
+						action = "Panen sayur",
+						text = "Panen sayur di {tempat}",
+						hold = 3,
+					},
+					{
+						place = "gudangTani",
+						action = "Antar hasil",
+						text = "Antar hasil panen ke {tempat}",
+						hold = 1,
 					},
 				},
 			},

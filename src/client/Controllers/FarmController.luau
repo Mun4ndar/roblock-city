@@ -7,6 +7,7 @@
 local CollectionService = game:GetService("CollectionService")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local Workspace = game:GetService("Workspace")
 
@@ -47,6 +48,7 @@ local folder: Folder
 local busy = false
 local mode: string? = nil -- "market" | "plant"
 local plantIndex = 0
+local marketName = "Pasar Tani"
 local drawn: { [number]: string } = {} -- petak -> tanda keadaan yang sudah digambar
 local refreshPanel: () -> ()
 
@@ -151,10 +153,58 @@ local function deco(
 	p.Parent = parent
 end
 
+local function plantTemplate(name: string?): Model?
+	if name == nil then
+		return nil
+	end
+	local assets = ReplicatedStorage:FindFirstChild("Assets")
+	local folder_ = if assets then assets:FindFirstChild("Tanaman") else nil
+	local template = if folder_ then folder_:FindFirstChild(name) else nil
+	return if template and template:IsA("Model") then template else nil
+end
+
+-- Tanaman mesh (Food Pack): 3x3 rumpun per petak, ukurannya tumbuh dari kecil sampai matang.
+local function drawMeshPlot(
+	model: Model,
+	index: number,
+	soil: BasePart,
+	template: Model,
+	crop: FarmConfig.CropDef,
+	growth: number
+)
+	local top = soil.CFrame * CFrame.new(0, soil.Size.Y / 2, 0)
+	local spacing = math.min(soil.Size.X, soil.Size.Z) / 3.4
+	local size = (crop.scale or 2) * (0.25 + 0.75 * growth)
+	for ix = -1, 1 do
+		for iz = -1, 1 do
+			local rng = Random.new(index * 97 + ix * 13 + iz * 5)
+			local plant = template:Clone()
+			plant:ScaleTo(size * (0.9 + 0.2 * rng:NextNumber()))
+			local height = plant:GetExtentsSize().Y
+			plant:PivotTo(
+				top
+					* CFrame.new(
+						ix * spacing + rng:NextNumber(-0.3, 0.3),
+						height / 2 - 0.05,
+						iz * spacing + rng:NextNumber(-0.3, 0.3)
+					)
+					* CFrame.Angles(0, rng:NextNumber(0, math.pi * 2), 0)
+			)
+			plant.Parent = model
+		end
+	end
+end
+
 -- Enam tanaman per petak; tinggi batang mengikuti kematangan, buah muncul saat siap panen.
 local function drawPlot(index: number, soil: BasePart, crop: FarmConfig.CropDef, growth: number)
 	local model = Instance.new("Model")
 	model.Name = "Tanaman" .. index
+	local template = plantTemplate(crop.model)
+	if template then
+		drawMeshPlot(model, index, soil, template, crop, growth)
+		model.Parent = folder
+		return
+	end
 	local top = soil.CFrame * CFrame.new(0, soil.Size.Y / 2, 0)
 	local height = 0.5 + 2.6 * growth
 	for ix = -1, 1 do
@@ -237,7 +287,7 @@ local function row(height: number, order: number): Frame
 end
 
 local function buildMarket(view: FarmView)
-	titleLabel.Text = "Pasar Tani"
+	titleLabel.Text = marketName
 	local money = player:GetAttribute("Money")
 	local total = 0
 	for order, crop in FarmConfig.CROPS do
@@ -322,7 +372,7 @@ local function buildPlant(view: FarmView)
 		r.BackgroundTransparency = 1
 		label({
 			Size = UDim2.fromScale(1, 1),
-			Text = "Kamu belum punya bibit. Beli dulu di Pasar Tani, tepat di depan kebun ini.",
+			Text = "Kamu belum punya bibit. Beli dulu di Toko Bibit di dekat kebun.",
 		}).Parent =
 			r
 	end
@@ -466,6 +516,8 @@ function FarmController.start()
 			return
 		end
 		if CollectionService:HasTag(part, FarmConfig.TAG_MARKET) then
+			local name = part:GetAttribute("MarketName")
+			marketName = if type(name) == "string" then name else "Pasar Tani"
 			open("market")
 		elseif CollectionService:HasTag(part, FarmConfig.TAG_PLOT) then
 			local index = part:GetAttribute(FarmConfig.ATTR_PLOT_INDEX)
