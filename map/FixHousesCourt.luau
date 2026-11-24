@@ -29,6 +29,12 @@ local HOUSE_FIXES: { { n: number, x: number, z: number, yaw: number? } } = {
 -- dari BuildResidential.buildHouses; tiap rumah dikembalikan ke slotnya (Rumah9-12 = lajur x -316, z -46..119).
 -- Dijalankan 2026-11-25 lewat execute_luau (24 rumah dipindah, Halaman_Rumah ikut), place v134.
 
+-- Halaman_RumahN (pagar, rumput, jalan setapak) dibangun menyamping (pagar depan di sisi +X rumah) dan
+-- terlalu dalam, jadi pagar masuk ke trotoar. 2026-11-25 (place v135): tiap halaman diputar di sekitar
+-- pusat rumahnya supaya pagar depan ada di sisi depan rumah, lalu digeser ke belakang sampai pagar 15,2
+-- stud dari pusat rumah (22 stud dari garis tengah jalan = tepi luar trotoar). Halaman 40 disalin dari 41,
+-- rumput Halaman 1 dipangkas di sisi Jalan Melati, batu/bedeng yang masih di trotoar dimundurkan.
+
 local COURT_CENTER = CFrame.new(-390, 0, -18)
 local OLD_COURT_PARTS = { "LapanganBasket", "Area", "TiangRing", "Papan", "Ring", "BolaBasket" }
 
