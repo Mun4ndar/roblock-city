@@ -366,13 +366,18 @@ local function build(spec: Spec): number
 		gui.PixelsPerStud = 30
 		gui.Parent = sign
 		local label = Instance.new("TextLabel")
-		label.Size = UDim2.fromScale(1, 1)
+		label.Size = UDim2.fromScale(0.92, 0.9) -- sisakan tepi agar huruf pertama tidak terpotong
+		label.Position = UDim2.fromScale(0.04, 0.05)
 		label.BackgroundTransparency = 1
 		label.Text = s.text
 		label.TextColor3 = s.color
 		label.Font = Enum.Font.GothamBlack
 		label.TextScaled = true
 		label.Parent = gui
+		-- batas ukuran huruf: tanpa ini TextScaled melebar dan huruf pertama terpotong
+		local limit = Instance.new("UITextSizeConstraint")
+		limit.MaxTextSize = math.floor(s.size.Y * gui.PixelsPerStud * 0.6)
+		limit.Parent = label
 		sign.Parent = visual
 	end
 	visual.Parent = old
