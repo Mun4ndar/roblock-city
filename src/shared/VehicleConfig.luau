@@ -30,6 +30,7 @@ export type VehicleBody = {
 	sideText: string?, -- tulisan di sisi bodi / boks
 	box: { height: number, color: Color3 }?, -- boks di belakang kabin (ambulans, truk)
 	ladder: boolean?, -- tangga di atas boks
+	bigLadder: boolean?, -- tangga panjang bertingkat (truk tangga)
 	bike: boolean?, -- motor: jok berurutan di tengah, dua roda tampak (roda fisika tetap empat, tersembunyi)
 }
 
@@ -40,6 +41,7 @@ export type VehicleDef = {
 	description: string,
 	price: number,
 	job: string?, -- kendaraan dinas: hanya untuk pemain dengan pekerjaan ini (tidak dijual)
+	extra: boolean?, -- kendaraan dinas tambahan: pekerjaan yang sama, tombol kedua di menu pekerjaan
 	seats: number, -- termasuk pengemudi (1, 2 atau 4)
 	maxSpeed: number,
 	reverseSpeed: number,
@@ -399,6 +401,44 @@ VehicleConfig.SERVICE = {
 		},
 	},
 	{
+		id = "damkarTangga",
+		name = "Truk Tangga",
+		class = "Kendaraan Dinas",
+		description = "Truk pemadam besar dengan tangga panjang untuk gedung tinggi.",
+		price = 0,
+		job = "pemadam",
+		extra = true,
+		seats = 2,
+		maxSpeed = 56,
+		reverseSpeed = 18,
+		acceleration = 20,
+		brake = 80,
+		steerAngle = 28,
+		color = Color3.fromRGB(205, 40, 36),
+		accent = Color3.fromRGB(250, 250, 250),
+		body = {
+			style = "truck",
+			length = 24,
+			width = 8.4,
+			clearance = 1.6,
+			lowerHeight = 3.2,
+			cabinHeight = 3.3,
+			cabinFront = 0.05,
+			cabinBack = 0.27,
+			rakeFront = 1,
+			rakeBack = 0.3,
+			wheelRadius = 1.9,
+			wheelWidth = 1.6,
+			wheelbase = 14.5,
+			lightBar = { Color3.fromRGB(255, 70, 50), Color3.fromRGB(255, 190, 40) },
+			band = Color3.fromRGB(250, 250, 250),
+			sideText = "TRUK TANGGA",
+			box = { height = 3.6, color = Color3.fromRGB(205, 40, 36) },
+			ladder = true,
+			bigLadder = true,
+		},
+	},
+	{
 		id = "patroli",
 		name = "Mobil Patroli",
 		class = "Kendaraan Dinas",
@@ -444,7 +484,9 @@ for _, def in VehicleConfig.SERVICE do
 	assert(byId[def.id] == nil, "id kendaraan ganda: " .. def.id)
 	assert(def.job ~= nil, "kendaraan dinas tanpa pekerjaan: " .. def.id)
 	byId[def.id] = def
-	byJob[def.job :: string] = def
+	if not def.extra then
+		byJob[def.job :: string] = def
+	end
 end
 
 -- Mengembalikan definisi kendaraan, atau nil jika id tidak dikenal.
@@ -462,6 +504,19 @@ function VehicleConfig.forJob(jobId: any): VehicleDef?
 		return nil
 	end
 	return byJob[jobId]
+end
+
+-- Kendaraan dinas tambahan (tombol kedua di menu pekerjaan) untuk `jobId`, atau nil.
+function VehicleConfig.extraForJob(jobId: any): VehicleDef?
+	if type(jobId) ~= "string" then
+		return nil
+	end
+	for _, def in VehicleConfig.SERVICE do
+		if def.job == jobId and def.extra then
+			return def
+		end
+	end
+	return nil
 end
 
 -- "kancil,serasi" -> { kancil = true, serasi = true }

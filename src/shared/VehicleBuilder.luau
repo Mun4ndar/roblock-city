@@ -313,7 +313,7 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 					Material = Enum.Material.Metal,
 				})
 			end
-			local rungs = 7
+			local rungs = if b.bigLadder then 14 else 7
 			for index = 1, rungs do
 				local t = (index - 0.5) / rungs
 				part({

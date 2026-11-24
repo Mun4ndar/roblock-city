@@ -130,14 +130,14 @@ return function(): number
 	local bays = Instance.new("Folder")
 	bays.Name = "Teluk"
 	bays.Parent = model
-	for _, bay in { { "TelukDamkar", "damkar", -17 }, { "TelukAmbulans", "ambulans", -2 } } do
+	for _, bay in { { "TelukDamkar", "damkar", -17 }, { "TelukTangga", "damkarTangga", -2 } } do
 		local part = Instance.new("Part")
 		part.Name = bay[1]
 		part.Anchored = true
 		part.CanCollide = false
 		part.CanQuery = false
 		part.Transparency = 1
-		part.Size = Vector3.new(8, 0.2, 18)
+		part.Size = Vector3.new(9, 0.2, 25)
 		local at = world * CFrame.new(ORIGIN + Vector3.new(bay[3], 0, 1))
 		part.CFrame = CFrame.lookAt(Vector3.new(at.X, 1.3, at.Z), Vector3.new(at.X, 1.3, at.Z - 1))
 		part:SetAttribute("VehicleId", bay[2])

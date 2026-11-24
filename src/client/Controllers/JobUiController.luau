@@ -48,6 +48,7 @@ local panelScale: UIScale
 local openButton: TextButton
 local skipButton: TextButton
 local serviceButton: TextButton
+local serviceButton2: TextButton
 local hintLabel: TextLabel
 local tracker: TextButton
 local trackerScale: UIScale
@@ -123,6 +124,11 @@ local function refreshCards()
 	hintLabel.Visible = service == nil
 	if service then
 		serviceButton.Text = "Keluarkan " .. service.name
+	end
+	local extra = VehicleConfig.extraForJob(current)
+	serviceButton2.Visible = extra ~= nil
+	if extra then
+		serviceButton2.Text = "Keluarkan " .. extra.name
 	end
 end
 
@@ -206,8 +212,8 @@ local function onSkipClicked()
 	busy = false
 end
 
-local function onServiceClicked()
-	local service = VehicleConfig.forJob(currentJob())
+local function onServiceClicked(extra: boolean?)
+	local service = if extra then VehicleConfig.extraForJob(currentJob()) else VehicleConfig.forJob(currentJob())
 	if busy or service == nil then
 		return
 	end
@@ -448,7 +454,7 @@ local function buildGui()
 	local list = Instance.new("ScrollingFrame")
 	list.Name = "List"
 	list.Position = UDim2.fromOffset(14, 56)
-	list.Size = UDim2.new(1, -28, 1, -122)
+	list.Size = UDim2.new(1, -28, 1, -170)
 	list.BackgroundTransparency = 1
 	list.BorderSizePixel = 0
 	list.ScrollBarThickness = 6
@@ -492,7 +498,26 @@ local function buildGui()
 	serviceButton.Visible = false
 	corner(serviceButton, 12)
 	serviceButton.Parent = panel
-	serviceButton.Activated:Connect(onServiceClicked)
+	serviceButton.Activated:Connect(function()
+		onServiceClicked(false)
+	end)
+
+	serviceButton2 = Instance.new("TextButton")
+	serviceButton2.Name = "ServiceVehicle2"
+	serviceButton2.AnchorPoint = Vector2.new(1, 1)
+	serviceButton2.Position = UDim2.new(1, -14, 1, -60)
+	serviceButton2.Size = UDim2.fromOffset(250, 42)
+	serviceButton2.BackgroundColor3 = COLORS.service
+	serviceButton2.Font = Enum.Font.FredokaOne
+	serviceButton2.TextSize = 17
+	serviceButton2.TextColor3 = Color3.new(1, 1, 1)
+	serviceButton2.Text = ""
+	serviceButton2.Visible = false
+	corner(serviceButton2, 12)
+	serviceButton2.Parent = panel
+	serviceButton2.Activated:Connect(function()
+		onServiceClicked(true)
+	end)
 
 	hintLabel = label({
 		Name = "Hint",
