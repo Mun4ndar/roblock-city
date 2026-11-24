@@ -107,12 +107,46 @@ function VehicleService.getSpawned(player: Player): Model?
 	return spawned[player]
 end
 
+-- Kendaraan dinas yang diparkir di teluk kantor (pemadam, ambulans): tiruan diam yang hilang selama
+-- kendaraan aslinya dikeluarkan pemain, lalu muncul lagi saat disimpan. Teluknya = part bertag
+-- "ServiceBay" dengan atribut VehicleId (map/ stasiun pemadam).
+local TAG_SERVICE_BAY = "ServiceBay"
+local BAY_SPAWN_RANGE = 160 -- pemain sejauh ini dari teluk: kendaraan dinas keluar dari teluk
+local parked: { [string]: { model: Model, holder: Instance } } = {}
+
+local function bayFor(vehicleId: string): BasePart?
+	for _, bay in CollectionService:GetTagged(TAG_SERVICE_BAY) do
+		if
+			bay:IsA("BasePart")
+			and bay:IsDescendantOf(Workspace)
+			and bay:GetAttribute("VehicleId") == vehicleId
+		then
+			return bay
+		end
+	end
+	return nil
+end
+
+local function refreshParked()
+	for id, entry in parked do
+		local busy = false
+		for _, model in spawned do
+			if model:GetAttribute(VehicleConfig.ATTR_VEHICLE_ID) == id then
+				busy = true
+				break
+			end
+		end
+		entry.model.Parent = if busy then nil else entry.holder
+	end
+end
+
 function VehicleService.despawn(player: Player)
 	local model = spawned[player]
 	spawned[player] = nil
 	speedStrikes[player] = nil
 	if model then
 		model:Destroy()
+		refreshParked()
 	end
 end
 
@@ -419,6 +453,29 @@ local function spawnVehicle(player: Player, vehicleId: any, skipCooldown: boolea
 	end
 
 	local cframe, reason = findSpawnCFrame(root, def)
+	-- Kendaraan dinas yang punya teluk: keluar dari teluknya bila pemain berada di sekitar kantor
+	-- dan teluknya kosong.
+	local fromBay = false
+	if def.job then
+		local bay = bayFor(def.id)
+		if bay and (bay.Position - root.Position).Magnitude <= BAY_SPAWN_RANGE then
+			local overlap = OverlapParams.new()
+			overlap.FilterType = Enum.RaycastFilterType.Include
+			overlap.FilterDescendantsInstances = { vehicleFolder }
+			local taken = false
+			local own = spawned[player]
+			for _, part in Workspace:GetPartBoundsInBox(bay.CFrame, Vector3.new(8, 6, 18), overlap) do
+				if own == nil or not part:IsDescendantOf(own) then
+					taken = true
+					break
+				end
+			end
+			if not taken then
+				cframe = CFrame.new(bay.Position - Vector3.new(0, 0.05, 0)) * bay.CFrame.Rotation
+				fromBay = true
+			end
+		end
+	end
 	if cframe == nil then
 		return result(false, reason or "Tidak bisa mengeluarkan mobil di sini.")
 	end
@@ -439,7 +496,11 @@ local function spawnVehicle(player: Player, vehicleId: any, skipCooldown: boolea
 	model.Parent = vehicleFolder
 	CollectionService:AddTag(model, VehicleConfig.TAG_VEHICLE)
 	spawned[player] = model
+	refreshParked()
 
+	if fromBay then
+		return result(true, `{def.name} keluar dari garasi kantor! Tekan "Kemudikan" di pintunya.`)
+	end
 	return result(true, `{def.name} siap! Dekati pintunya lalu tekan "Kemudikan".`)
 end
 
@@ -526,6 +587,29 @@ local function flipVehicle(player: Player)
 			d.AssemblyLinearVelocity = Vector3.zero
 			d.AssemblyAngularVelocity = Vector3.zero
 		end
+	end
+end
+
+-- ---------------------------------------------------------------- teluk kantor dinas
+
+local function buildParkedService()
+	local holder = Instance.new("Folder")
+	holder.Name = "KendaraanParkir"
+	holder.Parent = Workspace
+	for _, def in VehicleConfig.SERVICE do
+		local bay = bayFor(def.id)
+		if bay == nil then
+			continue
+		end
+		local model = VehicleBuilder.build(def, { static = true })
+		model.Name = "Parkir_" .. def.id
+		local ground = bay.Position.Y - 0.05
+		model:PivotTo(CFrame.new(bay.Position.X, ground, bay.Position.Z) * bay.CFrame.Rotation)
+		-- pivot pajangan lebih tinggi dari titik tanah: turunkan sampai dasar roda menyentuh lantai
+		local boxCf, boxSize = model:GetBoundingBox()
+		model:PivotTo(model:GetPivot() - Vector3.new(0, boxCf.Position.Y - boxSize.Y / 2 - ground, 0))
+		model.Parent = holder
+		parked[def.id] = { model = model, holder = holder }
 	end
 end
 
@@ -735,6 +819,7 @@ function VehicleService.start()
 	end)
 
 	buildDealerDisplays()
+	buildParkedService()
 	task.spawn(watchSpeeds)
 end
 
