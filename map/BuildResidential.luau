@@ -247,56 +247,8 @@ local function buildParks(zone: Instance)
 	end
 
 	-- lapangan basket
-	local bc = CFrame.new(-376, 0, -40)
-	Kit.P({
-		Name = "LapanganBasket",
-		Size = Vector3.new(60, 0.3, 34),
-		CFrame = bc * CFrame.new(0, 0.15, 0),
-		Color = col(70, 120, 200),
-		Parent = f,
-	})
-	Kit.deco({
-		Name = "Area",
-		Size = Vector3.new(56, 0.05, 30),
-		CFrame = bc * CFrame.new(0, 0.32, 0),
-		Color = col(235, 140, 70),
-		Parent = f,
-	})
-	for _, sx in { -1, 1 } do
-		local hb = bc * CFrame.new(sx * 29, 0, 0)
-		Kit.P({
-			Name = "TiangRing",
-			Size = Vector3.new(0.6, 11, 0.6),
-			CFrame = hb * CFrame.new(sx * 1, 5.5, 0),
-			Color = col(60, 60, 65),
-			Material = Enum.Material.Metal,
-			Parent = f,
-		})
-		Kit.P({
-			Name = "Papan",
-			Size = Vector3.new(0.4, 4, 6),
-			CFrame = hb * CFrame.new(0, 10.5, 0),
-			Color = Kit.C.white,
-			Parent = f,
-		})
-		Kit.deco({
-			Name = "Ring",
-			Shape = Enum.PartType.Cylinder,
-			Size = Vector3.new(0.2, 2.4, 2.4),
-			CFrame = hb * CFrame.new(-sx * 1.6, 9.2, 0) * CFrame.Angles(0, 0, math.pi / 2),
-			Color = col(240, 100, 40),
-			Parent = f,
-		})
-	end
-	local bola = Kit.P({
-		Name = "BolaBasket",
-		Shape = Enum.PartType.Ball,
-		Size = Vector3.one * 1.6,
-		CFrame = bc * CFrame.new(0, 1.3, 0),
-		Color = col(235, 120, 40),
-		Parent = f,
-	})
-	bola.Anchored = false
+	-- koordinat LAMA (sebelum CompactMap); lapangan akhir ada di (-390, 0, -18), lihat FixHousesCourt
+	require(script.Parent.BasketCourt).build(CFrame.new(-376, 0, -40), f)
 
 	-- taman kecil di selatan kota kecil
 	for i = 0, 7 do
