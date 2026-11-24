@@ -79,3 +79,12 @@ return function()
 	local Court = require(script.Parent.BasketCourt)
 	Court.build(COURT_CENTER, taman)
 end
+
+--[[
+	2026-11-25 (place v145): semak balok diganti mesh Creator Store gratis "Realistic Bush" (asset 12728953454,
+	EvilSwrd, 2 MeshPart tanpa skrip) = ServerStorage.AsetPihakKetiga.SemakBulat. 258 balok (Bush 3,5 di Houses,
+	SemakKiri/SemakKanan 4 x 2,2 x 4 di HouseLandscaping) diganti skala 0,34-0,38; part "Bush" disimpan transparan
+	karena StyleHouses menggesernya. Dua pagar hidup "Hedge" dealer (54 x 3 x 2,5) diganti deretan semak skala 0,5.
+	ModernDealer.luau baris "Hedge" (z ~326) sebaiknya membuat deretan SemakBulat juga, bukan balok.
+	Ditolak: aset 14161520172 / 9187118377 (bentuk jelek). Jangan dijalankan ulang tanpa mengecek balok yang tersisa.
+]]
