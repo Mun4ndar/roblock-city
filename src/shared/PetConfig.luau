@@ -95,4 +95,81 @@ function PetConfig.get(id: any): PetDef?
 	return if type(id) == "string" then byId[id] else nil
 end
 
+-- ---------------------------------------------------------------- kepribadian
+-- Tiap hewan punya sifat sendiri. Server (PetService) memilih suasana hati (mood) dan tempat berdiri
+-- hewan; client (PetAnimController) memainkan gerakan sendi sesuai mood. Mood = nama pose.
+
+export type MoodDef = {
+	place: "follow" | "near" | "orbit8" | "circle", -- di mana hewan berdiri terhadap pemilik
+	emote: string, -- teks melayang ("" = tidak ada)
+	seconds: number, -- lama mood sebelum ganti
+}
+
+export type Personality = {
+	gait: "trot" | "hop" | "waddle" | "sneak", -- cara jalan
+	follow: Vector3, -- x = samping kanan pemilik, z = di belakang pemilik (stud)
+	idle: { string }, -- mood bermanja saat pemilik diam
+	petMood: string, -- reaksi saat dielus
+}
+
+PetConfig.MOODS = {
+	walk = { place = "follow", emote = "", seconds = 0 },
+	idle = { place = "follow", emote = "", seconds = 0 },
+	sit = { place = "near", emote = "", seconds = 7 },
+	rub = { place = "orbit8", emote = "Purrr~ ♥", seconds = 9 },
+	beg = { place = "near", emote = "Guk guk! ♥", seconds = 7 },
+	nuzzle = { place = "near", emote = "♥", seconds = 7 },
+	binky = { place = "circle", emote = "Yeay!", seconds = 6 },
+	pounce = { place = "near", emote = "Yip!", seconds = 7 },
+	curl = { place = "near", emote = "Zzz ♥", seconds = 9 },
+	hug = { place = "near", emote = "Peluk aku! ♥", seconds = 7 },
+	roll = { place = "circle", emote = "Hehe!", seconds = 6 },
+	-- reaksi dielus
+	purr = { place = "near", emote = "Purrr~ ♥", seconds = 4 },
+	wag = { place = "near", emote = "Guk guk! ♥", seconds = 4 },
+	melt = { place = "near", emote = "♥ ♥", seconds = 4 },
+	wiggle = { place = "near", emote = "Yip yip! ♥", seconds = 4 },
+	sway = { place = "near", emote = "Hehe ♥", seconds = 4 },
+} :: { [string]: MoodDef }
+
+PetConfig.PERSONALITY = {
+	kucing = {
+		gait = "trot",
+		follow = Vector3.new(1.7, 0, 1.6),
+		idle = { "rub", "sit", "rub" },
+		petMood = "purr",
+	},
+	anjing = {
+		gait = "trot",
+		follow = Vector3.new(1.5, 0, 1.2),
+		idle = { "sit", "beg", "beg" },
+		petMood = "wag",
+	},
+	kelinci = {
+		gait = "hop",
+		follow = Vector3.new(1.4, 0, 1.4),
+		idle = { "nuzzle", "binky", "sit" },
+		petMood = "melt",
+	},
+	rubah = {
+		gait = "sneak",
+		follow = Vector3.new(1.3, 0, 1.0),
+		idle = { "pounce", "curl", "sit" },
+		petMood = "wiggle",
+	},
+	panda = {
+		gait = "waddle",
+		follow = Vector3.new(1.8, 0, 1.5),
+		idle = { "hug", "roll", "sit" },
+		petMood = "sway",
+	},
+} :: { [string]: Personality }
+
+PetConfig.PET_RANGE = 12 -- jarak maksimal untuk mengelus hewan
+PetConfig.PET_COOLDOWN = 1.2
+
+function PetConfig.personality(id: string): Personality
+	return PetConfig.PERSONALITY[id] or PetConfig.PERSONALITY.kucing
+end
+
 return table.freeze(PetConfig)

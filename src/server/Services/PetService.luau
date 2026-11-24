@@ -80,7 +80,61 @@ local function piece(
 	p.Parent = model
 end
 
+-- Hewan berkerangka dari Blender: ServerStorage.AsetHewanRig.<id> = Model berisi part "Root" (tak terlihat,
+-- di tanah), MeshPart tiap bagian tubuh, dan Motor6D per sendi (Body, Head, LegFL, ...). Gerakan sendi
+-- dimainkan tiap client oleh PetAnimController; server hanya memilih mood (atribut "Mood").
+local function buildRigged(def: PetConfig.PetDef, at: CFrame): (Model?, BasePart?)
+	local rigs = game:GetService("ServerStorage"):FindFirstChild("AsetHewanRig")
+	local template = if rigs then rigs:FindFirstChild(def.id) else nil
+	if template == nil or not template:IsA("Model") then
+		return nil, nil
+	end
+	local model = template:Clone()
+	local root = model:FindFirstChild("Root")
+	if root == nil or not root:IsA("BasePart") then
+		model:Destroy()
+		return nil, nil
+	end
+	model.Name = "Hewan_" .. def.id
+	for _, part in model:GetDescendants() do
+		if part:IsA("BasePart") then
+			part.Anchored = false
+			part.CanCollide = false
+			part.CanQuery = false
+			part.CanTouch = false
+			part.Massless = part ~= root
+		end
+	end
+	model.PrimaryPart = root
+	model:PivotTo(at)
+	model:SetAttribute("Mesh", true)
+	model:SetAttribute("Rig", true)
+	model:SetAttribute("PetId", def.id)
+	model:SetAttribute("Mood", "idle")
+	local height = model:GetAttribute("Height")
+	local tag = Instance.new("BillboardGui")
+	tag.Name = "Nama"
+	tag.Size = UDim2.fromScale(5, 1)
+	tag.StudsOffset = Vector3.new(0, (if type(height) == "number" then height else 3.4) + 0.9, 0)
+	tag.MaxDistance = 45
+	local text = Instance.new("TextLabel")
+	text.Size = UDim2.fromScale(1, 1)
+	text.BackgroundTransparency = 1
+	text.Font = Enum.Font.FredokaOne
+	text.TextScaled = true
+	text.TextColor3 = Color3.new(1, 1, 1)
+	text.TextStrokeTransparency = 0.4
+	text.Text = def.name
+	text.Parent = tag
+	tag.Parent = root
+	return model, root
+end
+
 local function buildPet(def: PetConfig.PetDef, at: CFrame): (Model, BasePart)
+	local rigModel, rigRoot = buildRigged(def, at)
+	if rigModel and rigRoot then
+		return rigModel, rigRoot
+	end
 	local k = def.size
 	local model = Instance.new("Model")
 	model.Name = "Hewan_" .. def.id
@@ -204,11 +258,197 @@ local function buildPet(def: PetConfig.PetDef, at: CFrame): (Model, BasePart)
 	return model, root
 end
 
+-- ---------------------------------------------------------------- otak hewan (kepribadian)
+-- Tiap hewan memilih mood sesuai keadaan pemilik: berjalan, diam sebentar, lalu bermanja dengan
+-- gaya khas spesiesnya (PetConfig.PERSONALITY). Mood + titik berdiri dikirim lewat atribut model
+-- dan Attachment target; gerak sendinya digambar client. Server yang memutuskan, client hanya menampilkan.
+
+type Brain = {
+	player: Player,
+	model: Model,
+	root: BasePart,
+	target: Attachment,
+	def: PetConfig.PetDef,
+	mood: string,
+	moodUntil: number,
+	idleFor: number,
+	petUntil: number,
+	petMood: string,
+	lastPet: number,
+	orbit: number,
+	nextEmote: number,
+	emoteN: number,
+}
+
+local brains: { [Player]: Brain } = {}
+local brainClock = 0
+local brainConn: RBXScriptConnection? = nil
+
+local function emote(brain: Brain, text: string)
+	if text == "" then
+		return
+	end
+	brain.emoteN += 1
+	brain.model:SetAttribute("Emote", text)
+	brain.model:SetAttribute("EmoteId", brain.emoteN)
+end
+
+local function setMood(brain: Brain, mood: string)
+	if brain.mood == mood then
+		return
+	end
+	brain.mood = mood
+	brain.model:SetAttribute("Mood", mood)
+	local def = PetConfig.MOODS[mood]
+	if def then
+		emote(brain, def.emote)
+		brain.nextEmote = os.clock() + 4
+	end
+end
+
+local function stepBrain(brain: Brain, dt: number)
+	local character = brain.player.Character
+	local hrp = if character then character:FindFirstChild("HumanoidRootPart") else nil
+	if hrp == nil or not hrp:IsA("BasePart") then
+		return
+	end
+	local personality = PetConfig.personality(brain.def.id)
+	local now = os.clock()
+	local velocity = hrp.AssemblyLinearVelocity
+	local speed = Vector3.new(velocity.X, 0, velocity.Z).Magnitude
+	if speed > 2.5 then
+		brain.idleFor = 0
+	else
+		brain.idleFor += dt
+	end
+
+	if now < brain.petUntil then
+		setMood(brain, brain.petMood)
+	elseif speed > 2.5 then
+		setMood(brain, "walk")
+		brain.moodUntil = 0
+	elseif brain.idleFor < 2.5 then
+		setMood(brain, "idle")
+		brain.moodUntil = 0
+	elseif now >= brain.moodUntil then
+		-- pilih gaya bermanja berikutnya (tidak mengulang yang sama persis kalau ada pilihan lain)
+		local list = personality.idle
+		local pick = list[math.random(1, #list)]
+		if pick == brain.mood and #list > 1 then
+			pick = list[math.random(1, #list)]
+		end
+		setMood(brain, pick)
+		local def = PetConfig.MOODS[pick]
+		brain.moodUntil = now + (if def then def.seconds else 6) * (0.8 + math.random() * 0.4)
+	end
+
+	-- titik berdiri (ruang lokal pemilik; pemilik menghadap -Z, +Z = belakang)
+	local def = PetConfig.MOODS[brain.mood]
+	local place = if def then def.place else "follow"
+	local ground = if brain.model:GetAttribute("Mesh") then -2.95 else -1.9 + 0.95 * brain.def.size
+	local px, pz, yaw = personality.follow.X, personality.follow.Z, 0
+	if place == "near" then
+		px, pz = 1.4, -1.2
+		yaw = math.atan2(px, pz)
+	elseif place == "orbit8" then
+		brain.orbit += dt * 2.2
+		local a = brain.orbit
+		px, pz = 1.6 * math.sin(a), 1.1 * math.sin(2 * a)
+		yaw = math.atan2(-(1.6 * math.cos(a)), -(2.2 * math.cos(2 * a)))
+	elseif place == "circle" then
+		brain.orbit += dt * 1.4
+		local a = brain.orbit
+		px, pz = 3.4 * math.sin(a), 3.4 * math.cos(a)
+		yaw = math.atan2(-math.cos(a), math.sin(a))
+	end
+	brain.target.Position = Vector3.new(px, ground, pz)
+	brain.target.Orientation = Vector3.new(0, math.deg(yaw), 0)
+
+	-- sesekali berseru lagi kalau masih bermanja
+	if def and def.emote ~= "" and now >= brain.nextEmote then
+		brain.nextEmote = now + 4.5
+		emote(brain, def.emote)
+	end
+end
+
+local function attachBrain(
+	player: Player,
+	model: Model,
+	root: BasePart,
+	target: Attachment,
+	def: PetConfig.PetDef
+)
+	local brain: Brain = {
+		player = player,
+		model = model,
+		root = root,
+		target = target,
+		def = def,
+		mood = "idle",
+		moodUntil = 0,
+		idleFor = 0,
+		petUntil = 0,
+		petMood = "",
+		lastPet = 0,
+		orbit = 0,
+		nextEmote = 0,
+		emoteN = 0,
+	}
+	brains[player] = brain
+	-- elus hewan: tahan E dekat hewan (siapa pun boleh mengelus, pemilik atau teman)
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.Name = "Elus"
+	prompt.ActionText = "Elus"
+	prompt.ObjectText = def.name
+	prompt.HoldDuration = 0.25
+	prompt.MaxActivationDistance = 9
+	prompt.RequiresLineOfSight = false
+	prompt.Parent = root
+	prompt.Triggered:Connect(function(who: Player)
+		local c = who.Character
+		local r = if c then c:FindFirstChild("HumanoidRootPart") else nil
+		local now = os.clock()
+		if
+			r == nil
+			or not r:IsA("BasePart")
+			or (r.Position - root.Position).Magnitude > PetConfig.PET_RANGE
+		then
+			return
+		end
+		if now - brain.lastPet < PetConfig.PET_COOLDOWN then
+			return
+		end
+		brain.lastPet = now
+		brain.petUntil = now + 4
+		brain.petMood = PetConfig.personality(def.id).petMood
+		brain.moodUntil = 0
+		brain.nextEmote = 0
+		brain.mood = "" -- paksa emote baru
+		setMood(brain, brain.petMood)
+	end)
+	if brainConn == nil then
+		brainConn = game:GetService("RunService").Heartbeat:Connect(function(dt: number)
+			brainClock += dt
+			if brainClock < 1 / 15 then
+				return
+			end
+			local step = brainClock
+			brainClock = 0
+			for _, b in brains do
+				if b.model.Parent ~= nil then
+					stepBrain(b, step)
+				end
+			end
+		end)
+	end
+end
+
 local function removePet(player: Player)
 	local model = models[player]
 	if model then
 		model:Destroy()
 		models[player] = nil
+		brains[player] = nil
 	end
 end
 
@@ -256,6 +496,7 @@ local function spawnPet(player: Player)
 		root:SetNetworkOwner(player)
 	end)
 	models[player] = model
+	attachBrain(player, model, root, target, def)
 end
 
 -- ---------------------------------------------------------------- remote handler

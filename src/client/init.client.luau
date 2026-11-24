@@ -17,6 +17,7 @@ local ORDER = {
 	"PhoneController",
 	"FarmController",
 	"PetController",
+	"PetAnimController",
 	"FashionController",
 	"BusinessController",
 	"ShopController",
