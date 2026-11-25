@@ -1,0 +1,46 @@
+--!nocheck
+-- Dibuat otomatis oleh tools/blender/panggung.py (jangan diubah manual). Koordinat Blender (x, y, z): depan = +Y.
+return {
+	bboxCenter = Vector3.new(0.0, 16.671, 18.3),
+	deckZ = 3.0,
+	fixtures = {
+		Vector3.new(-20, 7.0, 15.2),
+		Vector3.new(-16, 7.0, 15.2),
+		Vector3.new(-12, 7.0, 15.2),
+		Vector3.new(-8, 7.0, 15.2),
+		Vector3.new(-4, 7.0, 15.2),
+		Vector3.new(0, 7.0, 15.2),
+		Vector3.new(4, 7.0, 15.2),
+		Vector3.new(8, 7.0, 15.2),
+		Vector3.new(12, 7.0, 15.2),
+		Vector3.new(16, 7.0, 15.2),
+		Vector3.new(20, 7.0, 15.2),
+		Vector3.new(-20, -4.0, 15.2),
+		Vector3.new(-16, -4.0, 15.2),
+		Vector3.new(-12, -4.0, 15.2),
+		Vector3.new(-8, -4.0, 15.2),
+		Vector3.new(-4, -4.0, 15.2),
+		Vector3.new(0, -4.0, 15.2),
+		Vector3.new(4, -4.0, 15.2),
+		Vector3.new(8, -4.0, 15.2),
+		Vector3.new(12, -4.0, 15.2),
+		Vector3.new(16, -4.0, 15.2),
+		Vector3.new(20, -4.0, 15.2),
+	},
+	screens = {
+		{ name = "Utama", cx = 0.0, y = -10.18, cz = 11.5, w = 30.0, h = 12.4 },
+		{ name = "Kiri", cx = -18.3, y = -10.18, cz = 10.6, w = 3.5, h = 10.6 },
+		{ name = "Kanan", cx = 18.3, y = -10.18, cz = 10.6, w = 3.5, h = 10.6 },
+	},
+	speakers = {
+		Vector2.new(-28.0, 4.0),
+		Vector2.new(28.0, 4.0),
+	},
+	pads = {
+		Vector2.new(-10.0, 31.0),
+		Vector2.new(0.0, 31.0),
+		Vector2.new(10.0, 31.0),
+	},
+	marquee = { cx = 0.0, y = 14.7, cz = 27.0, w = 30.0, h = 5.0 },
+	floor = { x0 = -20.0, x1 = 20.0, y0 = 19.0, y1 = 43.0 },
+}

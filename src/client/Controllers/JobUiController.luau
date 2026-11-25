@@ -142,6 +142,12 @@ local function refreshTracker()
 		quitButton.Visible = false
 		return
 	end
+	-- dokter yang sedang duduk di Meja Dokter: sembunyikan panel supaya tidak menghalangi pandangan
+	if player:GetAttribute("KlinikDuduk") == true then
+		tracker.Visible = false
+		quitButton.Visible = false
+		return
+	end
 	tracker.Visible = true
 	quitButton.Visible = true
 	local stat = readStats()[def.id]
@@ -151,7 +157,9 @@ local function refreshTracker()
 	local step = if task_ then task_.steps[task_.index] else nil
 	if task_ == nil or step == nil then
 		trackerTitle.Text = `{def.icon} {def.name}`
-		trackerStep.Text = "Menyiapkan tugas berikutnya..."
+		trackerStep.Text = if player:GetAttribute("SedangKlinik") == true
+			then "Praktik di rumah sakit: layani pasien dari Meja Dokter"
+			else "Menyiapkan tugas berikutnya..."
 		trackerDistance.Text = ""
 		trackerArrow.Visible = false
 		return
@@ -603,6 +611,8 @@ function JobUiController.start()
 	end)
 	player:GetAttributeChangedSignal(JobConfig.ATTR_STATS):Connect(refreshCards)
 	JobController.Changed:Connect(refreshTracker)
+	player:GetAttributeChangedSignal("KlinikDuduk"):Connect(refreshTracker)
+	player:GetAttributeChangedSignal("SedangKlinik"):Connect(refreshTracker)
 
 	updateScale()
 	local camera = Workspace.CurrentCamera

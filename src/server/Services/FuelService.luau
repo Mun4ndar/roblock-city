@@ -95,7 +95,10 @@ local function refuel(player: Player, pump: BasePart)
 	lastUse[player] = now
 	local vehicle = ownVehicle(player)
 	if vehicle == nil or vehicle.PrimaryPart == nil then
-		EconomyService.notify(player, "Keluarkan mobilmu dulu dari menu Kendaraan, lalu parkir di dekat pompa.")
+		EconomyService.notify(
+			player,
+			"Keluarkan mobilmu dulu dari menu Kendaraan, lalu parkir di dekat pompa."
+		)
 		return
 	end
 	if (vehicle.PrimaryPart.Position - pump.Position).Magnitude > FuelConfig.VEHICLE_RANGE then

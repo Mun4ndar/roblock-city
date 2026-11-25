@@ -17,8 +17,8 @@ export type Level = {
 -- Keadaan yang dikirim ke client (atribut Player "Business", JSON). level 0 = belum punya.
 export type BusinessView = { level: number, stored: number }
 
--- Konter kasir di teras Kafe Kota (harus sama dengan COUNTER di map/BuildCafe.luau)
-BusinessConfig.POSITION = Vector3.new(28, 1.1, -555.4)
+-- Konter kasir di dalam Kafe Kota (harus sama dengan marker kafekota_Kasir di map/BuildKafeKotaDalam.luau)
+BusinessConfig.POSITION = Vector3.new(21, 0.5, -580.2)
 BusinessConfig.RANGE = 30
 BusinessConfig.ATTR_PLAYER = "Business"
 BusinessConfig.ATTR_PROMPT = "BusinessCafe"

@@ -20,7 +20,15 @@ local infoLabel: TextLabel? = nil
 local tipLabel: TextLabel? = nil
 local current: BasePart? = nil
 
-local function label(parent: Instance, name: string, size: UDim2, pos: UDim2, textSize: number, color: Color3, font: Enum.Font)
+local function label(
+	parent: Instance,
+	name: string,
+	size: UDim2,
+	pos: UDim2,
+	textSize: number,
+	color: Color3,
+	font: Enum.Font
+)
 	local l = Instance.new("TextLabel")
 	l.Name = name
 	l.BackgroundTransparency = 1
@@ -69,10 +77,34 @@ local function build()
 	hc.CornerRadius = UDim.new(0, 12)
 	hc.Parent = head
 
-	titleLabel = label(head, "Judul", UDim2.new(1, -60, 1, 0), UDim2.fromOffset(14, 0), 22, Color3.new(1, 1, 1), Enum.Font.FredokaOne)
-	;(titleLabel :: TextLabel).TextYAlignment = Enum.TextYAlignment.Center
-	infoLabel = label(f, "Fungsi", UDim2.new(1, -28, 0, 140), UDim2.fromOffset(14, 54), 18, Color3.fromRGB(40, 40, 50), Enum.Font.GothamMedium)
-	tipLabel = label(f, "Tahukah", UDim2.new(1, -28, 0, 70), UDim2.fromOffset(14, 202), 16, Color3.fromRGB(150, 90, 0), Enum.Font.GothamMedium)
+	titleLabel = label(
+		head,
+		"Judul",
+		UDim2.new(1, -60, 1, 0),
+		UDim2.fromOffset(14, 0),
+		22,
+		Color3.new(1, 1, 1),
+		Enum.Font.FredokaOne
+	);
+	(titleLabel :: TextLabel).TextYAlignment = Enum.TextYAlignment.Center
+	infoLabel = label(
+		f,
+		"Fungsi",
+		UDim2.new(1, -28, 0, 140),
+		UDim2.fromOffset(14, 54),
+		18,
+		Color3.fromRGB(40, 40, 50),
+		Enum.Font.GothamMedium
+	)
+	tipLabel = label(
+		f,
+		"Tahukah",
+		UDim2.new(1, -28, 0, 70),
+		UDim2.fromOffset(14, 202),
+		16,
+		Color3.fromRGB(150, 90, 0),
+		Enum.Font.GothamMedium
+	)
 
 	local close = Instance.new("TextButton")
 	close.Name = "TutupPameran"
@@ -101,11 +133,11 @@ local function show(stand: BasePart)
 	if not frame then
 		return
 	end
-	current = stand
-	;(titleLabel :: TextLabel).Text = tostring(stand:GetAttribute("Title") or stand.Name)
-	;(infoLabel :: TextLabel).Text = tostring(stand:GetAttribute("Info") or "")
-	local tip = stand:GetAttribute("Tip")
-	;(tipLabel :: TextLabel).Text = if tip then "Tahukah kamu? " .. tostring(tip) else ""
+	current = stand;
+	(titleLabel :: TextLabel).Text = tostring(stand:GetAttribute("Title") or stand.Name);
+	(infoLabel :: TextLabel).Text = tostring(stand:GetAttribute("Info") or "")
+	local tip = stand:GetAttribute("Tip");
+	(tipLabel :: TextLabel).Text = if tip then "Tahukah kamu? " .. tostring(tip) else ""
 	frame.Visible = true
 end
 
@@ -124,7 +156,14 @@ function ExhibitController.start()
 			if stand and frame and frame.Visible then
 				local char = Players.LocalPlayer.Character
 				local root = char and char:FindFirstChild("HumanoidRootPart")
-				if not stand.Parent or (root and root:IsA("BasePart") and (root.Position - stand.Position).Magnitude > CLOSE_DISTANCE) then
+				if
+					not stand.Parent
+					or (
+						root
+						and root:IsA("BasePart")
+						and (root.Position - stand.Position).Magnitude > CLOSE_DISTANCE
+					)
+				then
 					frame.Visible = false
 					current = nil
 				end

@@ -4,7 +4,7 @@
 -- sisi server (command bar / alat uji), tidak ada remote ke client.
 --   Debug:Invoke("money", player, jumlah)   -- tambah (+) atau kurangi (-) uang
 --   Debug:Invoke("event", "natal")          -- paksa event ("" = kembali ke tanggal asli)
---   Debug:Invoke("clock", jam)              -- setel jam dunia (0-24)
+--   Debug:Invoke("clock", jam)             -- setel jam dunia (0-24)
 --   Debug:Invoke("costume", player, "naga_api") -- pakai costume tanpa membeli (uji tampilan)
 --   Debug:Invoke("clear", player, "business") -- kosongkan satu bagian data (terisi ulang saat masuk lagi)
 

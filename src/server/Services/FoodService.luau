@@ -128,13 +128,19 @@ local function endBuff(player: Player, token: number)
 	end
 end
 
-local function startBuff(player: Player)
-	local expires = Workspace:GetServerTimeNow() + IndonesiaConfig.BUFF_SECONDS
+local function startBuff(player: Player, seconds: number?)
+	local duration = seconds or IndonesiaConfig.BUFF_SECONDS
+	local expires = Workspace:GetServerTimeNow() + duration
 	player:SetAttribute(IndonesiaConfig.BUFF_ATTR, expires)
 	applyBuff(player)
-	task.delay(IndonesiaConfig.BUFF_SECONDS, function()
+	task.delay(duration, function()
 		endBuff(player, expires)
 	end)
+end
+
+-- Dipakai StoreService: makanan/minuman toko memberi "kenyang semangat" yang sama.
+function FoodService.giveBuff(player: Player, seconds: number?)
+	startBuff(player, seconds)
 end
 
 -- ---------------------------------------------------------------- beli

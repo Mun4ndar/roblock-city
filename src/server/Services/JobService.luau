@@ -54,6 +54,7 @@ local HORIZONTAL = Vector3.new(1, 0, 1)
 local taskRemote: RemoteEvent
 local active: { [Player]: ActiveTask } = {}
 local earnings: { [Player]: { Earning } } = {}
+local clinicMode: { [Player]: boolean } = {} -- dokter sedang praktik di klinik rumah sakit (tanpa tugas keliling)
 local tracks: { [Player]: Track } = {}
 local lastCall: { [Player]: number } = {}
 local lastSelect: { [Player]: number } = {}
@@ -299,6 +300,10 @@ end
 local function assignTask(player: Player)
 	assignToken[player] = (assignToken[player] or 0) + 1
 	active[player] = nil
+	if clinicMode[player] then
+		sendTask(player)
+		return
+	end
 	local data = DataService.getData(player)
 	local def = if data then JobConfig.get(data.jobs.current) else nil
 	if def then
@@ -609,6 +614,22 @@ function JobService.payExternal(player: Player, jobId: string, base: number, rea
 	completedEvent:Fire(player, jobId, pay)
 	publish(player)
 	return pay
+end
+
+-- Dokter yang sedang praktik di dalam rumah sakit tidak diberi tugas keliling (kunjungan/jemput),
+-- supaya panel tugas tidak bertentangan dengan alur klinik. Dipanggil ClinicService.
+function JobService.setClinicMode(player: Player, on: boolean)
+	if (clinicMode[player] == true) == on then
+		return
+	end
+	clinicMode[player] = if on then true else nil
+	if on then
+		assignToken[player] = (assignToken[player] or 0) + 1
+		active[player] = nil
+		sendTask(player)
+	elseif player.Parent ~= nil then
+		assignTaskLater(player, 1)
+	end
 end
 
 function JobService.init()

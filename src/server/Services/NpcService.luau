@@ -119,16 +119,7 @@ local GROUPS = {
 			{ pos = Vector3.new(783, 1.6, -313.4), facing = Vector3.new(0, 0, -1), work = "cashier" },
 		},
 	},
-	{
-		-- Penjual jus di Kafe Pantai ("JUS SEGAR & ES KELAPA"): berdiri di dalam bar bambu menghadap
-		-- pembeli, mengocok shaker (avatar modern PakKebun: topi jerami, kemeja biru muda).
-		name = "PenjualJus",
-		template = "AsetPetani",
-		only = "PakKebun",
-		spots = {
-			{ pos = Vector3.new(1622, 0.1, -300), facing = Vector3.new(0, 0, -1), work = "serve" },
-		},
-	},
+	-- Penjual jus lama (petani bertopi jerami) diganti pelayan perempuan di BeachLifeService.
 	{
 		-- Pengunjung Kafe Kota: hampir selalu duduk di teras sambil memegang cangkir kopi.
 		name = "KafeKota",

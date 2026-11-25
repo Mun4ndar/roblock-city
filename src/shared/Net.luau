@@ -11,6 +11,8 @@ local Net = {}
 
 Net.Names = table.freeze({
 	ClaimDailyReward = "ClaimDailyReward", -- RemoteFunction: client -> server, tanpa argumen
+	KlinikMulai = "KlinikMulai", -- RemoteEvent: server -> client, (token, ikon, judul, jumlahKetuk, detik) mulai mini-game periksa
+	KlinikSelesai = "KlinikSelesai", -- RemoteEvent: client -> server, (token, jumlahKetuk)
 	Notify = "Notify", -- RemoteEvent: server -> client, (message: string)
 	VehicleBuy = "VehicleBuy", -- RemoteFunction: (vehicleId: string) -> VehicleResult
 	VehicleSpawn = "VehicleSpawn", -- RemoteFunction: (vehicleId: string) -> VehicleResult

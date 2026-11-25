@@ -62,7 +62,7 @@ local function part(parent, name, size, cf, color, material)
 	return p
 end
 
-local function sign(partOwner, face, text, size, textColor, bg)
+local function sign(partOwner, face, text, size, textColor, bg, fill)
 	local g = Instance.new("SurfaceGui")
 	g.Face = face
 	g.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
@@ -70,7 +70,9 @@ local function sign(partOwner, face, text, size, textColor, bg)
 	g.LightInfluence = 0
 	g.Parent = partOwner
 	local l = Instance.new("TextLabel")
-	l.Size = UDim2.fromScale(1, 1)
+	l.AnchorPoint = Vector2.new(0.5, 0.5)
+	l.Position = UDim2.fromScale(0.5, 0.5)
+	l.Size = UDim2.fromScale(fill or 1, fill and 0.8 or 1)
 	l.BackgroundTransparency = bg and 0 or 1
 	if bg then
 		l.BackgroundColor3 = bg
@@ -96,9 +98,9 @@ gate.Parent = root
 for _, x in ipairs({ 179, 197 }) do
 	part(gate, "Tiang", Vector3.new(1.6, 10, 1.6), CFrame.new(x, 6.15, 269), Color3.fromRGB(214, 36, 36))
 end
-local beam = part(gate, "Papan", Vector3.new(20, 3.4, 1.2), CFrame.new(188, 9.8, 269), Color3.fromRGB(255, 196, 30))
-sign(beam, Enum.NormalId.Back, "PAMERAN ALAT PEMADAM", 80, Color3.fromRGB(150, 20, 20))
-sign(beam, Enum.NormalId.Front, "PAMERAN ALAT PEMADAM", 80, Color3.fromRGB(150, 20, 20))
+local beam = part(gate, "Papan", Vector3.new(26, 3.4, 1.2), CFrame.new(188, 9.8, 269), Color3.fromRGB(255, 196, 30))
+sign(beam, Enum.NormalId.Back, "PAMERAN ALAT PEMADAM", 70, Color3.fromRGB(150, 20, 20), nil, 0.76)
+sign(beam, Enum.NormalId.Front, "PAMERAN ALAT PEMADAM", 70, Color3.fromRGB(150, 20, 20), nil, 0.76)
 
 -- salin bagian mesh dari model mentah (posisi relatif terhadap titik asal tiap alat)
 local function itemParts(index)

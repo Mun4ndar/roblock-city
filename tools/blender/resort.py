@@ -6,12 +6,24 @@ new_scene("Resort")
 W, D = 140.0, 40.0
 HW, HD = W / 2, D / 2
 
-# ---- lobi dasar ----
-rrect("RsWall", 0, 0, 0, W - 2, D - 2, 10.0, 4.0, 5)
+# ---- lobi dasar (BERONGGA: dinding tebal 1.5, interior di resort_dalam.py) ----
+WT = 1.5
 box("RsSand", 0, 0, 0, W + 1.0, D + 1.0, 0.9)
 box("RsWhite", 0, 0, 10.0, W + 1.0, D + 1.0, 0.8)  # atap lobi = lantai teras
 GY = HD
-# etalase kaca lobi (kiri dan kanan tengah)
+LX, LY = W / 2 - 1.0, D / 2 - 1.0  # tepi luar dinding lobi: x 69, y 19
+box("RsWall", 0, -LY + WT / 2, 0, 2 * LX, WT, 10.0)  # dinding belakang
+for sx in (-1, 1):
+    box("RsWall", sx * (LX - WT / 2), 0, 0, WT, 2 * LY, 10.0)  # dinding samping
+    fy = LY - WT / 2  # dinding depan: tiang antar bukaan
+    box("RsWall", sx * 10.75, fy, 0, 12.5, WT, 10.0)
+    box("RsWall", sx * 68.0, fy, 0, 2.0, WT, 10.0)
+    box("RsWall", sx * 42.0, fy, 8.8, 50.0, WT, 1.2)  # ambang atas jendela
+    box("RsWall", sx * 42.0, fy, 0, 50.0, WT, 1.4)  # ambang bawah jendela
+    box("RsTeal", sx * 4.75, LY + 0.1, 0.9, 0.5, 0.4, 7.7)  # kusen pintu masuk
+box("RsWall", 0, LY - WT / 2, 8.6, 9.0, WT, 1.4)  # ambang atas pintu
+box("RsTeal", 0, LY + 0.1, 8.4, 10.0, 0.4, 0.5)
+# etalase kaca lobi (kiri dan kanan tengah): kaca tipis di muka dinding, bukaan asli ada di dinding
 for sx in (-1, 1):
     box("RsGlass", sx * 44.0, GY, 1.2, 56.0, 0.3, 7.6)
     for i in range(10):
@@ -82,8 +94,6 @@ for i in range(12):
 for sx in (-1, 1):
     for sy in (GY + 11.0,):
         cyl("RsWhite", sx * 15.0, sy, 0.9, 0.8, 8.4, 14)
-box("RsDark", 0, GY + 0.1, 0.8, 9.0, 0.6, 8.4)
-box("RsGlass", 0, GY + 0.4, 1.2, 8.0, 0.3, 7.4)
 box("RsTeal", 0, GY + 11.9, 9.2, 34.4, 0.3, 0.8)
 box("RsDark", 0, 18.6, 11.6, 24.0, 0.8, 3.6)  # papan nama (teks di Roblox, y muka = 19.0)
 box("RsTeal", 0, 18.7, 11.3, 24.6, 0.9, 0.3)

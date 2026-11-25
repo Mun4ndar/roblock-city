@@ -74,7 +74,8 @@ function WindmillController.start()
 			local speed = instance:GetAttribute("SpinSpeed")
 			state.angle += dt * (if type(speed) == "number" then speed else DEFAULT_SPEED)
 			local axis = instance:GetAttribute("SpinAxis")
-			local cf = state.base * axisRotation(if type(axis) == "string" then axis else "Z", state.angle)
+			local cf = state.base
+				* axisRotation(if type(axis) == "string" then axis else "Z", state.angle)
 			if instance:IsA("Model") then
 				instance:PivotTo(cf)
 			elseif instance:IsA("BasePart") then

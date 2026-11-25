@@ -69,8 +69,11 @@ local function onTriggered(part: BasePart, player: Player)
 	for _, guard in guards do
 		local allowed, reason = guard(player, part)
 		if not allowed then
-			local Net = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Net"))
-			Net.event(Net.Names.Notify):FireClient(player, reason or "Pintu ini tidak bisa dimasuki.")
+			local Net = require(
+				game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Net")
+			)
+			Net.event(Net.Names.Notify)
+				:FireClient(player, reason or "Pintu ini tidak bisa dimasuki.")
 			return
 		end
 	end

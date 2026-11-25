@@ -60,14 +60,12 @@ IndonesiaConfig.ATTR_FESTIVAL = "FestivalKuliner" -- atribut Workspace: true saa
 
 IndonesiaConfig.STATIONS = {
 	{
+		-- 3 lagu koplo (Janji Koplo, Joged Bareng Sayang, Memendam Rasa) dipindah ke panggung konser (ConcertConfig.PLAYLIST)
 		id = "koplo",
 		name = "Radio Koplo",
 		icon = "🪘",
 		tracks = {
-			107302164689882,
-			108733665602479,
 			90047526532000,
-			115933072822345,
 			120786497356440,
 			96755117635802,
 			138631365846775,
