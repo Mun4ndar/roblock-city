@@ -903,7 +903,7 @@ local function buildBodyUniform(model: Model, character: Model, uniform: Uniform
 		buildDeliveryUniform(model, torso, character, uniform)
 	elseif jobId == "mekanik" then
 		buildMechanicUniform(model, torso, lower, character, uniform)
-	elseif jobId == "sopir" then
+	elseif jobId == "sopir" or jobId == "angkot" or jobId == "ojol" then
 		buildDriverUniform(model, torso, character, uniform)
 	elseif jobId == "pilot" then
 		buildPilotUniform(model, torso, character, uniform)

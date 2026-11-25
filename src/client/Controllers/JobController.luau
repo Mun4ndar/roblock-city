@@ -48,11 +48,17 @@ local lastFlyTry = 0
 local passengers: { Model } = {} -- penumpang yang terlihat duduk di bus (pekerjaan Sopir Bus)
 
 -- Titik duduk penumpang relatif ke sasis bus (x kiri/kanan, z dari depan ke belakang).
-local PASSENGER_SPOTS = {
+local BUS_SPOTS = {
 	Vector3.new(-1.9, 0, -4),
 	Vector3.new(1.9, 0, -1),
 	Vector3.new(-1.9, 0, 2),
 	Vector3.new(1.9, 0, 5),
+}
+-- Kendaraan yang menampilkan penumpang: bus, angkot (ketiga tempat duduk belakang), motor ojek (boncengan).
+local PASSENGER_SPOTS: { [string]: { Vector3 } } = {
+	bus = BUS_SPOTS,
+	angkot = { Vector3.new(-1.7, 0, -1), Vector3.new(1.7, 0, 1.5), Vector3.new(-1.7, 0, 4) },
+	ojek = { Vector3.new(0, 0.6, 1.5) },
 }
 
 local function clearPassengers()
@@ -81,15 +87,12 @@ local function boardPassengers(seed: number)
 	clearPassengers()
 	local vehicle = myVehicle()
 	local chassis = if vehicle then vehicle:FindFirstChild("Chassis") else nil
-	if
-		vehicle == nil
-		or chassis == nil
-		or not chassis:IsA("BasePart")
-		or vehicle:GetAttribute("VehicleId") ~= "bus"
-	then
+	local vehicleId = if vehicle then vehicle:GetAttribute("VehicleId") else nil
+	local spots = if type(vehicleId) == "string" then PASSENGER_SPOTS[vehicleId] else nil
+	if vehicle == nil or chassis == nil or not chassis:IsA("BasePart") or spots == nil then
 		return
 	end
-	for index, spot in PASSENGER_SPOTS do
+	for index, spot in spots do
 		local model = JobProps.build("person", chassis.CFrame * CFrame.new(spot), seed + index * 7)
 		model.Name = "Penumpang"
 		for _, d in model:GetDescendants() do

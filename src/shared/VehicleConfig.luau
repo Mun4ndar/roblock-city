@@ -78,7 +78,7 @@ VehicleConfig.ATTR_MOD_PROMPT = "VehicleModShop" -- atribut ProximityPrompt di b
 
 -- Modifikasi di Bengkel (Halaman Bengkel, kota kecil). Indeks 0 = warna asli pabrik.
 -- Menambah pilihan = menambah warna di daftar ini.
-VehicleConfig.MOD_POSITION = Vector3.new(186, 1, 282)
+VehicleConfig.MOD_POSITION = Vector3.new(138, 1, 303)
 VehicleConfig.MOD_RANGE = 60 -- mobil harus sedekat ini dari bengkel
 VehicleConfig.PAINT_PRICE = 150
 VehicleConfig.RIM_PRICE = 100
@@ -470,6 +470,74 @@ VehicleConfig.SERVICE = {
 			lightBar = { Color3.fromRGB(60, 110, 255), Color3.fromRGB(255, 70, 60) },
 			band = Color3.fromRGB(40, 80, 190),
 			sideText = "POLISI",
+		},
+	},
+	{
+		-- Mesh bodi: ReplicatedStorage.Assets.CarShells.ojek (salinan templat motor "lincah" buatan Blender).
+		id = "ojek",
+		name = "Motor Ojek",
+		class = "Kendaraan Dinas",
+		description = "Motor skuter oranye untuk mengantar penumpang dan pesanan.",
+		price = 0,
+		job = "ojol",
+		seats = 2,
+		maxSpeed = 62,
+		reverseSpeed = 12,
+		acceleration = 30,
+		brake = 70,
+		steerAngle = 30,
+		color = Color3.fromRGB(255, 150, 40),
+		accent = Color3.fromRGB(40, 50, 70),
+		body = {
+			style = "bike",
+			bike = true,
+			length = 9.2,
+			width = 4.4,
+			clearance = 0.8,
+			lowerHeight = 1.5,
+			cabinHeight = 0.6,
+			cabinFront = 0.5,
+			cabinBack = 0.92,
+			rakeFront = 0.5,
+			rakeBack = 0.5,
+			wheelRadius = 1.2,
+			wheelWidth = 0.7,
+			wheelbase = 6,
+		},
+	},
+	{
+		-- Mesh bodi: CarShells.angkot (salinan templat van "ambulans" buatan Blender, dicat hijau).
+		id = "angkot",
+		name = "Angkot",
+		class = "Kendaraan Dinas",
+		description = "Angkot hijau untuk mengangkut banyak penumpang keliling kota.",
+		price = 0,
+		job = "angkot",
+		seats = 4,
+		maxSpeed = 64,
+		reverseSpeed = 20,
+		acceleration = 24,
+		brake = 80,
+		steerAngle = 31,
+		color = Color3.fromRGB(70, 170, 120),
+		accent = Color3.fromRGB(250, 220, 90),
+		body = {
+			style = "van",
+			length = 17,
+			width = 7.6,
+			clearance = 1.3,
+			lowerHeight = 2.6,
+			cabinHeight = 3,
+			cabinFront = 0.12,
+			cabinBack = 0.42,
+			rakeFront = 1.5,
+			rakeBack = 0.3,
+			wheelRadius = 1.5,
+			wheelWidth = 1.3,
+			wheelbase = 10.5,
+			band = Color3.fromRGB(250, 220, 90),
+			sideText = "ANGKOT 07",
+			box = { height = 4.2, color = Color3.fromRGB(70, 170, 120) },
 		},
 	},
 } :: { VehicleDef }

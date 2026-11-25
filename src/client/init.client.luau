@@ -19,6 +19,10 @@ local ORDER = {
 	"RetentionController",
 	"FarmController",
 	"PetController",
+	"SocialController",
+	"FoodController",
+	"RadioController",
+	"LombaController",
 	"PetAnimController",
 	"FashionController",
 	"BusinessController",
@@ -28,6 +32,7 @@ local ORDER = {
 	"MinimapController",
 	"MapUiController",
 	"WindmillController",
+	"ExhibitController",
 	"UiStyleController",
 }
 

@@ -103,6 +103,8 @@ add("basketBarat", "Lapangan Basket Barat", "perumahan", "🏀", -390, -18, fals
 add("basketTimur", "Lapangan Basket Timur", "perumahan", "🏀", 712, 300, false, 45)
 add("tamanBermain", "Taman Bermain", "perumahan", "🎠", 440, 104, true, 50)
 add("tamanKota", "Taman Kota", "perumahan", "🌳", 716, 55, true, 60)
+add("pasarMalam", "Pasar Malam (buka sore)", "perumahan", "🏮", 668, 122, true, 45)
+add("arenaLomba", "Arena Lomba 17-an (Agustus)", "perumahan", "🇮🇩", 802, 100, false, 45)
 add("tamanBunga", "Taman Bunga", "perumahan", "🌸", -375, 277, false, 45)
 add("tamanBermainBarat", "Taman Bermain Barat", "perumahan", "🛝", -160, 330, false, 45)
 add("gazebo", "Gazebo & Kolam", "perumahan", "🛖", 466, 330, false, 45)
