@@ -81,6 +81,7 @@ local GROUPS = {
 		-- dan menghadap lorong. spots = posisi tanah + arah hadap (map/BuildPasarTani).
 		name = "PenjagaLapak",
 		template = "AsetPetani",
+		only = "BuTani", -- hanya versi perempuan yang menjaga lapak
 		spots = {
 			{ pos = Vector3.new(-684, 0.5, 95.6), facing = Vector3.new(0, 0, 1) },
 			{ pos = Vector3.new(-696, 0.5, 118.2), facing = Vector3.new(0, 0, -1) },
@@ -741,14 +742,18 @@ local function buildNpc(index: number): Model?
 end
 
 -- Warga dari templat avatar modern (ServerStorage.<folderName>): salin, rapikan, dan siap dianimasikan.
-local function buildFromTemplate(folderName: string, index: number): Model?
+local function buildFromTemplate(folderName: string, index: number, only: string?): Model?
 	local templates = ServerStorage:FindFirstChild(folderName)
 	if templates == nil then
 		return nil
 	end
 	local list: { Model } = {}
 	for _, child in templates:GetChildren() do
-		if child:IsA("Model") and child:FindFirstChildOfClass("Humanoid") then
+		if
+			child:IsA("Model")
+			and child:FindFirstChildOfClass("Humanoid")
+			and (only == nil or child.Name == only)
+		then
 			table.insert(list, child)
 		end
 	end
@@ -1268,6 +1273,7 @@ type Slot = {
 	home: Vector3,
 	model: Model?,
 	spot: { pos: Vector3, facing: Vector3 }?,
+	only: string?,
 }
 local modernSlots: { Slot } = {}
 
@@ -1283,7 +1289,7 @@ local function playerWithin(position: Vector3, range: number): boolean
 end
 
 local function spawnSlot(slot: Slot)
-	local model = buildFromTemplate(slot.template, slot.index)
+	local model = buildFromTemplate(slot.template, slot.index, slot.only)
 	if model == nil then
 		return
 	end
@@ -1377,6 +1383,7 @@ function NpcService.start()
 					home = spot.pos,
 					model = nil,
 					spot = spot,
+					only = (group :: any).only,
 				})
 			end
 			continue

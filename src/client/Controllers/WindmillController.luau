@@ -26,9 +26,15 @@ local function pivotOf(instance: Instance): CFrame?
 	return nil
 end
 
+-- Pivot Model baling harus diatur lewat Model.WorldPivot TANPA PrimaryPart: bila PrimaryPart diisi, pivot
+-- memakai offset sendiri yang bisa miring terhadap part dan baling berputar di sumbu yang salah.
+-- Dengan WorldPivot, pivot juga benar walau bagian baling belum ter-stream.
 local function register(instance: Instance)
+	if blades[instance] ~= nil then
+		return
+	end
 	local pivot = pivotOf(instance)
-	if pivot and blades[instance] == nil then
+	if pivot then
 		blades[instance] = { base = pivot, angle = 0 }
 	end
 end
