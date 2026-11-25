@@ -88,6 +88,15 @@ local GROUPS = {
 		},
 	},
 	{
+		-- Mekanik di kanopi Bengkel: avatar modern berdiri di belakang mobil yang terangkat di lift,
+		-- kedua lengan terangkat memperbaiki bagian bawah mobil (gerak dibuat dari kode, work = true).
+		name = "Mekanik",
+		template = "AsetMekanik",
+		spots = {
+			{ pos = Vector3.new(160.2, 1.3, 296), facing = Vector3.new(-1, 0, 0), work = true },
+		},
+	},
+	{
 		-- Pengunjung Kafe Kota: hampir selalu duduk di teras sambil memegang cangkir kopi.
 		name = "KafeKota",
 		count = 4,
@@ -1272,7 +1281,7 @@ type Slot = {
 	group: any,
 	home: Vector3,
 	model: Model?,
-	spot: { pos: Vector3, facing: Vector3 }?,
+	spot: { pos: Vector3, facing: Vector3, work: boolean? }?,
 	only: string?,
 }
 local modernSlots: { Slot } = {}
@@ -1286,6 +1295,46 @@ local function playerWithin(position: Vector3, range: number): boolean
 		end
 	end
 	return false
+end
+
+-- Mekanik: lengan terangkat ke bawah mobil di lift, siku memukul pelan (Transform sendi AnimationConstraint).
+-- Berhenti sendiri saat model dihapus (LOD).
+local function workPose(model: Model)
+	local function joint(name: string): AnimationConstraint?
+		local found = model:FindFirstChild(name, true)
+		if found and found:IsA("AnimationConstraint") then
+			return found
+		end
+		return nil
+	end
+	local rightShoulder, rightElbow = joint("RightShoulder"), joint("RightElbow")
+	local leftShoulder, leftElbow = joint("LeftShoulder"), joint("LeftElbow")
+	local neck, waist = joint("Neck"), joint("Waist")
+	task.spawn(function()
+		local t0 = os.clock()
+		while model.Parent do
+			local t = os.clock() - t0
+			if rightShoulder then
+				rightShoulder.Transform = CFrame.Angles(math.rad(-150) + math.sin(t * 5) * 0.06, 0, math.rad(-8))
+			end
+			if rightElbow then
+				rightElbow.Transform = CFrame.Angles(math.rad(-22) + math.sin(t * 9) * 0.35, 0, 0)
+			end
+			if leftShoulder then
+				leftShoulder.Transform = CFrame.Angles(math.rad(-142) + math.sin(t * 4 + 1) * 0.08, 0, math.rad(8))
+			end
+			if leftElbow then
+				leftElbow.Transform = CFrame.Angles(math.rad(-30) + math.sin(t * 7 + 2) * 0.25, 0, 0)
+			end
+			if neck then
+				neck.Transform = CFrame.Angles(math.rad(-28) + math.sin(t * 2) * 0.05, 0, 0)
+			end
+			if waist then
+				waist.Transform = CFrame.Angles(math.rad(-6), math.sin(t * 1.5) * 0.08, 0)
+			end
+			task.wait()
+		end
+	end)
 end
 
 local function spawnSlot(slot: Slot)
@@ -1306,7 +1355,11 @@ local function spawnSlot(slot: Slot)
 			model:PivotTo(CFrame.lookAt(at, at + spot.facing))
 			-- pivot templat bisa berbeda dari HumanoidRootPart: geser sampai root tepat di titiknya
 			model:PivotTo(model:GetPivot() + (at - anchor.Position))
-			animate(humanoid)
+			if spot.work then
+				workPose(model)
+			else
+				animate(humanoid)
+			end
 			anchor.Anchored = true
 		end
 		slot.model = model
