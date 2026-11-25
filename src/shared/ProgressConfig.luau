@@ -54,7 +54,7 @@ ProgressConfig.RARES = {
 	{
 		id = "kancilEmas",
 		icon = "🚗",
-		name = "Kancil Emas",
+		name = "Mini Car Emas",
 		kind = "Mobil",
 		rarity = "epik",
 		cash = 400,

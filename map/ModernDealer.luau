@@ -231,7 +231,7 @@ for i, z in { 252, 275, 298 } do
 end
 local banner = P(canopy, "Banner", cx1 + 0.45, T + ch - 1.2, ZC, 0.5, 2.2, 70, GRAPHITE, Enum.Material.Metal)
 local bgui = surfaceGui(banner, Enum.NormalId.Right, 28)
-text(bgui, "KANCIL  ·  SERASI  ·  JELAJAH  ·  KILAT  ·  ELEGAN  ·  LINCAH", UDim2.fromScale(0.02, 0.12), UDim2.fromScale(0.96, 0.76), WHITE, Enum.Font.GothamBold)
+text(bgui, "MINI CAR  ·  SEDAN  ·  SUV  ·  SPORT  ·  SEDAN MEWAH  ·  MIO KARBU", UDim2.fromScale(0.02, 0.12), UDim2.fromScale(0.96, 0.76), WHITE, Enum.Font.GothamBold)
 
 -- spotlight pajangan di atas tiap alas mobil
 local firstZ = ZC - 5 * 11 / 2
@@ -281,7 +281,7 @@ text(bback, "Mobil impianmu, siap meluncur.", UDim2.fromScale(0.06, 0.62), UDim2
 local chip = frame(bback, UDim2.fromScale(0.72, 0.18), UDim2.fromScale(0.24, 0.64), AMBER, 0.12)
 text(chip, "MULAI DARI", UDim2.fromScale(0.08, 0.1), UDim2.fromScale(0.84, 0.2), NAVY, Enum.Font.GothamBold)
 text(chip, "$250", UDim2.fromScale(0.05, 0.32), UDim2.fromScale(0.9, 0.5), NAVY, Enum.Font.GothamBlack)
-text(chip, "Skuter Lincah", UDim2.fromScale(0.08, 0.8), UDim2.fromScale(0.84, 0.14), NAVY, Enum.Font.GothamMedium)
+text(chip, "Skuter Mio Karbu", UDim2.fromScale(0.08, 0.8), UDim2.fromScale(0.84, 0.14), NAVY, Enum.Font.GothamMedium)
 for _, y in { 19, 29 } do
 	glow(ads, "BalihoBingkai", -88.05, T + y, ZC, 0.15, 0.25, 38.6, TEAL)
 end
@@ -313,7 +313,7 @@ for _, z in { 241, 309 } do
 		text(tb, "AUTO", UDim2.fromOffset(8, 198), UDim2.fromOffset(184, 54), TEAL, Enum.Font.GothamBlack)
 		frame(tb, UDim2.fromOffset(60, 262), UDim2.fromOffset(80, 4), AMBER)
 		text(tb, "DEALER MOBIL", UDim2.fromOffset(8, 276), UDim2.fromOffset(184, 26), COOL, Enum.Font.GothamBold)
-		for k, n in { "Lincah", "Kancil", "Serasi", "Jelajah", "Elegan", "Kilat" } do
+		for k, n in { "Mio Karbu", "Mini Car", "Sedan", "SUV", "Sedan Mewah", "Sport" } do
 			text(tb, n, UDim2.fromOffset(8, 316 + (k - 1) * 30), UDim2.fromOffset(184, 24), Color3.fromRGB(200, 212, 225), Enum.Font.GothamMedium)
 		end
 		local go = frame(tb, UDim2.fromOffset(20, 540), UDim2.fromOffset(160, 50), AMBER, 0.2)

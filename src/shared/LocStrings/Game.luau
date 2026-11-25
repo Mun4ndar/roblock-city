@@ -170,12 +170,12 @@ local exact: { [string]: string } = {
 	["Angkot"] = "Angkot (City Minibus)",
 	["Angkot hijau untuk mengangkut banyak penumpang keliling kota."] = "A green angkot for carrying many passengers around the city.",
 	["ANGKOT 07"] = "ANGKOT 07",
-	["Kancil"] = "Kancil",
-	["Lincah"] = "Lincah",
-	["Serasi"] = "Serasi",
-	["Jelajah"] = "Jelajah",
-	["Kilat"] = "Kilat",
-	["Elegan"] = "Elegan",
+	["Mini Car"] = "Mini Car",
+	["Mio Karbu"] = "Mio Karbu",
+	["Sedan"] = "Sedan",
+	["SUV"] = "SUV",
+	["Sport"] = "Sport",
+	["Sedan Mewah"] = "Luxury Sedan",
 	["BUS KOTA"] = "CITY BUS",
 
 	-- ===== Rumah: jenis, cat, hiasan =====

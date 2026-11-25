@@ -276,10 +276,10 @@ local exact: { [string]: string } = {
 	["DEALER MOBIL ROBLOCK"] = "ROBLOCK CAR DEALER",
 	["Mobil impianmu menunggu"] = "Your dream car awaits",
 	["Dealer Mobil  ·  Pilih, bayar, tancap gas"] = "Car Dealer  ·  Choose, pay, hit the road",
-	["KANCIL  ·  SERASI  ·  JELAJAH  ·  KILAT  ·  ELEGAN  ·  LINCAH"] = "KANCIL  ·  SERASI  ·  JELAJAH  ·  KILAT  ·  ELEGAN  ·  LINCAH",
+	["MINI CAR  ·  SEDAN  ·  SUV  ·  SPORT  ·  SEDAN MEWAH  ·  MIO KARBU"] = "MINI CAR  ·  SEDAN  ·  SUV  ·  SPORT  ·  LUXURY SEDAN  ·  MIO KARBU",
 	["Mobil impianmu, siap meluncur."] = "Your dream car, ready to roll.",
 	["MULAI DARI"] = "STARTING FROM",
-	["Skuter Lincah"] = "Lincah Scooter",
+	["Skuter Mio Karbu"] = "Mio Karbu Scooter",
 
 	-- ===== Pasar malam & lomba =====
 	["Bakso Pak Slamet"] = "Pak Slamet's Meatball Soup",

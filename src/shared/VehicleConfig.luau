@@ -113,7 +113,7 @@ VehicleConfig.LIST = {
 		-- Tampilan dari templat mesh ReplicatedStorage.Assets.CarShells.lincah (buatan Blender,
 		-- assets/blender/motor_shell.fbx). Ukuran di bawah mengikuti mesh itu.
 		id = "lincah",
-		name = "Lincah",
+		name = "Mio Karbu",
 		class = "Motor Skuter",
 		description = "Motor skuter mungil untuk berdua. Murah dan gesit di jalan kota!",
 		price = 250,
@@ -150,7 +150,7 @@ VehicleConfig.LIST = {
 	},
 	{
 		id = "kancil",
-		name = "Kancil",
+		name = "Mini Car",
 		class = "Mobil Kota",
 		description = "Mungil, irit, dan lincah. Cocok untuk mobil pertama!",
 		price = 400,
@@ -184,7 +184,7 @@ VehicleConfig.LIST = {
 	},
 	{
 		id = "serasi",
-		name = "Serasi",
+		name = "Sedan",
 		class = "Sedan",
 		description = "Sedan keluarga yang nyaman untuk jalan-jalan keliling kota.",
 		price = 2500,
@@ -218,7 +218,7 @@ VehicleConfig.LIST = {
 	},
 	{
 		id = "jelajah",
-		name = "Jelajah",
+		name = "SUV",
 		class = "SUV",
 		description = "Tinggi dan tangguh. Siap diajak ke pedesaan dan pantai.",
 		price = 6000,
@@ -253,7 +253,7 @@ VehicleConfig.LIST = {
 	},
 	{
 		id = "kilat",
-		name = "Kilat",
+		name = "Sport",
 		class = "Mobil Sport",
 		description = "Rendah, ramping, dan paling kencang di Kota ROBLOCK.",
 		price = 15000,
@@ -290,7 +290,7 @@ VehicleConfig.LIST = {
 		-- Tampilan dari templat mesh ReplicatedStorage.Assets.CarShells.elegan (mobil resmi Roblox
 		-- "Car", gratis di Creator Store). Ukuran di bawah mengikuti mesh itu (skala 0,75).
 		id = "elegan",
-		name = "Elegan",
+		name = "Sedan Mewah",
 		class = "Sedan Mewah",
 		description = "Sedan mewah yang mengilap dengan lampu dan velg asli. Nyaman dan cepat.",
 		price = 9000,
