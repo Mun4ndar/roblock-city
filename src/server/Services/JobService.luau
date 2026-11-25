@@ -215,6 +215,12 @@ local function pickFromPool(
 	return inRange[random:NextInteger(1, count)].id
 end
 
+-- Pengali gaji anggota grup Roblox (atribut diisi ProgressService); 1 kalau bukan anggota.
+local function groupBonus(player: Player): number
+	local value = player:GetAttribute("GroupBonus")
+	return if type(value) == "number" then value else 1
+end
+
 local function buildTask(player: Player, def: JobDef, origin: Vector3): ActiveTask?
 	local data = DataService.getData(player)
 	if data == nil then
@@ -270,7 +276,9 @@ local function buildTask(player: Player, def: JobDef, origin: Vector3): ActiveTa
 	end
 
 	local level = JobConfig.levelFor(getProgress(data, def.id).tasks)
-	local pay = (template.basePay + template.payPerStud * travel) * JobConfig.payMultiplier(level)
+	local pay = (template.basePay + template.payPerStud * travel)
+		* JobConfig.payMultiplier(level)
+		* groupBonus(player)
 	nextTaskId += 1
 	return {
 		view = {
@@ -571,6 +579,36 @@ end
 function JobService.getJob(player: Player): string
 	local data = DataService.getData(player)
 	return if data then data.jobs.current else ""
+end
+
+-- Gaji untuk pekerjaan yang dilayani layanan lain (mis. ClinicService: dokter di dalam rumah sakit).
+-- Memakai batas gaji per jendela waktu, level, statistik, dan misi yang sama dengan tugas biasa.
+-- Mengembalikan gaji yang dibayar (0 bila ditolak).
+function JobService.payExternal(player: Player, jobId: string, base: number, reason: string): number
+	local data = DataService.getData(player)
+	local def = JobConfig.get(jobId)
+	if data == nil or def == nil or data.jobs.current ~= jobId then
+		return 0
+	end
+	local progress = getProgress(data, jobId)
+	local pay = math.floor(
+		base * JobConfig.payMultiplier(JobConfig.levelFor(progress.tasks)) * groupBonus(player)
+			+ 0.5
+	)
+	if pay <= 0 or recentEarnings(player) + pay > JobConfig.MAX_EARN_PER_WINDOW then
+		return 0
+	end
+	if not EconomyService.addMoney(player, pay, `job:{jobId}:{reason}`) then
+		return 0
+	end
+	local list = earnings[player] or {}
+	table.insert(list, { time = os.clock(), amount = pay })
+	earnings[player] = list
+	progress.tasks += 1
+	progress.earned += pay
+	completedEvent:Fire(player, jobId, pay)
+	publish(player)
+	return pay
 end
 
 function JobService.init()

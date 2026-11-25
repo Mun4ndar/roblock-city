@@ -10,6 +10,7 @@ local ServerStorage = game:GetService("ServerStorage")
 local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local JobConfig = require(Shared:WaitForChild("JobConfig"))
 local FashionConfig = require(Shared:WaitForChild("FashionConfig"))
+local ProgressConfig = require(Shared:WaitForChild("ProgressConfig"))
 
 local DataService = require(script.Parent:WaitForChild("DataService"))
 
@@ -1129,7 +1130,19 @@ function UniformService.refresh(player: Player)
 	local data = DataService.getData(player)
 	local def = if data then JobConfig.get(data.jobs.current) else nil
 	if def then
-		apply(character, def.uniform, def.id)
+		-- Seragam naik tingkat (Perak/Emas/Emas Senior) menurut level pekerjaan ini.
+		local stat: any = if data then data.jobs.stats[def.id] else nil
+		local tier = ProgressConfig.tierFor(JobConfig.levelFor(if stat then stat.tasks else 0))
+		local uniform = def.uniform
+		if tier then
+			uniform = table.clone(def.uniform)
+			uniform.trim = tier.trim
+			uniform.badge = tier.badge
+			if tier.tintHat then
+				uniform.hatColor = tier.trim
+			end
+		end
+		apply(character, uniform, def.id)
 		return
 	end
 	-- Jika tidak sedang bekerja, tampilkan costume/fashion aktif pemain.

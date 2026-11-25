@@ -23,6 +23,7 @@ local ORDER = {
 	"FoodService",
 	"RadioService",
 	"LombaService",
+	"ProgressService",
 	"MissionService",
 	"RetentionService",
 	"FarmService",
