@@ -157,7 +157,8 @@ cyl("IDark", -32.3, -2, F, 0.9, 0.12, 6)
 for fy, mat in [(-8.4, "IFlag1"), (1.9, "IFlag2")]:
     cyl("IGold", -35.8, fy, F, 0.1, 9.5, 8)
     ball("IGold", -35.8, fy, F + 9.6, 0.25, 6)
-    box(mat, -35.8, fy + 1.5, F + 5.6, 0.1, 3.0, 3.2)
+    box("IFlag1", -35.8, fy + 1.5, F + 7.2, 0.1, 3.0, 1.6)  # merah di atas
+    box("IFlag2", -35.8, fy + 1.5, F + 5.6, 0.1, 3.0, 1.6)  # putih di bawah
 # rak buku sepanjang dinding belakang (y -10.5)
 for sx0 in (-34, -29.5, -25):
     box("IWoodD", sx0, -9.9, F, 3.8, 1.0, 8.0)
