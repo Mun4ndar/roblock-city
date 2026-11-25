@@ -13,6 +13,8 @@ local Types = require(Shared:WaitForChild("Types"))
 
 local player = Players.LocalPlayer
 
+local UiScale = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("UiScale"))
+
 local HudController = {}
 
 local COLORS = {
@@ -47,14 +49,16 @@ local function buildGui()
 	gui.IgnoreGuiInset = false
 	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-	-- Panel uang di tengah atas (kiri atas dipakai jendela chat Roblox).
+	-- Panel uang kecil di pojok kanan atas supaya tidak menghalangi pandangan (kiri atas dipakai
+	-- tombol Roblox, tengah atas dipakai panel tugas).
 	local panel = Instance.new("Frame")
 	panel.Name = "MoneyPanel"
 	panel.AnchorPoint = Vector2.new(1, 0)
-	panel.Position = UDim2.new(0.5, -6, 0, 8)
-	panel.Size = UDim2.fromOffset(200, 48)
+	panel.Position = UDim2.new(1, -8, 0, 4)
+	UiScale.attach(panel)
+	panel.Size = UDim2.fromOffset(150, 34)
 	panel.BackgroundColor3 = COLORS.panel
-	panel.BackgroundTransparency = 0.1
+	panel.BackgroundTransparency = 0.2
 	corner(panel, 14)
 	local stroke = Instance.new("UIStroke")
 	stroke.Thickness = 2
@@ -73,17 +77,21 @@ local function buildGui()
 	moneyLabel.TextXAlignment = Enum.TextXAlignment.Left
 	moneyLabel.Text = "..."
 	local textLimit = Instance.new("UITextSizeConstraint")
-	textLimit.MaxTextSize = 30
+	textLimit.MaxTextSize = 22
 	textLimit.Parent = moneyLabel
 	moneyLabel.Parent = panel
 
 	rewardButton = Instance.new("TextButton")
 	rewardButton.Name = "DailyReward"
-	rewardButton.Position = UDim2.new(0.5, 6, 0, 12)
-	rewardButton.Size = UDim2.fromOffset(190, 40)
+	rewardButton.AnchorPoint = Vector2.new(1, 0)
+	UiScale.attach(rewardButton)
+	UiScale.onChange(function(value: number)
+		rewardButton.Position = UDim2.new(1, -8, 0, 4 + 40 * value)
+	end)
+	rewardButton.Size = UDim2.fromOffset(150, 28)
 	rewardButton.BackgroundColor3 = COLORS.button
 	rewardButton.Font = Enum.Font.FredokaOne
-	rewardButton.TextSize = 20
+	rewardButton.TextSize = 14
 	rewardButton.TextColor3 = COLORS.text
 	rewardButton.Text = "🎁 Hadiah Harian"
 	rewardButton.AutoButtonColor = true
@@ -94,6 +102,7 @@ local function buildGui()
 	toastLabel.Name = "Toast"
 	toastLabel.AnchorPoint = Vector2.new(0.5, 1)
 	toastLabel.Position = UDim2.new(0.5, 0, 1, -120)
+	UiScale.attach(toastLabel)
 	toastLabel.Size = UDim2.fromOffset(380, 44)
 	toastLabel.BackgroundColor3 = COLORS.toastBg
 	toastLabel.BackgroundTransparency = 0.15
@@ -124,6 +133,11 @@ local function showToast(message: string)
 			toastLabel.Visible = false
 		end
 	end)
+end
+
+-- Dipakai controller lain untuk menampilkan pesan singkat.
+function HudController.toast(message: string)
+	showToast(message)
 end
 
 local function setMoney(target: number, animate: boolean)

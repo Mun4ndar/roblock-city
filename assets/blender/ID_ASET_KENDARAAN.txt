@@ -1,0 +1,29 @@
+Aset kendaraan Meshy (diunggah 2026-11-25 ke akun pemilik, userId 10218125941).
+Model = FBX bodi + satu roda (insert_asset -> ServerStorage.<Nama>Mentah). Tekstur = Decal; id gambar sebenarnya
+diambil lewat InsertService:LoadAsset(<id decal>) -> Decal.Texture, lalu dipasang ke SurfaceAppearance.ColorMap.
+
+kancil      model 80202868785051   decal 132157405672949   gambar 122115159582477   (terpasang di CarShells.kancil)
+serasi      model 113071088600933  decal 115703046631351
+jelajah     model 110502439272802  decal 89409866293409
+kilat       model 129878307579049  decal 118974856460756
+patroli     model 122615538542797  decal 112026184799029
+motor_matic model 117580508350116  decal 139611889879938
+motor_ojek  model 109154695553281  decal 121345070228476 (v2; v1 134186407121850 lambat termuat)
+motor_sport model 124269529630415  decal 129838670728082
+
+Ukuran untuk VehicleConfig (stud; hasil tools/blender/meshy_mobil.py):
+serasi      tinggi 5.33 lebar 7.34 panjang 17.5 wheelRadius 1.43 wheelWidth 1.38 wheelTrack 2.84 wheelbase 9.37
+jelajah     tinggi 6.81 lebar 7.82 panjang 17.5 wheelRadius 1.77 wheelWidth 1.32 wheelTrack 2.99 wheelbase 9.70
+kilat       tinggi 4.99 lebar 7.61 panjang 17.5 wheelRadius 1.35 wheelWidth 1.66 wheelTrack 2.68 wheelbase 10.60
+patroli     tinggi 5.78 lebar 7.43 panjang 17.5 wheelRadius 1.54 wheelWidth 1.46 wheelTrack 2.58 wheelbase 9.92
+motor_matic tinggi 6.43 lebar 4.16 panjang 10.0 wheelRadius 1.37 wheelbase 7.04 (roda y +3.75 / -3.30)
+motor_ojek  tinggi 7.20 lebar 3.74 panjang 10.5 wheelRadius 1.59 wheelbase 7.33 (roda y +3.80 / -3.53)
+motor_sport tinggi 5.73 lebar 4.19 panjang 10.5 wheelRadius 1.34 wheelbase 6.54 (roda y +3.89 / -2.65)
+ambulans    model 134435061734863  decal 71168544143127   gambar 115108122958073  (skrip Gemini buat_ambulans_roblox.py; panjang 17, wheelRadius 1.33, wheelTrack 3.07, wheelbase 10.02)
+damkar      model 104383633649644  decal 99536378504435   gambar 102999737979652 (skrip Gemini buat_damkar.py)
+damkarTangga model 84867619524737  decal sama dengan damkar (tangga disimpan rata; salinan skrip diperbaiki Matrix.Euler)
+bus         model 116248894567584  decal 87094219848501   gambar 129041940402482 (skrip Gemini buat_bus.py; 6 roda: roda belakang paling ujung digabung ke bodi)
+angkot      model 71705788816075   decal 83769804095033   gambar 80144494833052 (skrip Gemini buat_angkot.py; papan atap dibalik agar terbaca)
+
+Tekstur dengan padding (2026-11-25, perbaikan bintik putih; gambar baru di SurfaceAppearance): serasi 91484496672121, jelajah 78749345897530, kilat 129208817708012, patroli 101944020310450, lincah 86950962224284, ojek 94811848267675. Kancil masih versi lama (perlu unduh ulang model asli dari Meshy).
+kancil v4 (2026-11-25, diunduh ulang dari Meshy, bodi 12 ribu tris dengan decimate UV-delimit, roda 1,5 ribu): model 91209444065811, decal 86536224217116, gambar 122215422797934

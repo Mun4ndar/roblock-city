@@ -11,7 +11,35 @@ local Net = {}
 
 Net.Names = table.freeze({
 	ClaimDailyReward = "ClaimDailyReward", -- RemoteFunction: client -> server, tanpa argumen
+	KlinikMulai = "KlinikMulai", -- RemoteEvent: server -> client, (token, ikon, judul, jumlahKetuk, detik) mulai mini-game periksa
+	KlinikSelesai = "KlinikSelesai", -- RemoteEvent: client -> server, (token, jumlahKetuk)
 	Notify = "Notify", -- RemoteEvent: server -> client, (message: string)
+	VehicleBuy = "VehicleBuy", -- RemoteFunction: (vehicleId: string) -> VehicleResult
+	VehicleSpawn = "VehicleSpawn", -- RemoteFunction: (vehicleId: string) -> VehicleResult
+	VehicleDespawn = "VehicleDespawn", -- RemoteFunction: () -> VehicleResult
+	VehicleFlip = "VehicleFlip", -- RemoteEvent: client -> server, tanpa argumen (balikkan mobil sendiri)
+	VehicleMod = "VehicleMod", -- RemoteFunction: (pilihan: "paint:3" / "rim:2") -> VehicleResult (mobil yang sedang dikeluarkan)
+	ShopPrompt = "ShopPrompt", -- RemoteFunction: (kunci produk atau "vip") -> { ok, message }; Roblox yang menampilkan jendela beli
+	PetAction = "PetAction", -- RemoteFunction: ("buy"|"equip"|"feed", petId) -> { ok, message }
+	FashionAction = "FashionAction", -- RemoteFunction: ("buy"|"wear", outfitId) -> { ok, message }
+	BusinessAction = "BusinessAction", -- RemoteFunction: ("buy"|"collect"|"serve") -> { ok, message }
+	JobSelect = "JobSelect", -- RemoteFunction: (jobId: string, "" = berhenti) -> JobResult
+	JobStep = "JobStep", -- RemoteFunction: (taskId: number, stepIndex: number) -> JobResult
+	JobSkip = "JobSkip", -- RemoteFunction: () -> JobResult (minta tugas lain)
+	JobTask = "JobTask", -- RemoteEvent: server -> client, (task: JobConfig.TaskView?)
+	JobSync = "JobSync", -- RemoteEvent: client -> server, minta kirim ulang tugas aktif
+	HouseBuy = "HouseBuy", -- RemoteFunction: (houseId: number) -> HouseResult
+	HouseSell = "HouseSell", -- RemoteFunction: () -> HouseResult
+	HousePaint = "HousePaint", -- RemoteFunction: (slot: string, colorIndex: number) -> HouseResult
+	HouseItem = "HouseItem", -- RemoteFunction: (yardSlot: number, itemId: string, "" = kosongkan) -> HouseResult
+	HouseGoHome = "HouseGoHome", -- RemoteFunction: () -> HouseResult (pulang ke depan rumah)
+	MissionClaim = "MissionClaim", -- RemoteFunction: (missionId: string) -> { ok, message }
+	FarmBuySeed = "FarmBuySeed", -- RemoteFunction: (cropId: string) -> { ok, message } (beli 1 bibit)
+	FarmPlant = "FarmPlant", -- RemoteFunction: (plotIndex: number, cropId: string) -> { ok, message }
+	FarmHarvest = "FarmHarvest", -- RemoteFunction: (plotIndex: number) -> { ok, message }
+	RetentionAction = "RetentionAction", -- RemoteFunction: ("streak"|"mission"|"buy", id) -> { ok, message }
+	FarmSell = "FarmSell", -- RemoteFunction: () -> { ok, message } (jual semua hasil panen)
+	SetLanguage = "SetLanguage", -- RemoteEvent: client -> server, ("id"|"en") simpan pilihan bahasa pemain
 })
 
 local function getFolder(): Folder

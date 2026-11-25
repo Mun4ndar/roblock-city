@@ -3,7 +3,48 @@
 
 local Controllers = script:WaitForChild("Controllers")
 
-local ORDER = { "HudController" }
+local ORDER = {
+	"LocalizeController", -- harus pertama: pengamat teks sudah terpasang saat controller lain membuat UI
+	"HudController",
+	"DayNightController",
+	"VehicleController",
+	"VehicleUiController",
+	"VehicleModController",
+	"BeaconController",
+	"VehicleEffectsController",
+	"JobController",
+	"JobUiController",
+	"KlinikController",
+	"HouseUiController",
+	"NavController",
+	"PhoneController",
+	"RetentionController",
+	"FarmController",
+	"PetController",
+	"SocialController",
+	"FoodController",
+	"RadioController",
+	"LombaController",
+	"ProgressController",
+	"PetAnimController",
+	"FashionController",
+	"BusinessController",
+	"ShopController",
+	"StoreController",
+	"ConsumeAnimController",
+	"PlaneController",
+	"JetSkiController",
+	"MinimapController",
+	"MapUiController",
+	"InfoBoardController",
+	"WindmillController",
+	"ExhibitController",
+	"SportsController",
+	"ConcertController",
+	"BeachLifeController",
+	"CafeController",
+	"UiStyleController",
+}
 
 local loaded: { any } = {}
 for _, name in ORDER do

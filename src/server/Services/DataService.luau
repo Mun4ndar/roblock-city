@@ -49,6 +49,17 @@ local function defaultData(): PlayerData
 		money = Config.STARTING_MONEY,
 		lastDailyReward = 0,
 		stats = { totalEarned = 0, joins = 0 },
+		vehicles = {},
+		jobs = { current = "", stats = {} },
+		house = { id = 0, tier = "", boughtAt = 0, paint = {}, items = {} },
+		missions = { day = 0, progress = {}, claimed = {} },
+		farm = { plots = {}, seeds = {}, crops = {} },
+		receipts = {},
+		pets = { owned = {}, active = "", fedAt = 0 },
+		fashion = { owned = {}, active = "" },
+		business = { level = 0, stored = 0 },
+		gadgets = { owned = {} },
+		skins = { owned = {}, active = "" },
 	}
 end
 
@@ -83,6 +94,18 @@ local function migrate(raw: any): PlayerData
 		if raw.stats[key] == nil then
 			raw.stats[key] = value
 		end
+	end
+	if type(raw.vehicles) ~= "table" then
+		raw.vehicles = {}
+	end
+	if type(raw.jobs) ~= "table" then
+		raw.jobs = {}
+	end
+	if type(raw.jobs.current) ~= "string" then
+		raw.jobs.current = ""
+	end
+	if type(raw.jobs.stats) ~= "table" then
+		raw.jobs.stats = {}
 	end
 	return raw :: PlayerData
 end
@@ -230,6 +253,16 @@ end
 function DataService.getData(player: Player): PlayerData?
 	local profile = profiles[player]
 	return if profile then profile.data else nil
+end
+
+-- Simpan segera (dipakai ShopService sebelum pembelian dianggap selesai). true = tersimpan atau
+-- mode offline; false = gagal (pembelian harus diulang Roblox, jadi tidak ada yang hilang).
+function DataService.saveNow(player: Player): boolean
+	local profile = profiles[player]
+	if profile == nil or profile.released then
+		return false
+	end
+	return saveAsync(player, profile, false)
 end
 
 function DataService.isLoaded(player: Player): boolean

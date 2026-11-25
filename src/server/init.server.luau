@@ -5,7 +5,51 @@
 local Services = script:WaitForChild("Services")
 
 -- Urutan eksplisit: DataService harus siap sebelum service yang bergantung padanya.
-local ORDER = { "DataService", "EconomyService" }
+local ORDER = {
+	"DataService",
+	"EconomyService",
+	"LanguageService",
+	"TimeService",
+	"VehicleService",
+	"BikeRiderService",
+	"FuelService",
+	"UniformService",
+	"PlaneService",
+	"JobService",
+	"PortalService",
+	"DoorService",
+	"BalaiKotaService",
+	"ResortService",
+	"ClinicService",
+	"HouseService",
+	"SocialService",
+	"FoodService",
+	"RadioService",
+	"LombaService",
+	"ProgressService",
+	"MissionService",
+	"RetentionService",
+	"FarmService",
+	"ShopService",
+	"GadgetService",
+	"StoreService",
+	"ShopDoorService",
+	"ShopCashierService",
+	"PetService",
+	"FashionService",
+	"BusinessService",
+	"JetSkiService",
+	"CafePantaiService",
+	"FerryService",
+	"FerrisService",
+	"NpcService",
+	"SportsService",
+	"ConcertService",
+	"BeachLifeService",
+	"CafeService",
+	"FaceService",
+	"DebugService",
+}
 
 local loaded: { { name: string, module: any } } = {}
 for _, name in ORDER do
