@@ -85,19 +85,60 @@ for i in range(4):  # tangga lebar (tinggi 1.0 total, empat anak tangga)
     box("BkStone", 0, 14.4 + i * 2.0, 0, 34, 2.0, 1.0 - i * 0.25)
 box("BkStone", 0, 11.8, 1.0, 42, 5, 0.3)  # lantai beranda
 
-# ---------------- badan utama ----------------
-box("BkWall", 0, -2, 1.2, 44, 24, 22.8)  # y -14..10, z 1.2..24
-box("BkStone", 0, -2, 1.2, 45, 25, 2.2)
-box("BkStone", 0, -2, 11.5, 44.6, 24.6, 0.5)
+# ---------------- badan utama (BERONGGA: bisa dimasuki) ----------------
+T = 1.5  # tebal dinding
+COLL = []  # kotak tabrakan (x0,x1,y0,y1,z0,z1) dalam koordinat Blender, dicetak di akhir
+
+
+def wall(m, x0, x1, y0, y1, z0, z1, coll=True):
+    box(m, (x0 + x1) / 2, (y0 + y1) / 2, z0, x1 - x0, y1 - y0, z1 - z0)
+    if coll:
+        COLL.append((x0, x1, y0, y1, z0, z1))
+
+
+def ring(m, cx, cy, z0, sx, sy, sz, t):
+    """cincin kosong (empat papan) bertebal t, ukuran luar sx x sy."""
+    box(m, cx, cy + sy / 2 - t / 2, z0, sx, t, sz)
+    box(m, cx, cy - sy / 2 + t / 2, z0, sx, t, sz)
+    box(m, cx - sx / 2 + t / 2, cy, z0, t, sy - 2 * t, sz)
+    box(m, cx + sx / 2 - t / 2, cy, z0, t, sy - 2 * t, sz)
+
+
+DW = 3.6  # setengah lebar bukaan pintu depan
+DH = 10.8  # tinggi bukaan pintu (z)
+wall("BkWall", -22, 22, -14, -12.5, 1.2, 24)  # belakang
+for sx in (-1, 1):  # sisi, dengan bukaan lengkung ke sayap (y -7..3)
+    x0, x1 = (sx * 20.5, sx * 22)
+    x0, x1 = min(x0, x1), max(x0, x1)
+    wall("BkWall", x0, x1, -12.5, -7, 1.2, 24)
+    wall("BkWall", x0, x1, 3, 8.5, 1.2, 24)
+    wall("BkWall", x0, x1, -7, 3, 10.0, 24)
+wall("BkWall", -22, -DW, 8.5, 10, 1.2, 24)  # depan kiri
+wall("BkWall", DW, 22, 8.5, 10, 1.2, 24)  # depan kanan
+wall("BkWall", -DW, DW, 8.5, 10, DH, 24)  # ambang atas pintu
+wall("BkStone", -20.5, 20.5, -12.5, 8.5, 21.5, 23.0)  # langit-langit aula
+ring("BkStone", 0, -2, 1.2, 45, 25, 2.2, 0.5)  # alas bangunan (kulit luar)
+ring("BkStone", 0, -2, 11.5, 44.6, 24.6, 0.5, 0.3)
 box("BkStone", 0, -2, 23.0, 46.6, 26.6, 1.0)
 box("BkGold", 0, -2, 24.0, 47.0, 27.0, 0.35)
 box("BkRoof", 0, -2, 24.35, 40, 22, 0.6)
+# bingkai pintu: tiang batu + palang atas + hiasan emas
+box("BkStone", -DW - 0.45, 9.3, 1.2, 0.9, 2.4, DH - 1.2 + 1.6)
+box("BkStone", DW + 0.45, 9.3, 1.2, 0.9, 2.4, DH - 1.2 + 1.6)
+box("BkStone", 0, 9.3, DH, 2 * DW + 1.8, 2.4, 1.6)
+box("BkGold", 0, 10.55, DH + 1.6, 2 * DW + 2.2, 0.5, 0.35)
 
-for s in (-1, 1):  # sayap
+for s in (-1, 1):  # sayap (berongga, tersambung ke aula lewat bukaan)
     cx = s * 30
-    box("BkWall", cx, -2, 1.2, 16, 20, 14.8)  # y -12..8, z 1.2..16
-    box("BkStone", cx, -2, 1.2, 16.6, 20.6, 2.0)
-    box("BkStone", cx, -2, 8.5, 16.4, 20.4, 0.4)
+    xo0, xo1 = sorted((s * 22, s * 38))
+    wall("BkWall", xo0, xo1, -12, -10.5, 1.2, 16)  # belakang
+    wall("BkWall", xo0, xo1, 6.5, 8, 1.2, 16)  # depan
+    ox0, ox1 = sorted((s * 36.5, s * 38))
+    wall("BkWall", ox0, ox1, -10.5, 6.5, 1.2, 16)  # ujung luar
+    ix0, ix1 = sorted((s * 22, s * 36.5))
+    wall("BkStone", ix0, ix1, -10.5, 6.5, 14.0, 15.2)  # langit-langit sayap
+    ring("BkStone", cx, -2, 1.2, 16.6, 20.6, 2.0, 0.3)
+    ring("BkStone", cx, -2, 8.5, 16.4, 20.4, 0.4, 0.2)
     box("BkStone", cx, -2, 15.2, 17.6, 21.6, 1.0)
     box("BkGold", cx, -2, 16.2, 18.0, 22.0, 0.3)
     box("BkRoof", cx, -2, 16.5, 14.5, 18.5, 0.5)
@@ -137,12 +178,7 @@ b = bm("BkGold")  # lambang: cakram emas di muka frontispis
 res = bmesh.ops.create_cone(b, cap_ends=True, cap_tris=False, segments=28, radius1=2.3, radius2=2.3, depth=0.4)
 bmesh.ops.rotate(b, cent=(0, 0, 0), matrix=Matrix.Rotation(math.pi / 2, 3, "X"), verts=res["verts"])
 bmesh.ops.translate(b, vec=(0, 16.0, 27.0), verts=res["verts"])
-box("BkStone", 0, 10.15, 1.2, 8.4, 0.5, 11.2)  # pintu utama
-box("BkDark", 0, 10.4, 1.2, 7.0, 0.4, 9.6)
-box("BkGold", 0, 10.6, 1.2, 0.25, 0.3, 9.6)
-box("BkGlass", -1.75, 10.6, 2.0, 2.9, 0.3, 7.6)
-box("BkGlass", 1.75, 10.6, 2.0, 2.9, 0.3, 7.6)
-box("BkGold", 0, 10.5, 11.3, 7.0, 0.4, 0.6)
+# pintu utama: bukaan (kaca berengsel dipasang di Studio)
 for dx in (-12.5, -7.5, 7.5, 12.5):
     window(dx, 10.0, 3.5, 3.0, 8.0, "front")
 for dx in (-12.5, -7.5, -4.5, 4.5, 7.5, 12.5):
@@ -201,6 +237,14 @@ for hx in (-30, 30):  # pagar tanaman depan sayap
 for lx in (-18.5, 18.5):  # lampu taman emas di samping tangga
     cyl("BkGold", lx, 23.0, 0.0, 0.2, 6.0, 8)
     dome("BkGlass", lx, 23.0, 6.0, 0.75, 0.9, 10)
+
+# bingkai emas bukaan aula -> sayap
+for sx in (-1, 1):
+    xm = sx * 21.25
+    box("BkGold", xm, -7.25, 1.2, 1.7, 0.5, 8.8)
+    box("BkGold", xm, 3.25, 1.2, 1.7, 0.5, 8.8)
+    box("BkGold", xm, -2, 10.0, 1.7, 10.5, 0.5)
+print("COLL", [tuple(round(v, 3) for v in c) for c in COLL])
 
 # ---------------- bangun objek ----------------
 objs = []
