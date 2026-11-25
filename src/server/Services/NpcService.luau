@@ -93,7 +93,22 @@ local GROUPS = {
 		name = "Mekanik",
 		template = "AsetMekanik",
 		spots = {
-			{ pos = Vector3.new(188, 1.3, 280.8), facing = Vector3.new(0, 0, 1), work = true },
+			{
+				pos = Vector3.new(188, 1.3, 279),
+				facing = Vector3.new(0, 0, 1),
+				work = true,
+				-- Mondar-mandir di kanopi: bekerja di depan mobil, istirahat sebentar di sisi lift, bekerja di
+				-- belakang mobil, meja kerja, lemari alat, rak oli. Jalur menghindari tiang lift dan kolong mobil.
+				route = {
+					{ pos = Vector3.new(188, 1.3, 279), face = Vector3.new(188, 1.3, 289), act = "work", seconds = 7 },
+					{ pos = Vector3.new(198, 1.3, 289), face = Vector3.new(188, 1.3, 289), act = "idle", seconds = 2 },
+					{ pos = Vector3.new(192, 1.3, 303), face = Vector3.new(188, 1.3, 293), act = "work", seconds = 7 },
+					{ pos = Vector3.new(180, 1.3, 307), face = Vector3.new(171, 1.3, 307), act = "work", seconds = 6 },
+					{ pos = Vector3.new(180, 1.3, 301), face = Vector3.new(171, 1.3, 301), act = "idle", seconds = 3 },
+					{ pos = Vector3.new(177.5, 1.3, 292), face = Vector3.new(177.5, 1.3, 285), act = "walk", seconds = 0 },
+					{ pos = Vector3.new(180, 1.3, 283), face = Vector3.new(171, 1.3, 283), act = "idle", seconds = 4 },
+				},
+			},
 		},
 	},
 	{
@@ -1291,6 +1306,8 @@ local MODERN_DESPAWN_RANGE = 200
 local MODERN_MAX = 10
 local MODERN_CHECK_SECONDS = 3
 
+type RouteStop = { pos: Vector3, face: Vector3, act: string, seconds: number }
+
 type Slot = {
 	template: string,
 	index: number,
@@ -1299,7 +1316,7 @@ type Slot = {
 	group: any,
 	home: Vector3,
 	model: Model?,
-	spot: { pos: Vector3, facing: Vector3, work: (boolean | string)? }?,
+	spot: { pos: Vector3, facing: Vector3, work: (boolean | string)?, route: { RouteStop }? }?,
 	only: string?,
 }
 local modernSlots: { Slot } = {}
@@ -1357,12 +1374,73 @@ local function workAnimate(humanoid: Humanoid, mode: string)
 	end
 end
 
+-- NPC pekerja yang berjalan mondar-mandir antar titik kerja (jalur lurus, titik dipilih bebas rintangan).
+-- act: "work" = ayun alat, "idle" = diam sejenak, "walk" = hanya lewat.
+local function routeLoop(model: Model, route: { RouteStop })
+	local humanoid = model:FindFirstChildOfClass("Humanoid")
+	local root = model.PrimaryPart
+	if humanoid == nil or root == nil then
+		return
+	end
+	animate(humanoid) -- diam + jalan (sesuai kecepatan)
+	local animator = humanoid:FindFirstChildOfClass("Animator") :: Animator
+	local slashAnimation = Instance.new("Animation")
+	slashAnimation.AnimationId = WORK_SLASH_ANIMATION
+	local slash = animator:LoadAnimation(slashAnimation)
+	slash.Looped = true
+	slash.Priority = Enum.AnimationPriority.Action
+	humanoid.WalkSpeed = 6
+	local index = 1
+	while model.Parent and humanoid.Parent and humanoid.Health > 0 do
+		local stop = route[index]
+		local reached = false
+		local connection = humanoid.MoveToFinished:Connect(function()
+			reached = true
+		end)
+		humanoid:MoveTo(stop.pos)
+		local began = os.clock()
+		while not reached and model.Parent and os.clock() - began < 14 do
+			task.wait(0.2)
+		end
+		connection:Disconnect()
+		if model.Parent == nil then
+			break
+		end
+		if stop.act ~= "walk" then
+			local here = root.Position
+			model:PivotTo(CFrame.lookAt(here, Vector3.new(stop.face.X, here.Y, stop.face.Z)))
+			if stop.act == "work" then
+				slash:Play(0.2)
+				slash:AdjustSpeed(0.7)
+			end
+			task.wait(stop.seconds)
+			slash:Stop(0.3)
+		end
+		index = index % #route + 1
+	end
+end
+
 local function spawnSlot(slot: Slot)
 	local model = buildFromTemplate(slot.template, slot.index, slot.only)
 	if model == nil then
 		return
 	end
 	local spot = slot.spot
+	if spot and spot.route then
+		-- Pekerja berjalan: mulai di titik pertama jalur, fisika dipegang server
+		local first = spot.route[1]
+		model:PivotTo(CFrame.new(first.pos + Vector3.new(0, 3.5, 0)))
+		model.Parent = folder
+		local anchor = model.PrimaryPart
+		if anchor then
+			pcall(function()
+				anchor:SetNetworkOwner(nil)
+			end)
+		end
+		slot.model = model
+		task.spawn(routeLoop, model, spot.route)
+		return
+	end
 	if spot then
 		-- Penjaga lapak: berdiri diam menghadap lorong, animasi diam, root dikunci di tempatnya.
 		model.Parent = folder
