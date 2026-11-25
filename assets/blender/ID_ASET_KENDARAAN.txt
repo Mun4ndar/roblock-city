@@ -19,3 +19,4 @@ patroli     tinggi 5.78 lebar 7.43 panjang 17.5 wheelRadius 1.54 wheelWidth 1.46
 motor_matic tinggi 6.43 lebar 4.16 panjang 10.0 wheelRadius 1.37 wheelbase 7.04 (roda y +3.75 / -3.30)
 motor_ojek  tinggi 7.20 lebar 3.74 panjang 10.5 wheelRadius 1.59 wheelbase 7.33 (roda y +3.80 / -3.53)
 motor_sport tinggi 5.73 lebar 4.19 panjang 10.5 wheelRadius 1.34 wheelbase 6.54 (roda y +3.89 / -2.65)
+ambulans    model 134435061734863  decal 71168544143127   gambar 115108122958073  (skrip Gemini buat_ambulans_roblox.py; panjang 17, wheelRadius 1.33, wheelTrack 3.07, wheelbase 10.02)

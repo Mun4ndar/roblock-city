@@ -579,9 +579,10 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 		-- semua part bodi kotak disembunyikan (kursi tetap berfungsi) dan warna aslinya dipertahankan,
 		-- hanya part beratribut Paint yang ikut warna cat mobil.
 		local preserve = shellSource:GetAttribute("Preserve") == true
+		-- Lampu sirene (Beacon) tetap tampak dan berkedip walau bodi kotak disembunyikan.
 		for _, old in model:GetDescendants() do
 			local hide = if preserve
-				then not old:IsDescendantOf(wheelFolder)
+				then not old:IsDescendantOf(wheelFolder) and old.Name ~= "Beacon"
 				else old.Parent == bodyFolder and SHELL_REPLACES[old.Name]
 			if old:IsA("BasePart") and hide then
 				old.Transparency = 1
