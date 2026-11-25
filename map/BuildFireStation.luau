@@ -2,7 +2,9 @@
 --[[
 	ROBLOCK CITY: kantor pemadam kebakaran modern (dibuat di Blender: assets/blender/stasiun_damkar.fbx).
 
-	Mesh diunggah sebagai asset 83253360669850 (Model, 8 MeshPart per bahan: FsWall, FsRed, FsTrim,
+	Versi garasi TINGGI (bukaan pintu 12 stud supaya truk tangga 10,6 stud muat): asset 104213637771429
+	(assets/blender/stasiun_damkar_tinggi.fbx, semua titik z >= 8,9 naik 3), dipasang di ServerStorage.StasiunDamkarMentah.
+	Versi pertama: asset 83253360669850 (Model, 8 MeshPart per bahan: FsWall, FsRed, FsTrim,
 	FsGlass, FsDark, FsYellow, FsFloor, FsWhite) dan dipasang di ServerStorage.StasiunDamkarMentah.
 	Skrip ini menaruhnya di Blok Layanan (pusat (146, 1, 255), depan menghadap -Z ke jalan z=214),
 	mencadangkan model lama ke ServerStorage.CadanganPeta.PemadamLama, dan membuat:
@@ -32,16 +34,16 @@ local LOOK = {
 
 -- kotak tabrakan dalam koordinat Blender (x0, x1, y0, y1, z0, z1)
 local COLLIDERS: { { any } } = {
-	{ "Belakang", -25, 6.5, 13.8, 15, 0, 12.5 },
-	{ "Kiri", -25, -23.7, -15, 15, 0, 12.5 },
-	{ "Sekat1", -10.5, -9.5, -15, 15, 0, 12.5 },
-	{ "Sekat2", 4.6, 6.5, -15, 15, 0, 12.5 },
-	{ "Tiang1", -10.8, -8.2, -15.2, -12.5, 0, 12.5 },
-	{ "Tiang2", 4.3, 6.5, -15.2, -12.5, 0, 12.5 },
-	{ "Balok", -25, 6.5, -15, -13.8, 9, 12.5 },
-	{ "Atap", -25.4, 6.9, -15.5, 15.4, 12.5, 13.2 },
-	{ "Kantor", 6.5, 25, -15, 15, 0, 18.2 },
-	{ "Menara", 16.3, 25.3, -15.6, -6.2, 0, 28.2 },
+	{ "Belakang", -25, 6.5, 13.8, 15, 0, 15.5 },
+	{ "Kiri", -25, -23.7, -15, 15, 0, 15.5 },
+	{ "Sekat1", -10.5, -9.5, -15, 15, 0, 15.5 },
+	{ "Sekat2", 4.6, 6.5, -15, 15, 0, 15.5 },
+	{ "Tiang1", -10.8, -8.2, -15.2, -12.5, 0, 15.5 },
+	{ "Tiang2", 4.3, 6.5, -15.2, -12.5, 0, 15.5 },
+	{ "Balok", -25, 6.5, -15, -13.8, 12, 15.5 },
+	{ "Atap", -25.4, 6.9, -15.5, 15.4, 15.5, 16.2 },
+	{ "Kantor", 6.5, 25, -15, 15, 0, 21.2 },
+	{ "Menara", 16.3, 25.3, -15.6, -6.2, 0, 31.2 },
 	{ "Lantai", -23.7, 4.6, -15, 13.8, 0, 0.25 },
 }
 
@@ -59,11 +61,11 @@ return function(): number
 	backup.Parent = ServerStorage
 	local old = downtown:FindFirstChild("PemadamKebakaran")
 	if old then
-		local previous = backup:FindFirstChild("PemadamLama")
+		local previous = backup:FindFirstChild("PemadamRendah")
 		if previous then
 			previous:Destroy()
 		end
-		old.Name = "PemadamLama"
+		old.Name = "PemadamRendah"
 		old.Parent = backup
 	end
 
@@ -111,7 +113,7 @@ return function(): number
 	sign.CanCollide = false
 	sign.Transparency = 1
 	sign.Size = Vector3.new(27.3, 2.4, 0.1)
-	sign.CFrame = world * CFrame.new(ORIGIN + Vector3.new(-9.35, 10.8, 15.55))
+	sign.CFrame = world * CFrame.new(ORIGIN + Vector3.new(-9.35, 13.8, 15.55))
 	sign.Parent = model
 	local gui = Instance.new("SurfaceGui")
 	gui.Face = Enum.NormalId.Back -- model diputar 180 derajat
