@@ -48,41 +48,41 @@ ShopConfig.PRODUCTS = {
 	{ key = "skateboard_rocket", name = "Skateboard Rocket", robux = 99, productId = 3735942374 },
 	{ key = "headset_gamer", name = "Headset Gamer", robux = 49, productId = 3735942455 },
 	{ key = "pedang_cahaya", name = "Pedang Cahaya", robux = 149, productId = 3735942541 },
-	-- Costume premium Toko Costume (isi productId setelah Developer Product dibuat).
+	-- Costume premium Toko Costume (Developer Product dibuat pemilik di Creator Dashboard).
 	{
 		key = "costume_sayap_malaikat",
 		name = "Sayap Malaikat",
 		costume = "sayap_malaikat",
-		robux = 99,
-		productId = 0,
+		robux = 149,
+		productId = 3735960810,
 	},
 	{
 		key = "costume_naga_api",
 		name = "Naga Api",
 		costume = "naga_api",
-		robux = 129,
-		productId = 0,
+		robux = 199,
+		productId = 3735960874,
 	},
 	{
 		key = "costume_mecha_wing",
 		name = "Mecha Wing",
 		costume = "mecha_wing",
-		robux = 149,
-		productId = 0,
+		robux = 249,
+		productId = 3735960971,
 	},
 	{
 		key = "costume_penyihir_galaksi",
 		name = "Penyihir Galaksi",
 		costume = "penyihir_galaksi",
-		robux = 119,
-		productId = 0,
+		robux = 299,
+		productId = 3735961064,
 	},
 	{
 		key = "costume_raja_petir",
 		name = "Raja Petir",
 		costume = "raja_petir",
-		robux = 159,
-		productId = 0,
+		robux = 399,
+		productId = 3735961148,
 	},
 } :: { Product }
 

@@ -44,7 +44,7 @@ FashionConfig.OUTFITS = {
 		name = "Sayap Malaikat",
 		icon = "🪽",
 		price = 0,
-		robux = 99,
+		robux = 149,
 		productKey = "costume_sayap_malaikat",
 		look = look(
 			"peaked",
@@ -59,7 +59,7 @@ FashionConfig.OUTFITS = {
 		name = "Naga Api",
 		icon = "🐉",
 		price = 0,
-		robux = 129,
+		robux = 199,
 		productKey = "costume_naga_api",
 		look = look(
 			"helmet",
@@ -74,7 +74,7 @@ FashionConfig.OUTFITS = {
 		name = "Mecha Wing",
 		icon = "🤖",
 		price = 0,
-		robux = 149,
+		robux = 249,
 		productKey = "costume_mecha_wing",
 		look = look(
 			"helmet",
@@ -89,7 +89,7 @@ FashionConfig.OUTFITS = {
 		name = "Penyihir Galaksi",
 		icon = "🧙",
 		price = 0,
-		robux = 119,
+		robux = 299,
 		productKey = "costume_penyihir_galaksi",
 		look = look(
 			"peaked",
@@ -104,7 +104,7 @@ FashionConfig.OUTFITS = {
 		name = "Raja Petir",
 		icon = "⚡",
 		price = 0,
-		robux = 159,
+		robux = 399,
 		productKey = "costume_raja_petir",
 		look = look(
 			"peaked",

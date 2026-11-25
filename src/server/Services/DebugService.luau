@@ -13,11 +13,12 @@ local ServerStorage = game:GetService("ServerStorage")
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local EconomyService = require(script.Parent:WaitForChild("EconomyService"))
 local TimeService = require(script.Parent:WaitForChild("TimeService"))
+local ShopService = require(script.Parent:WaitForChild("ShopService"))
 local UniformService = require(script.Parent:WaitForChild("UniformService"))
 
 local DebugService = {}
 
-local function handle(command: any, a: any, b: any): any
+local function handle(command: any, a: any, b: any, c: any): any
 	if
 		command == "money"
 		and typeof(a) == "Instance"
@@ -52,6 +53,51 @@ local function handle(command: any, a: any, b: any): any
 			game:GetService("HttpService"):JSONEncode({ owned = fashion.owned, active = b })
 		)
 		UniformService.refresh(a)
+		return true
+	elseif
+		command == "receipt"
+		and typeof(a) == "Instance"
+		and a:IsA("Player")
+		and type(b) == "number"
+	then
+		-- Tiru tanda terima Developer Product (tanpa Robux). c = PurchaseId (opsional, untuk uji idempotensi).
+		local info = {
+			PlayerId = a.UserId,
+			PurchaseId = if type(c) == "string"
+				then c
+				else game:GetService("HttpService"):GenerateGUID(false),
+			ProductId = b,
+			CurrencySpent = 0,
+			CurrencyType = Enum.CurrencyType.Robux,
+			PlaceIdWherePurchased = game.PlaceId,
+		}
+		return tostring(ShopService.processReceipt(info))
+	elseif
+		command == "revoke"
+		and typeof(a) == "Instance"
+		and a:IsA("Player")
+		and type(b) == "string"
+	then
+		-- Cabut barang uji (costume atau gadget) dari data pemain, dan kosongkan costume aktif.
+		local data: any = DataService.getData(a)
+		if data == nil then
+			return false
+		end
+		if type(data.fashion) == "table" and type(data.fashion.owned) == "table" then
+			data.fashion.owned[b] = nil
+			if data.fashion.active == b then
+				data.fashion.active = ""
+			end
+			a:SetAttribute(
+				"Fashion",
+				game:GetService("HttpService")
+					:JSONEncode({ owned = data.fashion.owned, active = data.fashion.active })
+			)
+			UniformService.refresh(a)
+		end
+		if type(data.gadgets) == "table" and type(data.gadgets.owned) == "table" then
+			data.gadgets.owned[b] = nil
+		end
 		return true
 	elseif command == "clock" and type(a) == "number" then
 		TimeService.setClock(a)

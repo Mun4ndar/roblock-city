@@ -1315,16 +1315,19 @@ local function workPose(model: Model)
 		while model.Parent do
 			local t = os.clock() - t0
 			if rightShoulder then
-				rightShoulder.Transform = CFrame.Angles(math.rad(-150) + math.sin(t * 5) * 0.06, 0, math.rad(-8))
+				rightShoulder.Transform =
+					CFrame.Angles(math.rad(-150) + math.sin(t * 5) * 0.06, 0, math.rad(-8))
 			end
 			if rightElbow then
 				rightElbow.Transform = CFrame.Angles(math.rad(-22) + math.sin(t * 9) * 0.35, 0, 0)
 			end
 			if leftShoulder then
-				leftShoulder.Transform = CFrame.Angles(math.rad(-142) + math.sin(t * 4 + 1) * 0.08, 0, math.rad(8))
+				leftShoulder.Transform =
+					CFrame.Angles(math.rad(-142) + math.sin(t * 4 + 1) * 0.08, 0, math.rad(8))
 			end
 			if leftElbow then
-				leftElbow.Transform = CFrame.Angles(math.rad(-30) + math.sin(t * 7 + 2) * 0.25, 0, 0)
+				leftElbow.Transform =
+					CFrame.Angles(math.rad(-30) + math.sin(t * 7 + 2) * 0.25, 0, 0)
 			end
 			if neck then
 				neck.Transform = CFrame.Angles(math.rad(-28) + math.sin(t * 2) * 0.05, 0, 0)

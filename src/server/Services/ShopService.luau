@@ -22,6 +22,7 @@ local FashionConfig = require(Shared:WaitForChild("FashionConfig"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local EconomyService = require(script.Parent:WaitForChild("EconomyService"))
 local UniformService = require(script.Parent:WaitForChild("UniformService"))
+local GadgetService = require(script.Parent:WaitForChild("GadgetService"))
 
 local ShopService = {}
 
@@ -45,7 +46,11 @@ local function processReceipt(info: { [string]: any }): Enum.ProductPurchaseDeci
 	local receipts = getReceipts(data)
 	local purchaseId = tostring(info.PurchaseId)
 	if table.find(receipts, purchaseId) then
-		return Enum.ProductPurchaseDecision.PurchaseGranted -- sudah diberikan sebelumnya
+		-- Sudah diberikan sebelumnya; pastikan tersimpan sebelum Roblox menutup tanda terima.
+		if not DataService.saveNow(player) then
+			return Enum.ProductPurchaseDecision.NotProcessedYet
+		end
+		return Enum.ProductPurchaseDecision.PurchaseGranted
 	end
 	local product = ShopConfig.productById(info.ProductId)
 	if product == nil then
@@ -97,13 +102,58 @@ local function processReceipt(info: { [string]: any }): Enum.ProductPurchaseDeci
 			gadgets.owned = {}
 		end
 		gadgets.owned[product.key] = true
+		GadgetService.refresh(player)
 		EconomyService.notify(player, "Terima kasih! " .. product.name .. " sekarang milikmu.")
 	end
 	table.insert(receipts, purchaseId)
 	while #receipts > ShopConfig.MAX_RECEIPTS do
 		table.remove(receipts, 1)
 	end
+	-- Simpan ke DataStore SEBELUM tanda terima ditutup. Kalau gagal, Roblox mengulang pemanggilan
+	-- ini nanti; PurchaseId sudah tercatat di receipts jadi barang tidak diberikan dua kali.
+	if not DataService.saveNow(player) then
+		return Enum.ProductPurchaseDecision.NotProcessedYet
+	end
 	return Enum.ProductPurchaseDecision.PurchaseGranted
+end
+
+-- Dipakai alat uji Studio (DebugService) untuk meniru tanda terima tanpa Robux.
+function ShopService.processReceipt(info: { [string]: any }): Enum.ProductPurchaseDecision
+	return processReceipt(info)
+end
+
+-- Papan "VIP" kecil di atas kepala pemilik Game Pass VIP.
+local function applyVipTag(player: Player)
+	local char = player.Character
+	local head = if char then char:FindFirstChild("Head") else nil
+	if head == nil or not head:IsA("BasePart") then
+		return
+	end
+	local old = head:FindFirstChild("VipTag")
+	if old then
+		old:Destroy()
+	end
+	if player:GetAttribute(ShopConfig.ATTR_VIP) ~= true then
+		return
+	end
+	local gui = Instance.new("BillboardGui")
+	gui.Name = "VipTag"
+	gui.Size = UDim2.fromOffset(90, 28)
+	gui.StudsOffset = Vector3.new(0, 2.6, 0)
+	gui.MaxDistance = 60
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.fromScale(1, 1)
+	label.BackgroundColor3 = Color3.fromRGB(40, 30, 10)
+	label.BackgroundTransparency = 0.25
+	label.Font = Enum.Font.FredokaOne
+	label.TextScaled = true
+	label.TextColor3 = Color3.fromRGB(255, 214, 80)
+	label.Text = "⭐ VIP"
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 8)
+	corner.Parent = label
+	label.Parent = gui
+	gui.Parent = head
 end
 
 local function refreshVip(player: Player)
@@ -116,6 +166,7 @@ local function refreshVip(player: Player)
 		owns = ok and value == true
 	end
 	player:SetAttribute(ShopConfig.ATTR_VIP, owns)
+	applyVipTag(player)
 end
 
 function ShopService.isVip(player: Player): boolean
@@ -236,7 +287,13 @@ function ShopService.start()
 	for _, player in Players:GetPlayers() do
 		task.spawn(refreshVip, player)
 	end
-	Players.PlayerAdded:Connect(refreshVip)
+	Players.PlayerAdded:Connect(function(player: Player)
+		player.CharacterAdded:Connect(function()
+			task.wait(1)
+			applyVipTag(player)
+		end)
+		refreshVip(player)
+	end)
 	Players.PlayerRemoving:Connect(function(player: Player)
 		lastCall[player] = nil
 	end)
@@ -258,6 +315,11 @@ function ShopService.start()
 		function(player: Player, passId: number, purchased: boolean)
 			if purchased and passId == ShopConfig.PASSES.vip.passId then
 				player:SetAttribute(ShopConfig.ATTR_VIP, true)
+				applyVipTag(player)
+				EconomyService.notify(
+					player,
+					"Terima kasih! Kamu sekarang VIP: hadiah harian dua kali lipat dan tanda ⭐ VIP."
+				)
 			end
 		end
 	)

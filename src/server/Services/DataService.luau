@@ -58,6 +58,8 @@ local function defaultData(): PlayerData
 		pets = { owned = {}, active = "", fedAt = 0 },
 		fashion = { owned = {}, active = "" },
 		business = { level = 0, stored = 0 },
+		gadgets = { owned = {} },
+		skins = { owned = {}, active = "" },
 	}
 end
 
@@ -251,6 +253,16 @@ end
 function DataService.getData(player: Player): PlayerData?
 	local profile = profiles[player]
 	return if profile then profile.data else nil
+end
+
+-- Simpan segera (dipakai ShopService sebelum pembelian dianggap selesai). true = tersimpan atau
+-- mode offline; false = gagal (pembelian harus diulang Roblox, jadi tidak ada yang hilang).
+function DataService.saveNow(player: Player): boolean
+	local profile = profiles[player]
+	if profile == nil or profile.released then
+		return false
+	end
+	return saveAsync(player, profile, false)
 end
 
 function DataService.isLoaded(player: Player): boolean
