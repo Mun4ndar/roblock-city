@@ -4,6 +4,7 @@
 local Controllers = script:WaitForChild("Controllers")
 
 local ORDER = {
+	"LocalizeController", -- harus pertama: pengamat teks sudah terpasang saat controller lain membuat UI
 	"HudController",
 	"DayNightController",
 	"VehicleController",

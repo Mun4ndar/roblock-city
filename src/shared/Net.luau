@@ -37,6 +37,7 @@ Net.Names = table.freeze({
 	FarmHarvest = "FarmHarvest", -- RemoteFunction: (plotIndex: number) -> { ok, message }
 	RetentionAction = "RetentionAction", -- RemoteFunction: ("streak"|"mission"|"buy", id) -> { ok, message }
 	FarmSell = "FarmSell", -- RemoteFunction: () -> { ok, message } (jual semua hasil panen)
+	SetLanguage = "SetLanguage", -- RemoteEvent: client -> server, ("id"|"en") simpan pilihan bahasa pemain
 })
 
 local function getFolder(): Folder

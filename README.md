@@ -246,3 +246,10 @@ biasanya diklik manual. Jalankan setelah semua pembangun, dan ulangi setiap kali
 
 - Format: `stylua src map`
 - Lint: `selene src map`
+
+## Bahasa (Indonesia + Inggris)
+
+Teks sumber selalu Indonesia. `shared/Loc.luau` + kamus `shared/LocStrings/*.luau` menerjemahkannya ke Inggris di client
+(`LocalizeController`) untuk pemain yang locale Roblox-nya bukan `id-*`, atau yang memilih EN lewat HP > Menu > 🌐.
+Pilihan disimpan `LanguageService` (atribut Player `Lang`). **Fitur baru: cukup tambah padanan Inggris di
+`LocStrings/` (`exact` untuk teks tetap, `patterns` dengan `{}` untuk teks yang berisi angka/nama).** Detail di komentar `Loc.luau`.

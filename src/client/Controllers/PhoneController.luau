@@ -17,10 +17,12 @@ local Format = require(Shared:WaitForChild("Format"))
 local DayNightConfig = require(Shared:WaitForChild("DayNightConfig"))
 local MissionConfig = require(Shared:WaitForChild("MissionConfig"))
 local DestinationConfig = require(Shared:WaitForChild("DestinationConfig"))
+local Loc = require(Shared:WaitForChild("Loc"))
 
 local HudController = require(script.Parent:WaitForChild("HudController"))
 local HouseUiController = require(script.Parent:WaitForChild("HouseUiController"))
 local NavController = require(script.Parent:WaitForChild("NavController"))
+local LocalizeController = require(script.Parent:WaitForChild("LocalizeController"))
 
 local player = Players.LocalPlayer
 
@@ -347,7 +349,7 @@ end
 
 -- Pintasan ke menu lain (termasuk Toko Koin, lihat ShopController). Aplikasi didaftarkan controller lain lewat
 -- PhoneController.addApp, jadi HP tidak perlu mengenal mereka satu per satu.
-local apps: { { icon: string, name: string, open: () -> () } } = {}
+local apps: { { icon: string, name: string | (() -> string), open: () -> () } } = {}
 
 local function refreshMenu()
 	local page = pages.Menu
@@ -746,7 +748,7 @@ function PhoneController.getGpsTarget(): Vector3?
 end
 
 -- Daftarkan pintasan di halaman Menu HP (dipanggil controller lain saat start()).
-function PhoneController.addApp(icon: string, name: string, open: () -> ())
+function PhoneController.addApp(icon: string, name: string | (() -> string), open: () -> ())
 	table.insert(apps, { icon = icon, name = name, open = open })
 end
 
@@ -758,6 +760,14 @@ function PhoneController.start()
 	PhoneController.addApp("🏠", "Rumahku", HouseUiController.open)
 	PhoneController.addApp("🗺️", "Peta", function()
 		openMap(nil)
+	end)
+	-- Tombol bahasa (ID/EN). Namanya sengaja tidak ada di kamus supaya tidak ikut diterjemahkan.
+	PhoneController.addApp("🌐", function(): string
+		return if Loc.getLanguage() == "id" then "Bahasa: ID  ⇄  EN" else "Language: EN  ⇄  ID"
+	end, function()
+		LocalizeController.toggle()
+		refreshMenu()
+		phone.Visible = true
 	end)
 	phoneButton.Activated:Connect(function()
 		phone.Visible = not phone.Visible
