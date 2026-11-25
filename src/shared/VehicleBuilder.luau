@@ -404,11 +404,12 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 	-- ------------------------------------------------------------ roda
 	local r = b.wheelRadius
 	local wheelX = b.wheelTrack or (W / 2 - b.wheelWidth / 2 + 0.15)
+	local shiftZ = b.wheelShift or 0 -- geser roda depan-belakang agar pas dengan lubang roda mesh
 	local wheelPos = {
-		FL = Vector3.new(-wheelX, r, -b.wheelbase / 2),
-		FR = Vector3.new(wheelX, r, -b.wheelbase / 2),
-		RL = Vector3.new(-wheelX, r, b.wheelbase / 2),
-		RR = Vector3.new(wheelX, r, b.wheelbase / 2),
+		FL = Vector3.new(-wheelX, r, -b.wheelbase / 2 + shiftZ),
+		FR = Vector3.new(wheelX, r, -b.wheelbase / 2 + shiftZ),
+		RL = Vector3.new(-wheelX, r, b.wheelbase / 2 + shiftZ),
+		RR = Vector3.new(wheelX, r, b.wheelbase / 2 + shiftZ),
 	}
 
 	local function attachment(parent: BasePart, worldCFrame: CFrame, name: string): Attachment
@@ -488,7 +489,7 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 		if b.bike then
 			-- motor: pengemudi dan pembonceng duduk berurutan di atas jok
 			seatX = 0
-			local saddleY = y1 + b.cabinHeight
+			local saddleY = b.seatY or (y1 + b.cabinHeight)
 			spots = { Vector3.new(0, saddleY, zc0 + 0.9) }
 			if def.seats >= 2 then
 				table.insert(spots, Vector3.new(0, saddleY, zc0 + 2.7))
@@ -570,7 +571,7 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 		end
 		-- Atribut Yaw (derajat): putar mesh bila depannya tidak menghadap -Z saat diimpor.
 		local yaw = shellSource:GetAttribute("Yaw")
-		local target = CFrame.new(0, y0 + shellBody.Size.Y / 2, 0)
+		local target = CFrame.new(0, y0 + shellBody.Size.Y / 2 - (b.shellDrop or 0), 0)
 			* CFrame.Angles(0, math.rad(if type(yaw) == "number" then yaw else 0), 0)
 		for _, piece in shellSource:GetDescendants() do
 			if
