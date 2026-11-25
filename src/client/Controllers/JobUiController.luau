@@ -56,6 +56,8 @@ local trackerTitle: TextLabel
 local trackerStep: TextLabel
 local trackerDistance: TextLabel
 local trackerArrow: Frame
+local trackerStatus: TextLabel
+local quitButton: TextButton
 local cards: { Card } = {}
 local busy = false
 
@@ -137,9 +139,15 @@ local function refreshTracker()
 	local def = JobConfig.get(currentJob())
 	if def == nil then
 		tracker.Visible = false
+		quitButton.Visible = false
 		return
 	end
 	tracker.Visible = true
+	quitButton.Visible = true
+	local stat = readStats()[def.id]
+	local level =
+		JobConfig.levelFor(if stat and type(stat.tasks) == "number" then stat.tasks else 0)
+	trackerStatus.Text = `🟢 Sedang bekerja: {def.name} · Lv {level}`
 	local step = if task_ then task_.steps[task_.index] else nil
 	if task_ == nil or step == nil then
 		trackerTitle.Text = `{def.icon} {def.name}`
@@ -149,7 +157,7 @@ local function refreshTracker()
 		return
 	end
 	trackerTitle.Text = `{def.icon} {task_.title} · {Format.money(task_.pay)}`
-	trackerStep.Text = `{task_.index}/{#task_.steps}  {step.text}`
+	trackerStep.Text = `Ikuti misi {task_.index}/{#task_.steps}: {step.text}`
 	trackerArrow.Visible = true
 end
 
@@ -319,7 +327,7 @@ local function buildTracker()
 	UiScale.onChange(function(value: number)
 		tracker.Position = UDim2.new(0.5, 0, 0, 2 + 0 * value)
 	end)
-	tracker.Size = UDim2.fromOffset(330, 44)
+	tracker.Size = UDim2.fromOffset(330, 62)
 	tracker.BackgroundColor3 = COLORS.panel
 	tracker.BackgroundTransparency = 0.3
 	tracker.AutoButtonColor = false
@@ -337,7 +345,7 @@ local function buildTracker()
 
 	trackerTitle = label({
 		Name = "Title",
-		Position = UDim2.fromOffset(10, 3),
+		Position = UDim2.fromOffset(10, 19),
 		Size = UDim2.new(1, -78, 0, 18),
 		Font = Enum.Font.FredokaOne,
 		TextSize = 14,
@@ -347,7 +355,7 @@ local function buildTracker()
 	trackerTitle.Parent = tracker
 	trackerStep = label({
 		Name = "Step",
-		Position = UDim2.fromOffset(10, 21),
+		Position = UDim2.fromOffset(10, 37),
 		Size = UDim2.new(1, -78, 0, 20),
 		TextSize = 12,
 		TextTruncate = Enum.TextTruncate.AtEnd,
@@ -359,7 +367,7 @@ local function buildTracker()
 	trackerArrow = Instance.new("Frame")
 	trackerArrow.Name = "Arrow"
 	trackerArrow.AnchorPoint = Vector2.new(0.5, 0.5)
-	trackerArrow.Position = UDim2.new(1, -36, 0, 15)
+	trackerArrow.Position = UDim2.new(1, -36, 0, 22)
 	trackerArrow.Size = UDim2.fromOffset(28, 28)
 	trackerArrow.BackgroundTransparency = 1
 	for _, bar in { { 14, 15, 22, 0 }, { 9, 9, 14, 40 }, { 19, 9, 14, -40 } } do
@@ -377,7 +385,7 @@ local function buildTracker()
 	trackerDistance = label({
 		Name = "Distance",
 		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.new(1, -36, 0, 27),
+		Position = UDim2.new(1, -36, 0, 38),
 		Size = UDim2.fromOffset(70, 15),
 		Font = Enum.Font.FredokaOne,
 		TextSize = 12,
@@ -385,6 +393,45 @@ local function buildTracker()
 		Text = "",
 	})
 	trackerDistance.Parent = tracker
+
+	-- Keterangan status kerja (baris atas) dan tombol berhenti kerja di bawah panel.
+	trackerStatus = label({
+		Name = "Status",
+		Position = UDim2.fromOffset(10, 3),
+		Size = UDim2.new(1, -20, 0, 16),
+		Font = Enum.Font.FredokaOne,
+		TextSize = 12,
+		TextColor3 = Color3.fromRGB(40, 150, 80),
+		TextTruncate = Enum.TextTruncate.AtEnd,
+		Text = "",
+	})
+	trackerStatus.Parent = tracker
+	quitButton = Instance.new("TextButton")
+	quitButton.Name = "BerhentiKerja"
+	quitButton.AnchorPoint = Vector2.new(0.5, 0)
+	quitButton.Position = UDim2.new(0.5, 0, 0, 68)
+	quitButton.Size = UDim2.fromOffset(150, 26)
+	quitButton.BackgroundColor3 = COLORS.stop
+	quitButton.TextColor3 = Color3.new(1, 1, 1)
+	quitButton.Font = Enum.Font.FredokaOne
+	quitButton.TextSize = 13
+	quitButton.Text = "Berhenti kerja"
+	quitButton.Visible = false
+	corner(quitButton, 10)
+	quitButton.Parent = gui
+	UiScale.attach(quitButton)
+	quitButton.Activated:Connect(function()
+		if busy then
+			return
+		end
+		busy = true
+		local res = JobController.selectJob("")
+		HudController.toast(
+			if res.ok then "Kamu berhenti kerja. Silakan berkeliling bebas!" else res.message
+		)
+		busy = false
+		refreshTracker()
+	end)
 end
 
 local function buildGui()
