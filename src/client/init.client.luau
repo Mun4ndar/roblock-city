@@ -27,6 +27,7 @@ local ORDER = {
 	"MinimapController",
 	"MapUiController",
 	"WindmillController",
+	"UiStyleController",
 }
 
 local loaded: { any } = {}
