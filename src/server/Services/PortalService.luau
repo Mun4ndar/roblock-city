@@ -24,6 +24,7 @@ local COOLDOWN = 1.5
 local ARRIVE_OFFSET = CFrame.new(0, 0, -5)
 
 local portals: { [string]: BasePart } = {}
+local guards: { (Player, BasePart) -> (boolean, string?) } = {}
 local lastUse: { [Player]: number } = {}
 
 -- Pindahkan pemain dengan aman: turun dari kursi dulu, muat area tujuan, baru pindah.
@@ -65,7 +66,20 @@ local function onTriggered(part: BasePart, player: Player)
 	if (root.Position - part.Position).Magnitude > 24 then
 		return
 	end
+	for _, guard in guards do
+		local allowed, reason = guard(player, part)
+		if not allowed then
+			local Net = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Net"))
+			Net.event(Net.Names.Notify):FireClient(player, reason or "Pintu ini tidak bisa dimasuki.")
+			return
+		end
+	end
 	PortalService.teleport(player, target.CFrame * ARRIVE_OFFSET)
+end
+
+-- Penjaga pintu: fn(pemain, part portal) -> (boleh, alasan). Dipakai SocialService untuk akses rumah.
+function PortalService.addGuard(guard: (Player, BasePart) -> (boolean, string?))
+	table.insert(guards, guard)
 end
 
 local function register(inst: Instance)

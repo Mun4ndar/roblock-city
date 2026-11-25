@@ -544,6 +544,23 @@ end
 -- ---------------------------------------------------------------- API server
 
 -- Rumah yang ditempati pemain di server ini (untuk sistem lain, mis. misi).
+-- Pemilik rumah bernomor `id` di server ini, atau nil.
+function HouseService.ownerOf(id: number): Player?
+	local house = houses[id]
+	return if house then house.owner else nil
+end
+
+function HouseService.houseIdOf(player: Player): number?
+	local house = byPlayer[player]
+	return if house then house.id else nil
+end
+
+-- Titik di depan pintu rumah (menghadap keluar).
+function HouseService.doorFront(id: number): CFrame?
+	local house = houses[id]
+	return if house then house.base * DOOR_FRONT else nil
+end
+
 function HouseService.getHomePosition(player: Player): Vector3?
 	local house = byPlayer[player]
 	return if house then (house.base * DOOR_FRONT).Position else nil
