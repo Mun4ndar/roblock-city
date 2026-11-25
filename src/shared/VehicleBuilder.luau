@@ -538,6 +538,25 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 			prompt.RequiresLineOfSight = false
 			prompt.Parent = seat
 		end
+		-- titik sasaran pose pengendara motor (tangan di stang, kaki di pijakan): lihat BikeRiderService
+		if b.grip then
+			local function target(name: string, v: Vector3, sx: number)
+				part({
+					Name = name,
+					Size = Vector3.new(0.3, 0.3, 0.3),
+					CFrame = CFrame.new(v.X * sx, v.Y, v.Z),
+					Transparency = 1,
+					CanQuery = false,
+				})
+			end
+			target("GripR", b.grip, 1)
+			target("GripL", b.grip, -1)
+			if b.peg then
+				target("PegR", b.peg, 1)
+				target("PegL", b.peg, -1)
+			end
+			model:SetAttribute("Bike", true)
+		end
 		-- setir (hiasan)
 		part({
 			Name = "SteeringWheel",

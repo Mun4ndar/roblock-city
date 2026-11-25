@@ -32,6 +32,8 @@ export type VehicleBody = {
 	ladder: boolean?, -- tangga di atas boks
 	bigLadder: boolean?, -- tangga panjang bertingkat (truk tangga)
 	wheelTrack: number?, -- jarak tengah roda ke sumbu mobil (bawaan: dihitung dari lebar); dipakai bodi mesh
+	grip: Vector3?, -- motor: titik genggam stang kanan (x positif; kiri dicerminkan), y tinggi dari tanah, z depan = negatif
+	peg: Vector3?, -- motor: titik pijakan kaki kanan (kiri dicerminkan)
 	shellDrop: number?, -- turunkan bodi mesh dari tanah-bodi bawaan (stud) agar roda mesh sejajar dengan roda fisika
 	wheelShift: number?, -- geser roda sepanjang -Z/+Z (stud) agar sejajar dengan lubang roda mesh
 	seatY: number?, -- tinggi tengah kursi dari tanah (bawaan: clearance + 0,1); turunkan agar kepala tidak menembus atap
@@ -131,7 +133,7 @@ VehicleConfig.LIST = {
 			clearance = 0.9,
 			lowerHeight = 1.5,
 			cabinHeight = 0.6,
-			cabinFront = 0.5,
+			cabinFront = 0.41,
 			cabinBack = 0.92,
 			rakeFront = 0.5,
 			rakeBack = 0.5,
@@ -142,6 +144,8 @@ VehicleConfig.LIST = {
 			seatY = 2.6,
 			shellDrop = 0.86,
 			wheelTrack = 1.8,
+			grip = Vector3.new(1.5, 5.2, -1.7),
+			peg = Vector3.new(1, 1.7, 0),
 		},
 	},
 	{
@@ -524,7 +528,7 @@ VehicleConfig.SERVICE = {
 			clearance = 0.9,
 			lowerHeight = 1.5,
 			cabinHeight = 0.6,
-			cabinFront = 0.5,
+			cabinFront = 0.414,
 			cabinBack = 0.92,
 			rakeFront = 0.5,
 			rakeBack = 0.5,
@@ -535,6 +539,8 @@ VehicleConfig.SERVICE = {
 			seatY = 2.7,
 			shellDrop = 0.865,
 			wheelTrack = 1.8,
+			grip = Vector3.new(1.55, 5.6, -1.7),
+			peg = Vector3.new(1, 2, 0),
 		},
 	},
 	{
