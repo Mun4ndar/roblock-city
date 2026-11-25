@@ -9,6 +9,7 @@ local RetentionConfig = {}
 -- Penghitung kemajuan yang dikenal server:
 --   "tasks"        tugas pekerjaan apa pun       "task:<idPekerjaan>" tugas satu pekerjaan
 --   "earn"         total gaji dari pekerjaan     "refuel" isi bensin    "harvest" panen tanaman
+--   "patient"      pasien sembuh (ClinicService.PatientCured)
 export type MissionDef = {
 	id: string,
 	icon: string,
@@ -72,7 +73,7 @@ RetentionConfig.DAILY = {
 		id = "d_pasien",
 		icon = "🩺",
 		title = "Rawat 3 pasien sebagai Dokter",
-		counter = "task:dokter",
+		counter = "patient",
 		target = 3,
 		reward = 240,
 	},
@@ -147,7 +148,7 @@ RetentionConfig.WEEKLY = {
 		id = "w_pasien",
 		icon = "🩺",
 		title = "Rawat 15 pasien sebagai Dokter",
-		counter = "task:dokter",
+		counter = "patient",
 		target = 15,
 		reward = 1200,
 	},
