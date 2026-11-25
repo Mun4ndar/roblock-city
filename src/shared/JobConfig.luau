@@ -193,6 +193,9 @@ JobConfig.PLACES = {
 	ladangSelatan = place("Ladang Selatan", -757, 0.6, 224),
 	ladangBarat = place("Ladang Barat", -784, 0.6, 156),
 	ladangTimur = place("Ladang Timur", -730, 0.6, 200),
+	-- patroli penjaga Pasar Tani (NpcService grup PenjagaPasar), di depan lapak
+	pasarTaniKiri = place("Pasar Tani", -669, 0.3, 112),
+	pasarTaniKanan = place("Pasar Tani", -651, 0.3, 112),
 } :: { [string]: Place }
 
 local RUMAH = {

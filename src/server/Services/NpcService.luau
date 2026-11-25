@@ -77,6 +77,13 @@ local GROUPS = {
 		template = "AsetPetani",
 	},
 	{
+		-- Penjaga Pasar Tani: satu avatar modern yang mondar-mandir di depan lapak.
+		name = "PenjagaPasar",
+		count = 1,
+		places = { "pasarTaniKiri", "pasarTaniKanan" },
+		template = "AsetPetani",
+	},
+	{
 		-- Pengunjung Kafe Kota: hampir selalu duduk di teras sambil memegang cangkir kopi.
 		name = "KafeKota",
 		count = 4,
