@@ -378,6 +378,7 @@ return function(): number
 			clone.Color, clone.Material, clone.Transparency = look[1], look[2], look[3]
 			clone.Anchored, clone.CanCollide, clone.CanTouch, clone.CanQuery = true, false, false, false
 			clone.CastShadow = false
+			clone.RenderFidelity = Enum.RenderFidelity.Precise -- Automatic menyederhanakan dinding tipis sampai tembus pandang
 			clone.Parent = root
 		end
 	end

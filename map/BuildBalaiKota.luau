@@ -139,6 +139,7 @@ return function(): number
 			local look = LOOK[part.Name]
 			clone.Color, clone.Material, clone.Transparency = look[1], look[2], look[3]
 			clone.Anchored, clone.CanCollide, clone.CanTouch = true, false, false
+			clone.RenderFidelity = Enum.RenderFidelity.Precise -- Automatic menyederhanakan dinding tipis sampai tembus pandang
 			if part.Name == "BkGlass" then
 				CollectionService:AddTag(clone, "NightWindow")
 			end
