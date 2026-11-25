@@ -19,11 +19,13 @@ def _mesh_objects():
     return [o for o in bpy.context.scene.objects if o.type == "MESH"]
 
 
-def _dec(o, tris):
+def _dec(o, tris, uv=True):
     md = o.modifiers.new("d", "DECIMATE")
     md.decimate_type = "COLLAPSE"
     md.ratio = min(1.0, tris / max(1, len(o.data.polygons)))
     md.use_collapse_triangulate = True
+    if uv:
+        md.delimit = {"UV"}  # bodi: jangan runtuhkan tepi sambungan UV (mencegah sobekan dan bocor tekstur)
     bpy.context.view_layer.objects.active = o
     bpy.ops.object.modifier_apply(modifier="d")
 
@@ -45,22 +47,28 @@ def _contact(co, front, H, xmask, win=0.6):
     return float(low[np.abs(low[:, 1] - c) < win, 1].mean())
 
 
-def proses(id, path, panjang, depan="-X", tris_bodi=9500, tris_roda=1300, r_roda=None, y_depan=None, y_belakang=None):
+def proses(id, path, panjang, depan="-X", tris_bodi=9500, tris_roda=1300, r_roda=None, y_depan=None, y_belakang=None, obj_name=None):
     """depan = sumbu Blender yang dihadapi moncong mobil setelah impor ('-X','+X','-Y','+Y').
     Mobil diputar agar depan = +Y, diskalakan ke `panjang` stud, dan alasnya di z=0."""
-    before = set(bpy.data.objects.keys())
-    if path.lower().endswith(".fbx"):
-        bpy.ops.import_scene.fbx(filepath=path)
+    if obj_name:  # objek sudah ada di scene (mis. hasil unduh ulang dari Meshy)
+        o = bpy.data.objects[obj_name]
+        bpy.ops.object.select_all(action="DESELECT")
+        o.select_set(True)
+        bpy.context.view_layer.objects.active = o
     else:
-        bpy.ops.import_scene.gltf(filepath=path)
-    new = [bpy.data.objects[n] for n in bpy.data.objects.keys() if n not in before]
-    meshes = [o for o in new if o.type == "MESH"]
-    for o in new:
-        o.select_set(o in meshes)
-    bpy.context.view_layer.objects.active = meshes[0]
-    if len(meshes) > 1:
-        bpy.ops.object.join()
-    o = bpy.context.active_object
+        before = set(bpy.data.objects.keys())
+        if path.lower().endswith(".fbx"):
+            bpy.ops.import_scene.fbx(filepath=path)
+        else:
+            bpy.ops.import_scene.gltf(filepath=path)
+        new = [bpy.data.objects[n] for n in bpy.data.objects.keys() if n not in before]
+        meshes = [o for o in new if o.type == "MESH"]
+        for o in new:
+            o.select_set(o in meshes)
+        bpy.context.view_layer.objects.active = meshes[0]
+        if len(meshes) > 1:
+            bpy.ops.object.join()
+        o = bpy.context.active_object
     o.name = "Mx_" + id
     o.parent = None
     o.rotation_mode = "XYZ"
@@ -111,7 +119,7 @@ def proses(id, path, panjang, depan="-X", tris_bodi=9500, tris_roda=1300, r_roda
     wheels = {k: bpy.data.objects[o.name + "_w" + k] for k in spec}
     _dec(o, tris_bodi)
     for w in wheels.values():
-        _dec(w, tris_roda)
+        _dec(w, tris_roda, uv=False)  # roda kecil: tekstur ban/velg harus utuh, bukan sambungan
     wl = wheels["FL"]
     vs = _coords(wl)
     ctr = (vs.min(0) + vs.max(0)) / 2
