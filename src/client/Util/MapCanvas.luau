@@ -169,7 +169,7 @@ function MapCanvas.build(): Frame
 		button.AnchorPoint = Vector2.new(0.5, 0.5)
 		button.Position = UDim2.fromOffset(dest.position.X, dest.position.Z)
 		button.Size = UDim2.fromOffset(22, 22)
-		button.BackgroundColor3 = zone.color
+		button.BackgroundColor3 = dest.color or zone.color
 		button.AutoButtonColor = false
 		button.Text = dest.icon
 		button.TextSize = 13

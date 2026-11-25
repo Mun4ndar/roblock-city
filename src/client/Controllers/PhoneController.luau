@@ -198,7 +198,7 @@ local function refreshPlaces()
 				Position = UDim2.fromOffset(5, 5),
 				Size = UDim2.fromOffset(30, 30),
 				BackgroundTransparency = 0,
-				BackgroundColor3 = zone.color,
+				BackgroundColor3 = dest.color or zone.color,
 				TextXAlignment = Enum.TextXAlignment.Center,
 				TextSize = 16,
 				Text = dest.icon,

@@ -16,6 +16,7 @@ export type Destination = {
 	position: Vector3,
 	major: boolean,
 	arrive: number,
+	color: Color3?, -- warna khusus pin (bawaan: warna zona)
 }
 
 DestinationConfig.DEFAULT_ARRIVE = 35
@@ -59,7 +60,7 @@ end
 
 -- ---------------------------------------------------------------- Pusat Kota
 add("mall", "ROBLOCK Mall", "kota", "🛍️", 525, -530, true, 60)
-add("tokoCostume", "Toko Costume", "kota", "👗", 492, -437, true)
+add("tokoCostume", "Toko Premium Costume", "kota", "👑", 492, -437, true, 40)
 add("bioskop", "Bioskop", "kota", "🎬", -368, -566, true, 45)
 add("kantorPos", "Kantor Pos", "kota", "📮", -380, -399, false)
 add("perpustakaan", "Perpustakaan", "kota", "📚", 272, -409, false, 45)
@@ -142,6 +143,13 @@ add("hangar", "Hangar Pesawat", "bandara", "🛩️", -1282, 644, false, 50)
 add("landasan", "Landasan Pacu", "bandara", "✈️", -1010, 844, true, 80)
 
 DestinationConfig.LIST = LIST
+
+-- Pin emas khusus untuk toko premium supaya mudah dicari di peta.
+for _, d in LIST do
+	if d.id == "tokoCostume" then
+		d.color = Color3.fromRGB(255, 184, 0)
+	end
+end
 
 -- ---------------------------------------------------------------- util
 

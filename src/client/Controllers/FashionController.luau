@@ -288,6 +288,21 @@ end
 
 function FashionController.start()
 	local PhoneController = require(script.Parent:WaitForChild("PhoneController")) :: any
+	PhoneController.addApp("👑", "Toko Premium", function()
+		local Nav = require(script.Parent:WaitForChild("NavController")) :: any
+		local shop = require(
+			game:GetService("ReplicatedStorage")
+				:WaitForChild("Shared")
+				:WaitForChild("DestinationConfig")
+		).get("tokoCostume")
+		Nav.setTarget({
+			id = shop.id,
+			name = shop.name,
+			icon = shop.icon,
+			position = shop.position,
+			arrive = shop.arrive,
+		})
+	end)
 	PhoneController.addApp("🧥", "Costume", function()
 		panel.Visible = true
 		refresh()

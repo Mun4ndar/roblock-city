@@ -243,7 +243,7 @@ local function rebuildList()
 				Position = UDim2.fromOffset(6, 6),
 				Size = UDim2.fromOffset(32, 32),
 				BackgroundTransparency = 0,
-				BackgroundColor3 = zone.color,
+				BackgroundColor3 = dest.color or zone.color,
 				TextXAlignment = Enum.TextXAlignment.Center,
 				TextSize = 17,
 				Text = dest.icon,
