@@ -22,3 +22,4 @@ motor_sport tinggi 5.73 lebar 4.19 panjang 10.5 wheelRadius 1.34 wheelbase 6.54 
 ambulans    model 134435061734863  decal 71168544143127   gambar 115108122958073  (skrip Gemini buat_ambulans_roblox.py; panjang 17, wheelRadius 1.33, wheelTrack 3.07, wheelbase 10.02)
 damkar      model 104383633649644  decal 99536378504435   gambar 102999737979652 (skrip Gemini buat_damkar.py)
 damkarTangga model 84867619524737  decal sama dengan damkar (tangga disimpan rata; salinan skrip diperbaiki Matrix.Euler)
+bus         model 116248894567584  decal 87094219848501   gambar 129041940402482 (skrip Gemini buat_bus.py; 6 roda: roda belakang paling ujung digabung ke bodi)
