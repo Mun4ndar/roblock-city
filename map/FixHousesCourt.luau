@@ -154,3 +154,9 @@ end
 	60 pohon/semak PenggantiBulat, 237 bunga BungaToko, 8 bedeng oval, dan 19 bunga/semak Scenery.Countryside di atas terrain.
 	Audit ulang 3.964 dekorasi: nol melayang > 1,2 stud.
 ]]
+
+--[[
+	2026-11-25 (place v193+): sapuan semua marka putih/kuning (3.490 bagian Part tipis, lebar <= 3,5) terhadap aspal
+	(slab, cakram, dan baji taper segitiga) dengan titik tiap 0,5 stud. Dua garis tepi Boulevard di x 70 dan 130
+	masih menembus rumput di sudut taper (196 -> 175 stud) dan dipotong; yang lain sudah di atas aspal.
+]]
