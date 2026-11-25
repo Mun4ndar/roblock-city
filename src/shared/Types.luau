@@ -28,6 +28,22 @@ export type PlayerData = {
 	fashion: FashionData,
 	-- Usaha Kafe (lihat BusinessConfig).
 	business: BusinessData,
+	-- Hadiah login, misi harian/mingguan, dan event (lihat RetentionService).
+	retention: RetentionData?,
+}
+
+export type RetentionData = {
+	streak: number,
+	lastClaimDay: number,
+	day: number,
+	week: number,
+	daily: { [string]: number },
+	dailyClaimed: { [string]: boolean },
+	weekly: { [string]: number },
+	weeklyClaimed: { [string]: boolean },
+	eventKey: string,
+	eventProgress: { [string]: number },
+	eventClaimed: { [string]: boolean },
 }
 
 export type BusinessData = {

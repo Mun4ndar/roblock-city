@@ -141,6 +141,9 @@ function refresh()
 	local view = getView()
 	for order, outfit in FashionConfig.OUTFITS do
 		local owned = view.owned[outfit.id] == true
+		if outfit.event and not owned then
+			continue -- setelan event dibeli di panel Hadiah HP
+		end
 		local wearing = view.active == outfit.id
 		local row = Instance.new("Frame")
 		row.Name = outfit.id

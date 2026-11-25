@@ -14,6 +14,10 @@ local EconomyService = require(script.Parent:WaitForChild("EconomyService"))
 
 local FuelService = {}
 
+local refueledEvent = Instance.new("BindableEvent")
+-- Terpicu (player) setiap pengisian bensin berhasil (dipakai misi harian).
+FuelService.Refueled = refueledEvent.Event
+
 -- sisa bensin tiap mobil selama server hidup, supaya keluar-masuk garasi tidak mengisi ulang gratis
 local saved: { [number]: { [string]: number } } = {}
 local lastUse: { [Player]: number } = {}
@@ -116,6 +120,7 @@ local function refuel(player: Player, pump: BasePart)
 		return
 	end
 	vehicle:SetAttribute(FuelConfig.ATTR, math.min(FuelConfig.TANK, fuel + units))
+	refueledEvent:Fire(player)
 	if units >= need then
 		EconomyService.notify(player, `Tangki penuh! Bayar ${cost}.`)
 	else

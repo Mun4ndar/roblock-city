@@ -3,6 +3,7 @@
 -- Membuat BindableFunction ServerStorage.Debug yang hanya bisa dipanggil dari
 -- sisi server (command bar / alat uji), tidak ada remote ke client.
 --   Debug:Invoke("money", player, jumlah)   -- tambah (+) atau kurangi (-) uang
+--   Debug:Invoke("event", "natal")          -- paksa event ("" = kembali ke tanggal asli)
 --   Debug:Invoke("clock", jam)              -- setel jam dunia (0-24)
 --   Debug:Invoke("costume", player, "naga_api") -- pakai costume tanpa membeli (uji tampilan)
 --   Debug:Invoke("clear", player, "business") -- kosongkan satu bagian data (terisi ulang saat masuk lagi)
@@ -14,6 +15,7 @@ local DataService = require(script.Parent:WaitForChild("DataService"))
 local EconomyService = require(script.Parent:WaitForChild("EconomyService"))
 local TimeService = require(script.Parent:WaitForChild("TimeService"))
 local ShopService = require(script.Parent:WaitForChild("ShopService"))
+local RetentionService = require(script.Parent:WaitForChild("RetentionService"))
 local UniformService = require(script.Parent:WaitForChild("UniformService"))
 
 local DebugService = {}
@@ -98,6 +100,9 @@ local function handle(command: any, a: any, b: any, c: any): any
 		if type(data.gadgets) == "table" and type(data.gadgets.owned) == "table" then
 			data.gadgets.owned[b] = nil
 		end
+		return true
+	elseif command == "event" and type(a) == "string" then
+		RetentionService.forceEvent(a)
 		return true
 	elseif command == "clock" and type(a) == "number" then
 		TimeService.setClock(a)

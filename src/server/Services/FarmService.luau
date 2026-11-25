@@ -25,6 +25,10 @@ type Result = { ok: boolean, message: string }
 
 local FarmService = {}
 
+local harvestedEvent = Instance.new("BindableEvent")
+-- Terpicu (player, jumlah) setiap panen berhasil (dipakai misi harian).
+FarmService.Harvested = harvestedEvent.Event
+
 local CALL_COOLDOWN = 0.25
 
 local lastCall: { [Player]: number } = {}
@@ -172,6 +176,7 @@ local function harvest(player: Player, plotIndex: any): Result
 	farm.plots[key] = nil
 	farm.crops[crop.id] = math.min(owned + amount, FarmConfig.MAX_STACK)
 	publish(player, farm)
+	harvestedEvent:Fire(player, amount)
 	return result(true, `Panen {amount} {crop.name}! Jual di Gudang Hasil atau Pasar Tani.`)
 end
 

@@ -17,6 +17,7 @@ local ORDER = {
 	"PortalService",
 	"HouseService",
 	"MissionService",
+	"RetentionService",
 	"FarmService",
 	"ShopService",
 	"GadgetService",

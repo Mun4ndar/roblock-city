@@ -35,6 +35,7 @@ Net.Names = table.freeze({
 	FarmBuySeed = "FarmBuySeed", -- RemoteFunction: (cropId: string) -> { ok, message } (beli 1 bibit)
 	FarmPlant = "FarmPlant", -- RemoteFunction: (plotIndex: number, cropId: string) -> { ok, message }
 	FarmHarvest = "FarmHarvest", -- RemoteFunction: (plotIndex: number) -> { ok, message }
+	RetentionAction = "RetentionAction", -- RemoteFunction: ("streak"|"mission"|"buy", id) -> { ok, message }
 	FarmSell = "FarmSell", -- RemoteFunction: () -> { ok, message } (jual semua hasil panen)
 })
 

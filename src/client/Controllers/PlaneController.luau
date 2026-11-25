@@ -73,9 +73,10 @@ end
 -- pesawatnya makin cepat putarannya; pesawat kosong yang diam tidak berputar.
 local baseC0: { [Weld]: CFrame } = {}
 local angle = 0
+local planeSet: { [Instance]: boolean } = {} -- pesawat bertag yang ter-stream (tanpa GetTagged tiap frame)
 
 local function spinPropellers(dt: number)
-	for _, plane in CollectionService:GetTagged(PlaneConfig.TAG_PLANE) do
+	for plane in planeSet do
 		local propeller = plane:FindFirstChild(PlaneConfig.PROPELLER_NAME)
 		local weld = if propeller then propeller:FindFirstChild("Putar") else nil
 		if weld == nil or not weld:IsA("Weld") then
@@ -101,6 +102,17 @@ local function spinPropellers(dt: number)
 end
 
 function PlaneController.start()
+	for _, plane in CollectionService:GetTagged(PlaneConfig.TAG_PLANE) do
+		planeSet[plane] = true
+	end
+	CollectionService:GetInstanceAddedSignal(PlaneConfig.TAG_PLANE)
+		:Connect(function(plane: Instance)
+			planeSet[plane] = true
+		end)
+	CollectionService:GetInstanceRemovedSignal(PlaneConfig.TAG_PLANE)
+		:Connect(function(plane: Instance)
+			planeSet[plane] = nil
+		end)
 	RunService.RenderStepped:Connect(spinPropellers)
 	while true do
 		task.wait(0.15)

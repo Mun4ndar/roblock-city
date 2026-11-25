@@ -45,6 +45,23 @@ local function publish(player: Player, fashion: Types.FashionData)
 	player:SetAttribute(FashionConfig.ATTR_PLAYER, HttpService:JSONEncode(view))
 end
 
+-- Dipakai RetentionService: setelan event terbatas dibeli di panel event, bukan di toko.
+function FashionService.owns(player: Player, id: string): boolean
+	local data = DataService.getData(player)
+	return data ~= nil and getFashion(data).owned[id] == true
+end
+
+function FashionService.grant(player: Player, id: string): boolean
+	local data = DataService.getData(player)
+	if data == nil or FashionConfig.get(id) == nil then
+		return false
+	end
+	local fashion = getFashion(data)
+	fashion.owned[id] = true
+	publish(player, fashion)
+	return true
+end
+
 -- action: "buy" | "wear"; pada "wear", id "" = lepas setelan.
 local function act(player: Player, action: any, id: any): Result
 	local data = DataService.getData(player)
@@ -65,6 +82,9 @@ local function act(player: Player, action: any, id: any): Result
 	if action == "buy" then
 		if fashion.owned[outfit.id] then
 			return result(false, "Kamu sudah punya setelan itu.")
+		end
+		if outfit.event then
+			return result(false, "Setelan ini hanya dijual saat event, lewat menu Hadiah di HP.")
 		end
 		local character = player.Character
 		local root = if character then character.PrimaryPart else nil

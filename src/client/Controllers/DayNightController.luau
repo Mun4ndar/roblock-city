@@ -185,7 +185,17 @@ local function applyLighting(f: number)
 	end
 end
 
-local function update(dt: number)
+-- Langit berubah sangat pelan, jadi jam cukup diperbarui ~10x per detik (hemat di HP).
+local CLOCK_STEP = 0.1
+local clockAccum = 0
+
+local function update(frameDt: number)
+	clockAccum += frameDt
+	if clockAccum < CLOCK_STEP then
+		return
+	end
+	local dt = clockAccum
+	clockAccum = 0
 	local clock = Lighting.ClockTime
 	-- Majukan jam secara lokal; server mengoreksi tiap beberapa detik.
 	clock = (clock + DayNightConfig.hoursPerSecond(clock) * dt) % 24
