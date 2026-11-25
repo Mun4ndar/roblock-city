@@ -6,7 +6,7 @@
 	(Flag.Flag.1..32, tekstur merah-putih). Skrip bawaannya TIDAK dipakai (hanya Animate sederhana, diganti
 	skrip "Berkibar" buatan sendiri di bawah). Templat mentah dipasang sementara di ServerStorage.UjiBendera1,
 	dihapus setelah dipasang. Hasil: Workspace.Map.BangunanBlender.BalaiKota.Bendera {BenderaKiri, BenderaKanan, Berkibar}.
-	Skala 0,22 (kain sekitar 5,2 x 3,8 stud), tepi kiri menempel tiang (x 136 dan 184, z 114,5), tengah di y 13,6.
+	Skala 0,22 (kain sekitar 5,2 x 3,8 stud), tepi kiri tiap bingkai menempel tiang (x 136 dan 184, z 114,5), bagian atas kain di y 16,2 (puncak tiang 17).
 	Kain bendera lama (BkFlag1 biru, BkFlag2 emas) di mesh Balai Kota dihapus.
 ]]
 
@@ -82,9 +82,17 @@ return function(): number
 		model.Parent = folder
 		model.PrimaryPart = frames:FindFirstChild("1") :: BasePart
 		model:ScaleTo(SCALE)
-		local cf, size = model:GetBoundingBox()
-		local minX = cf.Position.X - size.X / 2
-		model:PivotTo(model:GetPivot() + Vector3.new(pole.x + 0.45 - minX, 13.6 - cf.Position.Y, pole.z - cf.Position.Z))
+		-- setiap bingkai disejajarkan sendiri: tepi kiri (hoist) selalu menempel di tiang (0,3 stud dari sumbu,
+		-- jari-jari tiang 0,35), pusat sedalam tiang, bagian atas kain sedikit di bawah puncak tiang
+		for _, part in frames:GetChildren() do
+			if part:IsA("BasePart") then
+				local minX = part.Position.X - part.Size.X / 2
+				part.CFrame += Vector3.new(pole.x + 0.3 - minX, 0, pole.z - part.Position.Z)
+			end
+		end
+		local _, size = model:GetBoundingBox()
+		local top = (model.PrimaryPart :: BasePart).Position.Y + size.Y / 2
+		model:PivotTo(model:GetPivot() + Vector3.new(0, 16.2 - top, 0))
 	end
 	local script = Instance.new("Script")
 	script.Name = "Berkibar"
