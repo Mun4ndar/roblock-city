@@ -348,7 +348,7 @@ local function applyMods(model: Model, def: VehicleDef, owned: Types.OwnedVehicl
 		if d:IsA("BasePart") then
 			local role = d:GetAttribute("Paint")
 			if role == "body" then
-				d.Color = paint or def.color
+				VehicleBuilder.tint(d, paint or def.color)
 			elseif role == "rim" and rim then
 				d.Color = rim
 			end

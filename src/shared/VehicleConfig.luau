@@ -31,6 +31,8 @@ export type VehicleBody = {
 	box: { height: number, color: Color3 }?, -- boks di belakang kabin (ambulans, truk)
 	ladder: boolean?, -- tangga di atas boks
 	bigLadder: boolean?, -- tangga panjang bertingkat (truk tangga)
+	wheelTrack: number?, -- jarak tengah roda ke sumbu mobil (bawaan: dihitung dari lebar); dipakai bodi mesh
+	seatY: number?, -- tinggi tengah kursi dari tanah (bawaan: clearance + 0,1); turunkan agar kepala tidak menembus atap
 	bike: boolean?, -- motor: jok berurutan di tengah, dua roda tampak (roda fisika tetap empat, tersembunyi)
 }
 
@@ -152,18 +154,21 @@ VehicleConfig.LIST = {
 		accent = Color3.fromRGB(255, 255, 255),
 		body = {
 			style = "hatch",
+			-- Bodi: mesh Meshy (assets/blender/mobil_kancil.fbx); ukuran mengikuti mesh itu.
 			length = 12.5,
-			width = 6.6,
-			clearance = 0.9,
-			lowerHeight = 2.3,
+			width = 6.8,
+			clearance = 0.07,
+			lowerHeight = 2.6,
 			cabinHeight = 2.9,
-			cabinFront = 0.26,
+			cabinFront = 0.2,
 			cabinBack = 0.97,
-			rakeFront = 1.6,
+			rakeFront = 1.55,
 			rakeBack = 0.7,
-			wheelRadius = 1.25,
-			wheelWidth = 1.0,
-			wheelbase = 7.6,
+			wheelRadius = 1.28,
+			wheelWidth = 1.3,
+			wheelbase = 8.87,
+			wheelTrack = 2.25,
+			seatY = 1.3,
 		},
 	},
 	{

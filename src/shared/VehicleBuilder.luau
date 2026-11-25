@@ -55,6 +55,17 @@ local SHELL_REPLACES = {
 	BoxDoor = true,
 }
 
+-- Mengecat part. Bodi mesh bertekstur (SurfaceAppearance, mis. dari Meshy) memakai warna putih
+-- di tekstur, jadi cat = tint SurfaceAppearance.Color; part biasa cukup Color.
+function VehicleBuilder.tint(part: BasePart, color: Color3)
+	local sa = part:FindFirstChildOfClass("SurfaceAppearance")
+	if sa then
+		sa.Color = color
+	else
+		part.Color = color
+	end
+end
+
 local function findShell(id: string): Instance?
 	local assets = game:GetService("ReplicatedStorage"):FindFirstChild("Assets")
 	local shells = if assets then assets:FindFirstChild("CarShells") else nil
@@ -392,7 +403,7 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 
 	-- ------------------------------------------------------------ roda
 	local r = b.wheelRadius
-	local wheelX = W / 2 - b.wheelWidth / 2 + 0.15
+	local wheelX = b.wheelTrack or (W / 2 - b.wheelWidth / 2 + 0.15)
 	local wheelPos = {
 		FL = Vector3.new(-wheelX, r, -b.wheelbase / 2),
 		FR = Vector3.new(wheelX, r, -b.wheelbase / 2),
@@ -470,7 +481,7 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 
 	-- ------------------------------------------------------------ kursi
 	if not static then
-		local seatY = y0 + 0.1
+		local seatY = b.seatY or (y0 + 0.1)
 		local frontZ = zm0 + 1.7
 		local seatX = W / 4 - 0.1
 		local spots = { Vector3.new(seatX, seatY, frontZ) } -- setir kanan
@@ -557,7 +568,10 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 				old.CastShadow = false
 			end
 		end
+		-- Atribut Yaw (derajat): putar mesh bila depannya tidak menghadap -Z saat diimpor.
+		local yaw = shellSource:GetAttribute("Yaw")
 		local target = CFrame.new(0, y0 + shellBody.Size.Y / 2, 0)
+			* CFrame.Angles(0, math.rad(if type(yaw) == "number" then yaw else 0), 0)
 		for _, piece in shellSource:GetDescendants() do
 			if
 				piece:IsA("MeshPart")
@@ -576,7 +590,7 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 				clone.CollisionGroup = VehicleBuilder.GROUP_BODY
 				if preserve then
 					if piece:GetAttribute("Paint") then
-						clone.Color = paint
+						VehicleBuilder.tint(clone, paint)
 					end
 				elseif piece.Name == "ShellGlass" then
 					clone.Color = Color3.fromRGB(70, 96, 120)
@@ -618,9 +632,12 @@ function VehicleBuilder.build(def: VehicleDef, options: BuildOptions?): Model
 					then Vector3.new(0, wheel.Position.Y, wheel.Position.Z)
 					else wheel.Position
 				-- Roda kanan = roda kiri diputar setengah lingkaran.
-				local side = if wheel.Position.X > 0
-					then CFrame.Angles(0, math.pi, 0)
-					else CFrame.new()
+				-- Atribut OuterPlusX: sisi luar roda templat menghadap +X (hasil impor FBX tercermin),
+				-- jadi roda kiri yang diputar, bukan roda kanan.
+				local flipSide = if wheelSource:GetAttribute("OuterPlusX") == true
+					then wheel.Position.X < 0
+					else wheel.Position.X > 0
+				local side = if flipSide then CFrame.Angles(0, math.pi, 0) else CFrame.new()
 				for _, piece in wheelSource:GetChildren() do
 					if piece:IsA("MeshPart") then
 						local clone = piece:Clone()
