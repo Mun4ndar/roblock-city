@@ -10,6 +10,7 @@
 local PathfindingService = game:GetService("PathfindingService")
 local PhysicsService = game:GetService("PhysicsService")
 local Players = game:GetService("Players")
+local ServerStorage = game:GetService("ServerStorage")
 local Workspace = game:GetService("Workspace")
 
 local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
@@ -58,6 +59,22 @@ local GROUPS = {
 		count = 4,
 		places = { "kiosKelapa", "kiosEsKrim", "sewaJetSki", "dermaga" },
 		seatsIn = "Beach", -- warga di sini juga duduk santai di kursi (Seat) dalam Workspace.Map.Beach
+	},
+	{
+		-- Petani di Perkebunan Besar: avatar modern (bukan blok klasik) dari ServerStorage.AsetPetani,
+		-- dibuat dengan generate_avatar; kalau templatnya belum ada, kelompok ini dilewati.
+		name = "Petani",
+		count = 4,
+		places = {
+			"ladangUtara",
+			"ladangTengah",
+			"ladangSelatan",
+			"ladangBarat",
+			"ladangTimur",
+			"tokoBibit",
+			"gudangTani",
+		},
+		template = "AsetPetani",
 	},
 	{
 		-- Pengunjung Kafe Kota: hampir selalu duduk di teras sambil memegang cangkir kopi.
@@ -713,6 +730,45 @@ local function buildNpc(index: number): Model?
 	return model
 end
 
+-- Warga dari templat avatar modern (ServerStorage.<folderName>): salin, rapikan, dan siap dianimasikan.
+local function buildFromTemplate(folderName: string, index: number): Model?
+	local templates = ServerStorage:FindFirstChild(folderName)
+	if templates == nil then
+		return nil
+	end
+	local list: { Model } = {}
+	for _, child in templates:GetChildren() do
+		if child:IsA("Model") and child:FindFirstChildOfClass("Humanoid") then
+			table.insert(list, child)
+		end
+	end
+	if #list == 0 then
+		return nil
+	end
+	local model = list[(index - 1) % #list + 1]:Clone()
+	local humanoid = model:FindFirstChildOfClass("Humanoid")
+	if humanoid == nil or model.PrimaryPart == nil then
+		model:Destroy()
+		return nil
+	end
+	model.Name = "Petani"
+	humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+	humanoid.WalkSpeed = random:NextNumber(6, 9)
+	humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing, false)
+	humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming, false)
+	humanoid.BreakJointsOnDeath = false
+	for _, d in model:GetDescendants() do
+		if d:IsA("LuaSourceContainer") then
+			d:Destroy()
+		elseif d:IsA("BasePart") then
+			d.Anchored = false
+			d.CollisionGroup = GROUP_NPC
+			d.CanTouch = false
+		end
+	end
+	return model
+end
+
 local function animate(humanoid: Humanoid)
 	local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator")
 	animator.Parent = humanoid
@@ -1223,7 +1279,9 @@ function NpcService.start()
 		end
 		for _ = 1, group.count do
 			index += 1
-			local model = buildNpc(index)
+			local model = if (group :: any).template
+				then buildFromTemplate((group :: any).template, index)
+				else buildNpc(index)
 			if model then
 				model:PivotTo(CFrame.new(near(pick(places))))
 				model.Parent = folder
