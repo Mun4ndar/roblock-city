@@ -94,9 +94,11 @@ Urutan load ada di `ORDER` pada `init.server.luau` / `init.client.luau`; tambahk
   pesawat lewat; `landed` = harus sudah mendarat), diperiksa JobService.
 - **Toko Koin**: ID produk dan Game Pass di `src/shared/ShopConfig.luau`. Panelnya `ShopController`
   (menu HP "Toko Koin" dan kios di atrium mall); harga yang tampil dibaca dari Roblox.
-- **Peta kecil** (`MinimapController`): kanan bawah, utara di atas, ketuk untuk ganti jangkauan. Jalan dan
-  daratan dibaca dari `src/shared/MapData.luau`, yang dibuat otomatis dari `Workspace.Map` di Studio
-  (part beraspal + sampel Terrain); buat ulang kalau tata jalan berubah.
+- **Peta dan GPS**: peta kecil bundar (`MinimapController`, ketuk = peta penuh) dan peta penuh (`MapUiController`,
+  tombol M) memakai gambar yang sama (`Util/MapCanvas`) dari `src/shared/MapData.luau` (jalan + daratan, dibuat
+  otomatis dari `Workspace.Map` di Studio; buat ulang kalau tata jalan berubah). Daftar tujuan per zona ada di
+  `src/shared/DestinationConfig.luau` (tambah tempat = tambah satu baris). GPS (`NavController`) mencari rute
+  LEWAT JALAN dengan A* di `src/shared/RoadRouter.luau`, menggambar garis biru di peta dan panah biru di jalan.
 - **Motor**: kendaraan dengan `body.bike = true` di VehicleConfig (skuter "lincah"): jok berurutan, dua roda
   tampak, roda fisika tetap empat dan tersembunyi. Templatnya `ReplicatedStorage.Assets.CarShells.lincah`.
 - **BusinessService**: usaha Kafe Kota di pusat kota (kasir di teras depan gedung Kafe Kota, dibangun

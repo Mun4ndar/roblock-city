@@ -1,144 +1,104 @@
 --!strict
--- MinimapController: peta kecil di kanan bawah. Utara selalu di atas; pemain di tengah (panah merah
--- menunjukkan arah hadap). Menampilkan daratan, jalan, tempat penting, rumah pemain, tujuan tugas
--- (kuning), dan tujuan GPS (biru). Penanda yang di luar jangkauan menempel di tepi peta sebagai arah.
--- Ketuk peta untuk memperbesar/memperkecil jangkauan. Data jalan dan daratan dari Shared.MapData.
--- Di HP, peta digeser ke kiri tombol lompat supaya tidak tertutup jari.
+-- MinimapController: peta kecil bundar di kanan bawah. Utara selalu di atas, pemain di tengah (titik
+-- biru dengan sorot arah). Menampilkan laut, daratan, jalan, pin tempat penting, rute GPS (garis biru
+-- lewat jalan), rumah (merah muda), dan tujuan tugas (kuning). Penanda di luar jangkauan menempel di
+-- tepi lingkaran sebagai arah. Ketuk peta = buka peta penuh; tombol +/- = perbesar/perkecil.
+-- Gambar peta dipakai bersama dengan peta penuh lewat Util/MapCanvas.
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
-local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
-local MapData = require(Shared:WaitForChild("MapData"))
-local MissionConfig = require(Shared:WaitForChild("MissionConfig"))
-
-local UiScale = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("UiScale"))
+local Util = script.Parent.Parent:WaitForChild("Util")
+local UiScale = require(Util:WaitForChild("UiScale"))
+local MapCanvas = require(Util:WaitForChild("MapCanvas"))
 local JobController = require(script.Parent:WaitForChild("JobController"))
 local HouseUiController = require(script.Parent:WaitForChild("HouseUiController"))
+local NavController = require(script.Parent:WaitForChild("NavController"))
 
 local player = Players.LocalPlayer
 
 local MinimapController = {}
 
 local rgb = Color3.fromRGB
-local SIZE = 150 -- piksel pada ukuran penuh
-local SCALES = { 0.2, 0.09 } -- piksel per stud: dekat, jauh
+local SIZE = 172 -- piksel pada ukuran penuh
+local HALF = SIZE / 2
+local SCALES = { 0.32, 0.2, 0.11, 0.06 } -- piksel per stud, dari dekat ke jauh
 local UPDATE_SECONDS = 0.05
-local COLORS = {
-	sea = rgb(112, 196, 236),
-	land = rgb(150, 208, 132),
-	road = rgb(250, 250, 246),
-	border = rgb(34, 46, 80),
-	player = rgb(230, 60, 60),
-	task = rgb(255, 204, 0),
-	gps = rgb(60, 130, 255),
-	home = rgb(40, 170, 140),
-}
 
 type Marker = { dot: GuiObject, position: () -> Vector3? }
 
 local gui: ScreenGui
 local frame: TextButton
-local canvas: Frame
-local arrow: Frame
+local clip: CanvasGroup
 local markers: { Marker } = {}
-local scaleIndex = 1
+local scaleIndex = 2
 local elapsed = 0
+local drawnVersion = -1
+local drawnIndex = -1
 
-local function corner(parent: GuiObject, radius: number)
+local function corner(parent: Instance, radius: UDim)
 	local c = Instance.new("UICorner")
-	c.CornerRadius = UDim.new(0, radius)
+	c.CornerRadius = radius
 	c.Parent = parent
 end
 
--- Kanvas digambar pada 1 piksel = 1 stud lalu dikecilkan dengan UIScale, jadi ganti jangkauan
--- cukup mengubah satu angka.
-local canvasScale: UIScale
-
-local function rect(
-	x: number,
-	z: number,
-	sx: number,
-	sz: number,
-	rotation: number,
-	color: Color3,
-	z_: number
-)
-	local f = Instance.new("Frame")
-	f.AnchorPoint = Vector2.new(0.5, 0.5)
-	f.Position = UDim2.fromOffset(x, z)
-	f.Size = UDim2.fromOffset(sx, sz)
-	f.Rotation = rotation
-	f.BackgroundColor3 = color
-	f.BorderSizePixel = 0
-	f.ZIndex = z_
-	f.Parent = canvas
-end
-
-local function buildCanvas()
-	local step = MapData.STEP
-	for _, run in MapData.LAND :: { { number } } do
-		local x0, x1, z = run[1], run[2], run[3]
-		rect((x0 + x1) / 2, z, x1 - x0 + step, step + 1, 0, COLORS.land, 1)
-	end
-	for _, road in MapData.ROADS :: { { number } } do
-		rect(road[1], road[2], road[3], road[4], -road[5], COLORS.road, 2)
-	end
-	-- tempat penting (ikon tetap terbaca karena ukurannya dilawan skala kanvas, lihat applyScale)
-	local function icon(position: Vector3, text: string)
-		local l = Instance.new("TextLabel")
-		l.Name = "Ikon"
-		l.AnchorPoint = Vector2.new(0.5, 0.5)
-		l.Position = UDim2.fromOffset(position.X, position.Z)
-		l.Size = UDim2.fromOffset(16, 16)
-		l.BackgroundTransparency = 1
-		l.Font = Enum.Font.GothamMedium
-		l.TextSize = 13
-		l.Text = text
-		l.ZIndex = 3
-		local s = Instance.new("UIScale")
-		s.Parent = l
-		l.Parent = canvas
-	end
-	for _, landmark in MissionConfig.LANDMARKS do
-		local position = MissionConfig.placePosition(landmark.place)
-		if position then
-			icon(position, landmark.icon)
-		end
-	end
-	for _, extra in MissionConfig.EXTRA_PLACES do
-		icon(extra.position, extra.icon)
-	end
-end
-
 local function applyScale()
-	local scale = SCALES[scaleIndex]
-	canvasScale.Scale = scale
-	for _, child in canvas:GetChildren() do
-		if child.Name == "Ikon" then
-			local s = child:FindFirstChildOfClass("UIScale")
-			if s then
-				s.Scale = 1 / scale
-			end
-		end
-	end
+	MapCanvas.setScale(SCALES[scaleIndex])
+	MapCanvas.setPinMode(0.65, SCALES[scaleIndex] >= 0.25, false, false)
 end
 
-local function addMarker(color: Color3, size: number, position: () -> Vector3?)
+-- Ambil kembali kanvas (setelah peta penuh ditutup).
+function MinimapController.reclaim()
+	local canvas = MapCanvas.getCanvas()
+	canvas.Parent = clip
+	applyScale()
+	drawnVersion = -1
+end
+
+local function addMarker(color: Color3, icon: string, position: () -> Vector3?)
 	local dot = Instance.new("Frame")
 	dot.AnchorPoint = Vector2.new(0.5, 0.5)
-	dot.Size = UDim2.fromOffset(size, size)
+	dot.Size = UDim2.fromOffset(20, 20)
 	dot.BackgroundColor3 = color
 	dot.BorderSizePixel = 0
 	dot.ZIndex = 5
 	dot.Visible = false
-	corner(dot, size)
+	corner(dot, UDim.new(0.5, 0))
 	local stroke = Instance.new("UIStroke")
-	stroke.Thickness = 1.5
+	stroke.Thickness = 2
 	stroke.Color = Color3.new(1, 1, 1)
 	stroke.Parent = dot
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.fromScale(1, 1)
+	label.BackgroundTransparency = 1
+	label.Text = icon
+	label.TextSize = 12
+	label.Font = Enum.Font.GothamMedium
+	label.Parent = dot
 	dot.Parent = frame
 	table.insert(markers, { dot = dot, position = position })
+end
+
+local function roundButton(text: string, offsetY: number, onClick: () -> ()): TextButton
+	local b = Instance.new("TextButton")
+	b.AnchorPoint = Vector2.new(1, 0.5)
+	b.Position = UDim2.new(0, -6, 0.5, offsetY)
+	b.Size = UDim2.fromOffset(28, 28)
+	b.BackgroundColor3 = Color3.new(1, 1, 1)
+	b.Text = text
+	b.TextColor3 = MapCanvas.COLORS.ink
+	b.Font = Enum.Font.FredokaOne
+	b.TextSize = 20
+	b.AutoButtonColor = true
+	corner(b, UDim.new(0.5, 0))
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = MapCanvas.COLORS.ink
+	stroke.Thickness = 2
+	stroke.Transparency = 0.6
+	stroke.Parent = b
+	b.Activated:Connect(onClick)
+	b.Parent = frame
+	return b
 end
 
 local function buildGui()
@@ -151,77 +111,97 @@ local function buildGui()
 	frame = Instance.new("TextButton")
 	frame.Name = "Peta"
 	frame.AnchorPoint = Vector2.new(1, 1)
-	frame.Position = UDim2.new(1, -10, 1, -10)
+	frame.Position = UDim2.new(1, -44, 1, -14)
 	frame.Size = UDim2.fromOffset(SIZE, SIZE)
-	frame.BackgroundColor3 = COLORS.sea
+	frame.BackgroundColor3 = MapCanvas.COLORS.sea
 	frame.AutoButtonColor = false
 	frame.Text = ""
-	corner(frame, 16)
+	corner(frame, UDim.new(0.5, 0))
 	local stroke = Instance.new("UIStroke")
-	stroke.Thickness = 3
-	stroke.Color = COLORS.border
+	stroke.Thickness = 5
+	stroke.Color = MapCanvas.COLORS.ink
 	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	stroke.Parent = frame
 	UiScale.attach(frame)
 	frame.Parent = gui
 
-	-- CanvasGroup memotong isi (termasuk jalan yang diputar) mengikuti sudut bulat peta.
-	local clip = Instance.new("CanvasGroup")
+	-- bayangan lembut
+	local shadow = Instance.new("Frame")
+	shadow.Name = "Bayangan"
+	shadow.AnchorPoint = Vector2.new(0.5, 0.5)
+	shadow.Position = UDim2.new(0.5, 0, 0.5, 5)
+	shadow.Size = UDim2.new(1, 10, 1, 10)
+	shadow.BackgroundColor3 = Color3.new(0, 0, 0)
+	shadow.BackgroundTransparency = 0.78
+	shadow.BorderSizePixel = 0
+	shadow.ZIndex = 0
+	corner(shadow, UDim.new(0.5, 0))
+	shadow.Parent = frame
+
+	clip = Instance.new("CanvasGroup")
 	clip.Name = "Isi"
 	clip.Size = UDim2.fromScale(1, 1)
 	clip.BackgroundTransparency = 1
 	clip.ZIndex = 1
-	corner(clip, 16)
+	corner(clip, UDim.new(0.5, 0))
 	clip.Parent = frame
 
-	canvas = Instance.new("Frame")
-	canvas.Name = "Kanvas"
-	canvas.Size = UDim2.fromOffset(0, 0)
-	canvas.BackgroundTransparency = 1
-	canvasScale = Instance.new("UIScale")
-	canvasScale.Parent = canvas
-	canvas.Parent = clip
+	-- cincin putih tipis di dalam bingkai gelap
+	local ring = Instance.new("Frame")
+	ring.Name = "Cincin"
+	ring.AnchorPoint = Vector2.new(0.5, 0.5)
+	ring.Position = UDim2.fromScale(0.5, 0.5)
+	ring.Size = UDim2.new(1, -2, 1, -2)
+	ring.BackgroundTransparency = 1
+	ring.ZIndex = 8
+	corner(ring, UDim.new(0.5, 0))
+	local ringStroke = Instance.new("UIStroke")
+	ringStroke.Color = Color3.new(1, 1, 1)
+	ringStroke.Thickness = 2.5
+	ringStroke.Parent = ring
+	ring.Parent = frame
 
+	-- lencana utara
 	local north = Instance.new("TextLabel")
 	north.Name = "Utara"
-	north.AnchorPoint = Vector2.new(0.5, 0)
-	north.Position = UDim2.new(0.5, 0, 0, 2)
-	north.Size = UDim2.fromOffset(16, 14)
-	north.BackgroundTransparency = 1
+	north.AnchorPoint = Vector2.new(0.5, 0.5)
+	north.Position = UDim2.fromScale(0.5, 0.02)
+	north.Size = UDim2.fromOffset(22, 22)
+	north.BackgroundColor3 = MapCanvas.COLORS.ink
+	north.TextColor3 = Color3.new(1, 1, 1)
 	north.Font = Enum.Font.FredokaOne
-	north.TextSize = 12
-	north.TextColor3 = COLORS.border
+	north.TextSize = 13
 	north.Text = "U"
-	north.ZIndex = 6
+	north.ZIndex = 9
+	corner(north, UDim.new(0.5, 0))
 	north.Parent = frame
 
-	-- panah pemain di tengah
-	arrow = Instance.new("Frame")
-	arrow.Name = "Pemain"
-	arrow.AnchorPoint = Vector2.new(0.5, 0.5)
-	arrow.Position = UDim2.fromScale(0.5, 0.5)
-	arrow.Size = UDim2.fromOffset(18, 18)
-	arrow.BackgroundTransparency = 1
-	arrow.ZIndex = 7
-	for _, bar in { { 9, 9, 14, 0 }, { 5.5, 6, 10, 38 }, { 12.5, 6, 10, -38 } } do
-		local f = Instance.new("Frame")
-		f.AnchorPoint = Vector2.new(0.5, 0.5)
-		f.Position = UDim2.fromOffset(bar[1], bar[2])
-		f.Size = UDim2.fromOffset(4, bar[3])
-		f.Rotation = bar[4]
-		f.BackgroundColor3 = COLORS.player
-		f.BorderSizePixel = 0
-		f.ZIndex = 7
-		corner(f, 2)
-		f.Parent = arrow
-	end
-	arrow.Parent = frame
-
-	buildCanvas()
+	local canvas = MapCanvas.getCanvas()
+	canvas.Parent = clip
 	applyScale()
-	frame.Activated:Connect(function()
-		scaleIndex = scaleIndex % #SCALES + 1
+
+	local arrow = MapCanvas.makeArrow(frame, 34)
+	arrow.Position = UDim2.fromScale(0.5, 0.5)
+	arrow.ZIndex = 7
+	for _, child in arrow:GetDescendants() do
+		if child:IsA("GuiObject") then
+			child.ZIndex = 7
+		end
+	end
+	arrow.Name = "Pemain"
+
+	roundButton("+", -18, function()
+		scaleIndex = math.max(1, scaleIndex - 1)
 		applyScale()
+	end)
+	roundButton("-", 18, function()
+		scaleIndex = math.min(#SCALES, scaleIndex + 1)
+		applyScale()
+	end)
+
+	frame.Activated:Connect(function()
+		local MapUi = require(script.Parent:WaitForChild("MapUiController")) :: any
+		MapUi.open()
 	end)
 	gui.Parent = player:WaitForChild("PlayerGui")
 end
@@ -233,26 +213,58 @@ local function place()
 	local jump = if touch then touch:FindFirstChild("JumpButton", true) else nil
 	if jump and jump:IsA("GuiObject") and jump.AbsoluteSize.X > 0 then
 		local screen = gui.AbsoluteSize
-		local right = screen.X - jump.AbsolutePosition.X + 10
-		frame.Position = UDim2.new(1, -math.max(10, right), 1, -10)
+		local right = screen.X - jump.AbsolutePosition.X + 44
+		frame.Position = UDim2.new(1, -math.max(44, right), 1, -14)
 	else
-		frame.Position = UDim2.new(1, -10, 1, -10)
+		frame.Position = UDim2.new(1, -44, 1, -14)
 	end
 end
 
+local function redrawRoute()
+	local route = NavController.getRoute()
+	local index = NavController.getRouteIndex()
+	local version = NavController.getVersion()
+	if version == drawnVersion and index == drawnIndex then
+		return
+	end
+	drawnVersion, drawnIndex = version, index
+	if route == nil then
+		MapCanvas.showRoute(nil)
+		return
+	end
+	local points: { Vector3 } = {}
+	local character = player.Character
+	local root = if character then character.PrimaryPart else nil
+	if root then
+		table.insert(points, Vector3.new(root.Position.X, 0, root.Position.Z))
+	end
+	for i = index + 1, #route.points do
+		table.insert(points, route.points[i])
+	end
+	MapCanvas.showRoute(points)
+end
+
 local function update()
+	if not frame.Visible then
+		return
+	end
 	local character = player.Character
 	local root = if character then character.PrimaryPart else nil
 	if root == nil then
 		return
 	end
+	local canvas = MapCanvas.getCanvas()
+	if canvas.Parent ~= clip then
+		return -- peta penuh sedang memakai kanvas
+	end
 	local scale = SCALES[scaleIndex]
 	local here = root.Position
-	local half = frame.AbsoluteSize.X / 2 / math.max(UiScale.factor(), 0.01)
-	canvas.Position = UDim2.fromOffset(half - here.X * scale, half - here.Z * scale)
+	canvas.Position = UDim2.fromOffset(HALF - here.X * scale, HALF - here.Z * scale)
 	local look = root.CFrame.LookVector
+	local arrow = frame:FindFirstChild("Pemain") :: Frame
 	arrow.Rotation = math.deg(math.atan2(look.X, -look.Z))
-	local limit = half - 9
+	redrawRoute()
+	local limit = HALF - 12
 	for _, marker in markers do
 		local position = marker.position()
 		if position == nil then
@@ -260,13 +272,17 @@ local function update()
 			continue
 		end
 		local dx, dz = (position.X - here.X) * scale, (position.Z - here.Z) * scale
-		local over = math.max(math.abs(dx), math.abs(dz)) / limit
-		if over > 1 then
-			dx, dz = dx / over, dz / over -- di luar jangkauan: tempel di tepi sebagai arah
+		local length = math.sqrt(dx * dx + dz * dz)
+		if length > limit then
+			dx, dz = dx / length * limit, dz / length * limit -- di luar jangkauan: tempel di tepi
 		end
-		marker.dot.Position = UDim2.fromOffset(half + dx, half + dz)
+		marker.dot.Position = UDim2.fromOffset(HALF + dx, HALF + dz)
 		marker.dot.Visible = true
 	end
+end
+
+function MinimapController.setVisible(visible: boolean)
+	frame.Visible = visible
 end
 
 function MinimapController.init()
@@ -274,15 +290,18 @@ function MinimapController.init()
 end
 
 function MinimapController.start()
-	local PhoneController = require(script.Parent:WaitForChild("PhoneController")) :: any
-	addMarker(COLORS.home, 9, function(): Vector3?
+	addMarker(rgb(255, 92, 120), "🏠", function(): Vector3?
 		return HouseUiController.getHomePosition()
 	end)
-	addMarker(COLORS.gps, 10, function(): Vector3?
-		return PhoneController.getGpsTarget()
-	end)
-	addMarker(COLORS.task, 11, function(): Vector3?
+	addMarker(rgb(255, 196, 0), "★", function(): Vector3?
 		return JobController.getTarget()
+	end)
+	addMarker(MapCanvas.COLORS.route, "📍", function(): Vector3?
+		return NavController.getTargetPosition()
+	end)
+	NavController.onChanged(function()
+		local target = NavController.getTarget()
+		MapCanvas.setSelected(if target then target.id else nil)
 	end)
 	RunService.Heartbeat:Connect(function(dt: number)
 		elapsed += dt
