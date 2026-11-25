@@ -97,6 +97,14 @@ local GROUPS = {
 		},
 	},
 	{
+		-- Petugas minimarket SPBU: berdiri di belakang meja kasir menghadap pintu (avatar modern, animasi diam).
+		name = "PenjagaSPBU",
+		template = "AsetSPBU",
+		spots = {
+			{ pos = Vector3.new(783, 1.6, -313.4), facing = Vector3.new(0, 0, -1) },
+		},
+	},
+	{
 		-- Pengunjung Kafe Kota: hampir selalu duduk di teras sambil memegang cangkir kopi.
 		name = "KafeKota",
 		count = 4,

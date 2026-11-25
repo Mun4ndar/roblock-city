@@ -14,6 +14,7 @@ local Workspace = game:GetService("Workspace")
 local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local Net = require(Shared:WaitForChild("Net"))
 local VehicleConfig = require(Shared:WaitForChild("VehicleConfig"))
+local FuelConfig = require(Shared:WaitForChild("FuelConfig"))
 
 type VehicleDef = VehicleConfig.VehicleDef
 
@@ -48,6 +49,7 @@ local stepConnection: RBXScriptConnection? = nil
 
 local gui: ScreenGui
 local speedLabel: TextLabel
+local fuelLabel: TextLabel
 local flipEvent: RemoteEvent
 
 -- ---------------------------------------------------------------- UI
@@ -63,7 +65,7 @@ local function buildGui()
 	UiScale.attach(panel)
 	panel.AnchorPoint = Vector2.new(0.5, 1)
 	panel.Position = UDim2.new(0.5, 0, 1, -16)
-	panel.Size = UDim2.fromOffset(170, 64)
+	panel.Size = UDim2.fromOffset(170, 84)
 	panel.BackgroundColor3 = Color3.fromRGB(40, 48, 60)
 	panel.BackgroundTransparency = 0.2
 	local corner = Instance.new("UICorner")
@@ -92,6 +94,17 @@ local function buildGui()
 	hint.Text = "Lompat untuk turun"
 	hint.Parent = panel
 
+	fuelLabel = Instance.new("TextLabel")
+	fuelLabel.Name = "Fuel"
+	fuelLabel.BackgroundTransparency = 1
+	fuelLabel.Position = UDim2.fromOffset(0, 58)
+	fuelLabel.Size = UDim2.new(1, 0, 0, 20)
+	fuelLabel.Font = Enum.Font.GothamBold
+	fuelLabel.TextSize = 14
+	fuelLabel.TextColor3 = Color3.fromRGB(150, 235, 150)
+	fuelLabel.Text = ""
+	fuelLabel.Parent = panel
+
 	gui.Parent = player:WaitForChild("PlayerGui")
 end
 
@@ -110,6 +123,23 @@ local function step(dt: number)
 	-- Gas + belok bersamaan (W+D atau thumbstick miring) memberi 0,7 pada tiap sumbu
 	-- karena vektor gerak dinormalkan; kalikan supaya tetap bisa gas/belok penuh.
 	local throttle = math.clamp(d.seat.ThrottleFloat * 1.42, -1, 1)
+	-- Bensin (atribut dari FuelService): habis = tenaga kecil, masih bisa merayap ke SPBU.
+	local fuel = chassis.Parent and chassis.Parent:GetAttribute(FuelConfig.ATTR)
+	if type(fuel) == "number" then
+		if fuel <= 0 then
+			throttle *= FuelConfig.EMPTY_POWER
+			fuelLabel.Text = "Bensin habis! Cari SPBU"
+			fuelLabel.TextColor3 = Color3.fromRGB(255, 110, 110)
+		elseif fuel <= FuelConfig.LOW then
+			fuelLabel.Text = string.format("Bensin menipis: %d%%", math.ceil(fuel))
+			fuelLabel.TextColor3 = Color3.fromRGB(255, 200, 90)
+		else
+			fuelLabel.Text = string.format("Bensin: %d%%", math.ceil(fuel))
+			fuelLabel.TextColor3 = Color3.fromRGB(150, 235, 150)
+		end
+	else
+		fuelLabel.Text = ""
+	end
 	local steerRaw = math.clamp(d.seat.SteerFloat * 1.42, -1, 1)
 	local steer = math.sign(steerRaw) * math.abs(steerRaw) ^ STEER_CURVE
 	local speed = chassis.AssemblyLinearVelocity:Dot(chassis.CFrame.LookVector)
