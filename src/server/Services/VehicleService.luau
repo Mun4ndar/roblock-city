@@ -369,7 +369,8 @@ local function modVehicle(player: Player, choice: any): VehicleResult
 		return result(false, "Mobil dinas tidak bisa dimodifikasi.")
 	end
 	if
-		(model:GetPivot().Position - VehicleConfig.MOD_POSITION).Magnitude > VehicleConfig.MOD_RANGE
+		(model:GetPivot().Position - VehicleConfig.MOD_POSITION).Magnitude
+		> VehicleConfig.MOD_RANGE
 	then
 		return result(false, "Bawa mobilmu ke Halaman Bengkel dulu ya.")
 	end
@@ -607,7 +608,9 @@ local function buildParkedService()
 		model:PivotTo(CFrame.new(bay.Position.X, ground, bay.Position.Z) * bay.CFrame.Rotation)
 		-- pivot pajangan lebih tinggi dari titik tanah: turunkan sampai dasar roda menyentuh lantai
 		local boxCf, boxSize = model:GetBoundingBox()
-		model:PivotTo(model:GetPivot() - Vector3.new(0, boxCf.Position.Y - boxSize.Y / 2 - ground, 0))
+		model:PivotTo(
+			model:GetPivot() - Vector3.new(0, boxCf.Position.Y - boxSize.Y / 2 - ground, 0)
+		)
 		model.Parent = holder
 		parked[def.id] = { model = model, holder = holder }
 	end

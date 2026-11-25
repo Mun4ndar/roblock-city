@@ -213,7 +213,9 @@ local function onSkipClicked()
 end
 
 local function onServiceClicked(extra: boolean?)
-	local service = if extra then VehicleConfig.extraForJob(currentJob()) else VehicleConfig.forJob(currentJob())
+	local service = if extra
+		then VehicleConfig.extraForJob(currentJob())
+		else VehicleConfig.forJob(currentJob())
 	if busy or service == nil then
 		return
 	end
