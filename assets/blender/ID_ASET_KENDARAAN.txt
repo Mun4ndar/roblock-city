@@ -24,3 +24,5 @@ damkar      model 104383633649644  decal 99536378504435   gambar 102999737979652
 damkarTangga model 84867619524737  decal sama dengan damkar (tangga disimpan rata; salinan skrip diperbaiki Matrix.Euler)
 bus         model 116248894567584  decal 87094219848501   gambar 129041940402482 (skrip Gemini buat_bus.py; 6 roda: roda belakang paling ujung digabung ke bodi)
 angkot      model 71705788816075   decal 83769804095033   gambar 80144494833052 (skrip Gemini buat_angkot.py; papan atap dibalik agar terbaca)
+
+Tekstur dengan padding (2026-11-25, perbaikan bintik putih; gambar baru di SurfaceAppearance): serasi 91484496672121, jelajah 78749345897530, kilat 129208817708012, patroli 101944020310450, lincah 86950962224284, ojek 94811848267675. Kancil masih versi lama (perlu unduh ulang model asli dari Meshy).

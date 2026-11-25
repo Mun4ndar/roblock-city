@@ -265,3 +265,57 @@ def proses_motor(id, path, panjang, depan="-X", tris_bodi=9500, tris_roda=1500):
     )
     print(info)
     return info
+
+
+def pad_png(path, objs, pad=10):
+    """Tambahkan 'padding' pada tekstur: piksel di luar pulau UV diisi warna pulau terdekat, supaya
+    tepi panel tidak membocorkan warna latar (putih/hitam) saat di-mipmap atau difilter di Roblox.
+    path = PNG warna dasar; objs = semua objek yang memakai tekstur itu (bodi + roda)."""
+    img = bpy.data.images.load(path, check_existing=False)
+    w, h = img.size
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
+    mask = np.zeros((h, w), dtype=bool)
+    for o in objs:
+        me = o.data
+        uv = me.uv_layers.active.data
+        me.calc_loop_triangles()
+        for t in me.loop_triangles:
+            pts = np.array([uv[i].uv[:] for i in t.loops], dtype=np.float64) * [w, h]
+            x0, y0 = np.floor(pts.min(0)).astype(int) - 1
+            x1, y1 = np.ceil(pts.max(0)).astype(int) + 1
+            x0, y0 = max(x0, 0), max(y0, 0)
+            x1, y1 = min(x1, w - 1), min(y1, h - 1)
+            if x1 < x0 or y1 < y0:
+                continue
+            gx, gy = np.meshgrid(np.arange(x0, x1 + 1) + 0.5, np.arange(y0, y1 + 1) + 0.5)
+            a, b, c = pts
+            d = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1])
+            if abs(d) < 1e-9:
+                continue
+            l1 = ((b[1] - c[1]) * (gx - c[0]) + (c[0] - b[0]) * (gy - c[1])) / d
+            l2 = ((c[1] - a[1]) * (gx - c[0]) + (a[0] - c[0]) * (gy - c[1])) / d
+            l3 = 1 - l1 - l2
+            eps = -0.04
+            inside = (l1 >= eps) & (l2 >= eps) & (l3 >= eps)
+            mask[y0:y1 + 1, x0:x1 + 1] |= inside
+    covered = mask.copy()
+    for _ in range(pad):
+        grow = np.zeros_like(mask)
+        acc = np.zeros((h, w, 3), dtype=np.float32)
+        cnt = np.zeros((h, w), dtype=np.float32)
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            m = np.roll(mask, (dy, dx), (0, 1))
+            c = np.roll(px[:, :, :3], (dy, dx), (0, 1))
+            sel = m & ~mask
+            acc[sel] += c[sel]
+            cnt[sel] += 1
+        new = (cnt > 0)
+        px[new, :3] = acc[new] / cnt[new][:, None]
+        mask = mask | new
+    px[:, :, 3] = 1.0
+    img.pixels = px.ravel().tolist()
+    img.filepath_raw = path
+    img.file_format = "PNG"
+    img.save()
+    bpy.data.images.remove(img)
+    return float(covered.mean())
