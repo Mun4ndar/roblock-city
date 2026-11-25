@@ -39,6 +39,8 @@ IndonesiaConfig.MENUS = {
 	martabak = { "martabak", "rotiBakar", "kopi" },
 	jagung = { "jagungBakar", "kerakTelor", "klepon" },
 	gado = { "gado", "kerakTelor", "esCampur" },
+	restoran = { "nasiGoreng", "sate", "gado", "esCampur", "kopi" }, -- Restoran Samudra, Resort ROBLOCK
+	barJus = { "esTeh", "esCampur", "cendol", "kopi" }, -- Bar Jus & Kopi, Resort ROBLOCK
 } :: { [string]: { string } }
 
 IndonesiaConfig.BUFF_SECONDS = 90 -- lama "kenyang semangat" setelah jajan
@@ -61,7 +63,16 @@ IndonesiaConfig.STATIONS = {
 		id = "koplo",
 		name = "Radio Koplo",
 		icon = "🪘",
-		tracks = { 107302164689882, 108733665602479, 90047526532000 },
+		tracks = {
+			107302164689882,
+			108733665602479,
+			90047526532000,
+			115933072822345,
+			120786497356440,
+			96755117635802,
+			138631365846775,
+			90650312125003,
+		},
 	},
 	{
 		id = "dangdut",
