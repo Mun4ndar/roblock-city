@@ -218,6 +218,7 @@ local exact: { [string]: string } = {
 	["💰 Toko Koin"] = "💰 Coin Shop",
 	[" uang kota"] = " city money",
 	["Semua isi kota bisa didapat dengan bermain. Toko ini hanya jalan pintas. "] = "Everything in the city can be earned by playing. This shop is only a shortcut. ",
+	["Semua isi kota bisa didapat dengan bermain. Toko ini hanya jalan pintas. Minta izin orang tua dulu sebelum membeli ya!"] = "Everything in the city can be earned by playing. This shop is only a shortcut. Ask a parent for permission before buying!",
 	["Minta izin orang tua dulu sebelum membeli ya!"] = "Ask a parent for permission before buying!",
 	["Toko belum dibuka."] = "The shop isn't open yet.",
 	["⭐ VIP"] = "⭐ VIP",
@@ -506,7 +507,7 @@ local patterns: { { string } } = {
 	{ "{} tugas", "{} tasks" },
 	{ "Level {}", "Level {}" },
 	{ "{} kursi", "{} seats" },
-	{ "Mulai di: {}.", "Start at: {}." },
+	{ "Ikuti misi {}/{}: {}", "Follow task {}/{}: {}" },
 	{ "{} hanya untuk {} yang sedang bertugas.", "{} is only for {} on duty." },
 	{
 		"Kamu belum punya {}. Beli dulu di Dealer Mobil ya!",

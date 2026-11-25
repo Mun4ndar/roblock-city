@@ -31,6 +31,7 @@ type Pattern = {
 	lua: string,
 	template: string,
 	caps: number,
+	order: number,
 }
 
 local EXACT: { [string]: string } = {}
@@ -67,6 +68,7 @@ local function addPattern(idText: string, enText: string)
 		lua = "^" .. table.concat(parts, "(.-)") .. "$",
 		template = enText,
 		caps = #parts - 1,
+		order = #PATTERNS + 1,
 	})
 end
 
@@ -90,6 +92,13 @@ function Loc.register(dictionary: Dictionary)
 			end
 		end
 	end
+	-- Awalan literal lebih panjang diperiksa dulu, supaya "Beli bakso {}" menang atas "Beli {}".
+	table.sort(PATTERNS, function(a, b)
+		if #a.prefix ~= #b.prefix then
+			return #a.prefix > #b.prefix
+		end
+		return a.order < b.order
+	end)
 	table.clear(cache)
 	cacheCount = 0
 end
@@ -97,6 +106,7 @@ end
 -- ---------------------------------------------------------------- penerjemahan
 
 local translateCore: (string, number) -> string?
+local translateCapture: (string, number) -> string?
 
 local function isAllCaps(text: string): boolean
 	return text == string.upper(text) and text ~= string.lower(text)
@@ -132,8 +142,15 @@ local function renderTemplate(template: string, caps: { string }, depth: number)
 		if value == nil then
 			return ""
 		end
-		local translated = if depth < MAX_DEPTH then translateCore(value, depth + 1) else nil
-		return translated or value
+		if depth >= MAX_DEPTH then
+			return value
+		end
+		local pre, core, post = string.match(value, "^(%s*)(.-)(%s*)$")
+		if core == nil or core == "" then
+			return value
+		end
+		local translated = translateCapture(core, depth + 1)
+		return if translated then (pre :: string) .. translated .. (post :: string) else value
 	end)
 	return rendered
 end
@@ -157,6 +174,16 @@ end
 
 -- Satu baris: coba utuh, lalu tanpa ikon/angka di awal dan ikon/spasi di akhir, lalu pecah di "·".
 local function translateLine(text: string, depth: number): string?
+	if depth < MAX_DEPTH and string.find(text, " Mulai di: ", 1, true) then
+		local head, tail = string.match(text, "^(.-) Mulai di: (.*)$")
+		if head and tail then
+			local first = translateLine(head, depth + 1)
+			local second = translateLine(tail, depth + 1)
+			if first or second then
+				return (first or head) .. " Start at: " .. (second or tail)
+			end
+		end
+	end
 	local direct = translateCore(text, depth)
 	if direct then
 		return direct
@@ -173,13 +200,24 @@ local function translateLine(text: string, depth: number): string?
 		end
 	end
 
+	local stem, punct = string.match(text, "^(.-)([%.!]+)$")
+	if stem ~= nil and stem ~= "" and punct ~= nil then
+		local result = translateCore(stem, depth)
+		if result then
+			return result .. punct
+		end
+	end
+
 	if string.find(text, "·", 1, true) then
 		local pieces = string.split(text, "·")
 		local changed = false
 		for index, piece in pieces do
-			local translated = translateLine(piece, depth + 1)
+			local pre, core2, post = string.match(piece, "^(%s*)(.-)(%s*)$")
+			local translated = if core2 ~= nil and core2 ~= ""
+				then translateLine(core2, depth + 1)
+				else nil
 			if translated then
-				pieces[index] = translated
+				pieces[index] = (pre :: string) .. translated .. (post :: string)
 				changed = true
 			end
 		end
@@ -189,6 +227,8 @@ local function translateLine(text: string, depth: number): string?
 	end
 	return nil
 end
+
+translateCapture = translateLine
 
 -- Pasca-proses khusus bahasa Inggris: satuan, durasi, dan pemisah ribuan uang.
 local POST_RULES: { { string } } = {
@@ -235,7 +275,9 @@ local function postProcess(text: string): string
 end
 
 local function worthTranslating(text: string): boolean
-	return string.find(text, "%a%a%a") ~= nil or string.find(text, "$", 1, true) ~= nil
+	return string.find(text, "%a%a%a") ~= nil
+		or string.find(text, "$", 1, true) ~= nil
+		or string.find(text, "km/j", 1, true) ~= nil
 end
 
 -- Terjemahkan teks Indonesia ke Inggris. Kalau tidak ada padanannya, teks dikembalikan apa adanya.
