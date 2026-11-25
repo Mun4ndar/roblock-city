@@ -78,7 +78,7 @@ VehicleConfig.ATTR_MOD_PROMPT = "VehicleModShop" -- atribut ProximityPrompt di b
 
 -- Modifikasi di Bengkel (Halaman Bengkel, kota kecil). Indeks 0 = warna asli pabrik.
 -- Menambah pilihan = menambah warna di daftar ini.
-VehicleConfig.MOD_POSITION = Vector3.new(138, 1, 303)
+VehicleConfig.MOD_POSITION = Vector3.new(195, 1, 303)
 VehicleConfig.MOD_RANGE = 60 -- mobil harus sedekat ini dari bengkel
 VehicleConfig.PAINT_PRICE = 150
 VehicleConfig.RIM_PRICE = 100

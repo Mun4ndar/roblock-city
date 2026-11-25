@@ -83,8 +83,8 @@ local GROUPS = {
 		template = "AsetPetani",
 		only = "BuTani", -- hanya versi perempuan yang menjaga lapak
 		spots = {
-			{ pos = Vector3.new(-684, 0.5, 95.6), facing = Vector3.new(0, 0, 1) },
-			{ pos = Vector3.new(-696, 0.5, 118.2), facing = Vector3.new(0, 0, -1) },
+			{ pos = Vector3.new(-684, 0.5, 95.6), facing = Vector3.new(0, 0, 1), work = "stall" },
+			{ pos = Vector3.new(-696, 0.5, 118.2), facing = Vector3.new(0, 0, -1), work = "stall" },
 		},
 	},
 	{
@@ -93,7 +93,7 @@ local GROUPS = {
 		name = "Mekanik",
 		template = "AsetMekanik",
 		spots = {
-			{ pos = Vector3.new(160.2, 1.3, 296), facing = Vector3.new(-1, 0, 0), work = true },
+			{ pos = Vector3.new(188, 1.3, 280.8), facing = Vector3.new(0, 0, 1), work = true },
 		},
 	},
 	{
@@ -101,7 +101,7 @@ local GROUPS = {
 		name = "PenjagaSPBU",
 		template = "AsetSPBU",
 		spots = {
-			{ pos = Vector3.new(783, 1.6, -313.4), facing = Vector3.new(0, 0, -1) },
+			{ pos = Vector3.new(783, 1.6, -313.4), facing = Vector3.new(0, 0, -1), work = "cashier" },
 		},
 	},
 	{
@@ -1315,90 +1315,46 @@ local function playerWithin(position: Vector3, range: number): boolean
 	return false
 end
 
--- Mekanik: lengan terangkat ke bawah mobil di lift, siku memukul pelan (Transform sendi AnimationConstraint).
--- Berhenti sendiri saat model dihapus (LOD).
-local function workPose(model: Model)
-	local function joint(name: string): AnimationConstraint?
-		local found = model:FindFirstChild(name, true)
-		if found and found:IsA("AnimationConstraint") then
-			return found
-		end
-		return nil
-	end
-	local rightShoulder, rightElbow = joint("RightShoulder"), joint("RightElbow")
-	local leftShoulder, leftElbow = joint("LeftShoulder"), joint("LeftElbow")
-	local neck, waist = joint("Neck"), joint("Waist")
-	task.spawn(function()
-		local t0 = os.clock()
-		while model.Parent do
-			local t = os.clock() - t0
-			if rightShoulder then
-				rightShoulder.Transform =
-					CFrame.Angles(math.rad(145) + math.sin(t * 5) * 0.06, 0, math.rad(8))
-			end
-			if rightElbow then
-				rightElbow.Transform = CFrame.Angles(math.rad(20) + math.sin(t * 9) * 0.35, 0, 0)
-			end
-			if leftShoulder then
-				leftShoulder.Transform =
-					CFrame.Angles(math.rad(140) + math.sin(t * 4 + 1) * 0.08, 0, math.rad(-8))
-			end
-			if leftElbow then
-				leftElbow.Transform =
-					CFrame.Angles(math.rad(26) + math.sin(t * 7 + 2) * 0.25, 0, 0)
-			end
-			if neck then
-				neck.Transform = CFrame.Angles(math.rad(-18) + math.sin(t * 2) * 0.05, 0, 0)
-			end
-			if waist then
-				waist.Transform = CFrame.Angles(math.rad(-6), math.sin(t * 1.5) * 0.08, 0)
-			end
-			task.wait()
-		end
-	end)
-end
+-- Animasi kerja NPC penjaga (animasi resmi Roblox lewat Animator di server, terlihat oleh semua pemain):
+--   "work"  = mekanik: ayunan alat (toolslash) berulang
+--   "serve" = penjual jus: melambai ke pembeli berulang
+--   "cashier" / "stall" = diam santai, sesekali melambai ke pembeli
+-- Catatan: mengubah Transform sendi dari skrip TIDAK menggerakkan anggota badan avatar modern.
+local WORK_SLASH_ANIMATION = "rbxassetid://522635514"
+local WAVE_ANIMATION = "rbxassetid://507770239"
 
--- Penjual jus: kedua lengan di depan dada, tangan kanan mengocok shaker, kadang menyodorkan gelas.
-local function servePose(model: Model)
-	local function joint(name: string): AnimationConstraint?
-		local found = model:FindFirstChild(name, true)
-		if found and found:IsA("AnimationConstraint") then
-			return found
-		end
-		return nil
+local function workAnimate(humanoid: Humanoid, mode: string)
+	local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator")
+	animator.Parent = humanoid
+	local function load(id: string, priority: Enum.AnimationPriority): AnimationTrack
+		local animation = Instance.new("Animation")
+		animation.AnimationId = id
+		local track = animator:LoadAnimation(animation)
+		track.Looped = true
+		track.Priority = priority
+		return track
 	end
-	local rightShoulder, rightElbow = joint("RightShoulder"), joint("RightElbow")
-	local leftShoulder, leftElbow = joint("LeftShoulder"), joint("LeftElbow")
-	local neck, waist = joint("Neck"), joint("Waist")
-	task.spawn(function()
-		local t0 = os.clock()
-		while model.Parent do
-			local t = os.clock() - t0
-			-- tiap 6 detik: 2 detik menyodorkan gelas ke pembeli, sisanya mengocok
-			local phase = t % 6
-			local offer = if phase > 4 then math.sin((phase - 4) / 2 * math.pi) else 0
-			if rightShoulder then
-				rightShoulder.Transform = CFrame.Angles(math.rad(55) + offer * 0.6, 0, 0)
+	if mode == "work" then
+		local track = load(WORK_SLASH_ANIMATION, Enum.AnimationPriority.Action)
+		track:Play()
+		track:AdjustSpeed(0.7)
+	elseif mode == "serve" then
+		load(WAVE_ANIMATION, Enum.AnimationPriority.Action):Play()
+	else
+		load(IDLE_ANIMATION, Enum.AnimationPriority.Idle):Play()
+		local wave = load(WAVE_ANIMATION, Enum.AnimationPriority.Action)
+		task.spawn(function()
+			while humanoid.Parent do
+				task.wait(random:NextNumber(6, 12))
+				if humanoid.Parent == nil then
+					break
+				end
+				wave:Play(0.3)
+				task.wait(3)
+				wave:Stop(0.3)
 			end
-			if rightElbow then
-				rightElbow.Transform =
-					CFrame.Angles(math.rad(85) + math.sin(t * 14) * 0.18 * (1 - offer) - offer * 0.95, 0, 0)
-			end
-			if leftShoulder then
-				leftShoulder.Transform = CFrame.Angles(math.rad(50) + math.sin(t * 1.3) * 0.05, 0, 0)
-			end
-			if leftElbow then
-				leftElbow.Transform = CFrame.Angles(math.rad(75), 0, 0)
-			end
-			if neck then
-				neck.Transform = CFrame.Angles(math.rad(8) + offer * 0.1, math.sin(t * 0.7) * 0.2, 0)
-			end
-			if waist then
-				waist.Transform = CFrame.Angles(math.rad(4), math.sin(t * 0.9) * 0.1, 0)
-			end
-			task.wait()
-		end
-	end)
+		end)
+	end
 end
 
 local function spawnSlot(slot: Slot)
@@ -1419,10 +1375,8 @@ local function spawnSlot(slot: Slot)
 			model:PivotTo(CFrame.lookAt(at, at + spot.facing))
 			-- pivot templat bisa berbeda dari HumanoidRootPart: geser sampai root tepat di titiknya
 			model:PivotTo(model:GetPivot() + (at - anchor.Position))
-			if spot.work == "serve" then
-				servePose(model)
-			elseif spot.work then
-				workPose(model)
+			if spot.work then
+				workAnimate(humanoid, if type(spot.work) == "string" then spot.work else "work")
 			else
 				animate(humanoid)
 			end
