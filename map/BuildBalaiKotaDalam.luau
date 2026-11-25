@@ -54,7 +54,7 @@ local LOOK: { [string]: Look } = {
 
 -- kotak tabrakan perabot (Blender: nama, x0, x1, y0, y1, z0, z1)
 local SOLIDS: { { any } } = {
-	{ "Air mancur", -5.5, 5.5, -6.5, 4.5, 1.3, 2.5, "cyl" },
+	{ "Air mancur", -3.1, 3.1, -4.1, 2.1, 1.3, 2.3, "cyl" },
 	{ "MejaResepsionis", -6.8, 6.8, -9.2, -7.0, 1.3, 4.5 },
 	{ "MejaLoketKiri", -14.5, -9.5, 5.2, 6.8, 1.3, 4.2 },
 	{ "MejaLoketKanan", 9.5, 14.5, 5.2, 6.8, 1.3, 4.2 },
@@ -469,9 +469,9 @@ return function(): number
 		e.Parent = part
 		part.Parent = fx
 	end
-	emitter("SemburTengah", W(0, -1, 1.3 + 9.8), 22, 11, 8, 0.5)
-	emitter("SemburMangkukAtas", W(0, -1, 1.3 + 6.3), 12, 5, 55, 0.35)
-	emitter("SemburMangkukBawah", W(0, -1, 1.3 + 4.0), 16, 4, 75, 0.35)
+	emitter("SemburTengah", W(0, -1, 1.3 + 7.6), 22, 11, 8, 0.5)
+	emitter("SemburMangkukAtas", W(0, -1, 1.3 + 5.0), 12, 5, 55, 0.35)
+	emitter("SemburMangkukBawah", W(0, -1, 1.3 + 3.2), 16, 4, 75, 0.35)
 
 	root.Parent = hall
 	return #root:GetDescendants()

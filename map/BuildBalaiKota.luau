@@ -27,8 +27,7 @@ local LOOK = {
 	BkDome = { Color3.fromRGB(70, 165, 150), Enum.Material.SmoothPlastic, 0 },
 	BkGlass = { Color3.fromRGB(125, 185, 220), Enum.Material.Glass, 0.3 },
 	BkDark = { Color3.fromRGB(70, 46, 34), Enum.Material.Wood, 0 },
-	BkFlag1 = { Color3.fromRGB(30, 110, 180), Enum.Material.Fabric, 0 },
-	BkFlag2 = { Color3.fromRGB(240, 190, 40), Enum.Material.Fabric, 0 },
+	-- BkFlag1/BkFlag2 (bendera biru/kuning bawaan mesh) sengaja dibuang: bendera Merah Putih dari map/BenderaBalaiKota
 	BkHedge = { Color3.fromRGB(62, 135, 58), Enum.Material.Grass, 0 },
 }
 

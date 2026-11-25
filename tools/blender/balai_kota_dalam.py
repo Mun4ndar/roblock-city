@@ -26,32 +26,36 @@ for j in range(8):
         if (i + j) % 2:
             box("IFloorB", 22 + (i + 0.5) * (14.5 / 7), -10.5 + (j + 0.5) * (17 / 8), F, 14.5 / 7, 17 / 8, 0.02)
 # karpet merah: lorong dari pintu + cincin di sekeliling air mancur
-cyl("IGold", 0, -1, F, 7.75, 0.02, 48)
-cyl("IRug", 0, -1, F, 7.55, 0.04, 48)
-box("IRug", 0, 7.2, F, 4.4, 5.2, 0.04)
-box("IGold", -2.3, 7.2, F, 0.12, 5.2, 0.045)
-box("IGold", 2.3, 7.2, F, 0.12, 5.2, 0.045)
+cyl("IGold", 0, -1, F, 5.2, 0.02, 48)
+cyl("IRug", 0, -1, F, 5.0, 0.04, 48)
+box("IRug", 0, 5.7, F, 4.4, 8.2, 0.04)
+box("IGold", -2.3, 5.7, F, 0.12, 8.2, 0.045)
+box("IGold", 2.3, 5.7, F, 0.12, 8.2, 0.045)
 box("IRugB", -29.0, -2, F, 9.0, 11.0, 0.04)  # karpet sayap kiri
 box("IRugB", 19.0, 2.0, F, 0.1, 0.1, 0.0)
 
-# ---------------- air mancur (pusat aula) ----------------
+# ---------------- air mancur (pusat aula, ukuran kecil supaya tidak menghalangi) ----------------
 FX, FY = 0, -1
-cyl("IStone", FX, FY, F, 5.5, 1.1, 40)
-cyl("IGold", FX, FY, F + 0.93, 5.65, 0.15, 40)
-cyl("IWater", FX, FY, F + 0.7, 5.0, 0.55, 40)  # permukaan air z 2.0 .. 2.55? (di bawah bibir 2.4+0.15)
-cyl("IStone", FX, FY, F + 0.7, 1.4, 2.2, 24, 1.0)  # tiang bawah
-cyl("IStone", FX, FY, F + 2.9, 1.2, 0.9, 32, 3.0)  # mangkuk 1
-cyl("IGold", FX, FY, F + 3.6, 3.1, 0.12, 32)
-cyl("IWater", FX, FY, F + 3.55, 2.75, 0.3, 32)
-cyl("IStone", FX, FY, F + 3.8, 0.55, 2.0, 16)  # tiang atas
-cyl("IStone", FX, FY, F + 5.5, 0.6, 0.6, 24, 1.7)  # mangkuk 2
-cyl("IGold", FX, FY, F + 5.9, 1.75, 0.1, 24)
-cyl("IWater", FX, FY, F + 5.95, 1.4, 0.2, 24)
-cyl("IGold", FX, FY, F + 6.1, 0.28, 1.9, 12, 0.06)  # puncak
-ball("IGold", FX, FY, F + 8.2, 0.38)
-for k in range(4):  # patung ikan kecil emas di bibir kolam
+K, KH = 0.56, 0.78  # skala jari-jari dan tinggi
+def R(v): return v * K
+def Z(v): return F + v * KH
+cyl("IStone", FX, FY, F, R(5.5), 1.0, 36)
+cyl("IGold", FX, FY, F + 0.83, R(5.65), 0.15, 36)
+cyl("IWater", FX, FY, F + 0.6, R(5.0), 0.55, 36)
+cyl("IStone", FX, FY, Z(0.7), R(1.4), 2.2 * KH, 24, R(1.0))
+cyl("IStone", FX, FY, Z(2.9), R(1.2), 0.9 * KH, 28, R(3.0))
+cyl("IGold", FX, FY, Z(3.6), R(3.1), 0.1, 28)
+cyl("IWater", FX, FY, Z(3.55), R(2.75), 0.3 * KH, 28)
+cyl("IStone", FX, FY, Z(3.8), R(0.55), 2.0 * KH, 16)
+cyl("IStone", FX, FY, Z(5.5), R(0.6), 0.6 * KH, 20, R(1.7))
+cyl("IGold", FX, FY, Z(5.9), R(1.75), 0.08, 20)
+cyl("IWater", FX, FY, Z(5.95), R(1.4), 0.2 * KH, 20)
+cyl("IGold", FX, FY, Z(6.1), R(0.28), 1.9 * KH, 12, 0.05)
+ball("IGold", FX, FY, Z(8.2), 0.3)
+cyl("IGold", FX, FY, F, R(7.75) + 0.2, 0.02, 40)
+for k in range(4):
     a = k * math.pi / 2 + math.pi / 4
-    ball("IGold", FX + math.cos(a) * 5.5, FY + math.sin(a) * 5.5, F + 1.45, 0.3)
+    ball("IGold", FX + math.cos(a) * R(5.5), FY + math.sin(a) * R(5.5), F + 1.3, 0.25)
 
 # ---------------- panel dinding + hiasan ----------------
 def panel(x0, x1, y0, y1, thick_axis, off):
