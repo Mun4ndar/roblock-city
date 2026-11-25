@@ -77,11 +77,14 @@ local GROUPS = {
 		template = "AsetPetani",
 	},
 	{
-		-- Penjaga Pasar Tani: satu avatar modern yang mondar-mandir di depan lapak.
-		name = "PenjagaPasar",
-		count = 1,
-		places = { "pasarTaniKiri", "pasarTaniKanan" },
+		-- Penjaga lapak Pasar Tani: dua avatar modern berdiri diam (animasi diam) di belakang lapak
+		-- dan menghadap lorong. spots = posisi tanah + arah hadap (map/BuildPasarTani).
+		name = "PenjagaLapak",
 		template = "AsetPetani",
+		spots = {
+			{ pos = Vector3.new(-684, 0.5, 95.6), facing = Vector3.new(0, 0, 1) },
+			{ pos = Vector3.new(-696, 0.5, 118.2), facing = Vector3.new(0, 0, -1) },
+		},
 	},
 	{
 		-- Pengunjung Kafe Kota: hampir selalu duduk di teras sambil memegang cangkir kopi.
@@ -1264,6 +1267,7 @@ type Slot = {
 	group: any,
 	home: Vector3,
 	model: Model?,
+	spot: { pos: Vector3, facing: Vector3 }?,
 }
 local modernSlots: { Slot } = {}
 
@@ -1281,6 +1285,25 @@ end
 local function spawnSlot(slot: Slot)
 	local model = buildFromTemplate(slot.template, slot.index)
 	if model == nil then
+		return
+	end
+	local spot = slot.spot
+	if spot then
+		-- Penjaga lapak: berdiri diam menghadap lorong, animasi diam, root dikunci di tempatnya.
+		model.Parent = folder
+		local humanoid = model:FindFirstChildOfClass("Humanoid")
+		local anchor = model.PrimaryPart
+		if humanoid and anchor then
+			local ground = spot.pos.Y -- tinggi lantai pasar (tanpa raycast: atap/meja lapak bisa tertabrak)
+			local y = ground + humanoid.HipHeight + anchor.Size.Y / 2
+			local at = Vector3.new(spot.pos.X, y, spot.pos.Z)
+			model:PivotTo(CFrame.lookAt(at, at + spot.facing))
+			-- pivot templat bisa berbeda dari HumanoidRootPart: geser sampai root tepat di titiknya
+			model:PivotTo(model:GetPivot() + (at - anchor.Position))
+			animate(humanoid)
+			anchor.Anchored = true
+		end
+		slot.model = model
 		return
 	end
 	model:PivotTo(CFrame.new(slot.home))
@@ -1342,6 +1365,22 @@ function NpcService.start()
 	end)
 	local index = 0
 	for _, group in GROUPS do
+		if (group :: any).spots then
+			for _, spot in (group :: any).spots do
+				index += 1
+				table.insert(modernSlots, {
+					template = (group :: any).template,
+					index = index,
+					places = { spot.pos },
+					seats = {},
+					group = group,
+					home = spot.pos,
+					model = nil,
+					spot = spot,
+				})
+			end
+			continue
+		end
 		local places: { Vector3 } = {}
 		for _, key in group.places do
 			local position = placePosition(key)
