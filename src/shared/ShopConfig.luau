@@ -17,7 +17,7 @@ export type Product = {
 	key: string,
 	name: string,
 	coins: number?, -- uang dalam game yang diberikan (produk koin)
-	skin: boolean?, -- true = produk skin Toko Skin (lihat SkinConfig, key = id skin)
+	costume: string?, -- id costume (lihat FashionConfig) yang diberikan
 	robux: number, -- saran harga (tidak dipakai kode)
 	productId: number, -- 0 = belum dibuat
 }
@@ -44,17 +44,46 @@ ShopConfig.PRODUCTS = {
 		productId = 3734530604,
 	},
 	-- Gadget ROBLOCK STORE (lihat MapBuilders/BuildShops.luau untuk etalasenya).
-	{ key = "boombox_neon", name = "Boombox Neon", robux = 75, productId = 0 },
-	{ key = "skateboard_rocket", name = "Skateboard Rocket", robux = 49, productId = 0 },
-	{ key = "headset_gamer", name = "Headset Gamer", robux = 35, productId = 0 },
-	{ key = "pedang_cahaya", name = "Pedang Cahaya", robux = 99, productId = 0 },
-	-- Skin Toko Skin (tampilannya di SkinConfig; key = id skin).
-	{ key = "perak", name = "Skin Perak Chrome", skin = true, robux = 75, productId = 0 },
-	{ key = "emas", name = "Skin Bintang Emas", skin = true, robux = 99, productId = 0 },
-	{ key = "robot", name = "Skin Robot Kota", skin = true, robux = 129, productId = 0 },
-	{ key = "neon_biru", name = "Skin Neon Biru", skin = true, robux = 149, productId = 0 },
-	{ key = "kristal_es", name = "Skin Kristal Es", skin = true, robux = 149, productId = 0 },
-	{ key = "lava", name = "Skin Kulit Lava", skin = true, robux = 199, productId = 0 },
+	{ key = "boombox_neon", name = "Boombox Neon", robux = 75, productId = 3735942279 },
+	{ key = "skateboard_rocket", name = "Skateboard Rocket", robux = 99, productId = 3735942374 },
+	{ key = "headset_gamer", name = "Headset Gamer", robux = 49, productId = 3735942455 },
+	{ key = "pedang_cahaya", name = "Pedang Cahaya", robux = 149, productId = 3735942541 },
+	-- Costume premium Toko Costume (isi productId setelah Developer Product dibuat).
+	{
+		key = "costume_sayap_malaikat",
+		name = "Sayap Malaikat",
+		costume = "sayap_malaikat",
+		robux = 99,
+		productId = 0,
+	},
+	{
+		key = "costume_naga_api",
+		name = "Naga Api",
+		costume = "naga_api",
+		robux = 129,
+		productId = 0,
+	},
+	{
+		key = "costume_mecha_wing",
+		name = "Mecha Wing",
+		costume = "mecha_wing",
+		robux = 149,
+		productId = 0,
+	},
+	{
+		key = "costume_penyihir_galaksi",
+		name = "Penyihir Galaksi",
+		costume = "penyihir_galaksi",
+		robux = 119,
+		productId = 0,
+	},
+	{
+		key = "costume_raja_petir",
+		name = "Raja Petir",
+		costume = "raja_petir",
+		robux = 159,
+		productId = 0,
+	},
 } :: { Product }
 
 ShopConfig.PASSES = {

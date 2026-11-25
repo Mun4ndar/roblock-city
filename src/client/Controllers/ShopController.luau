@@ -163,8 +163,18 @@ function refresh()
 	for _, product in ShopConfig.PRODUCTS do
 		if product.productId ~= 0 then
 			order += 1
-			local frame =
-				row(order, "💰", product.name, "+" .. Format.money(product.coins) .. " uang kota")
+			local icon, detail
+			if product.coins then
+				icon = "💰"
+				detail = "+" .. Format.money(product.coins) .. " uang kota"
+			elseif product.costume then
+				icon = "🧥"
+				detail = "Costume premium Toko Costume"
+			else
+				icon = "🎮"
+				detail = "Gadget eksklusif ROBLOCK STORE"
+			end
+			local frame = row(order, icon, product.name, detail)
 			button(frame, {
 				Name = "Buy",
 				AnchorPoint = Vector2.new(1, 0.5),

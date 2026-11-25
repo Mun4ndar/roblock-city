@@ -1,7 +1,7 @@
 --!strict
--- FashionService: Toko Baju (beli dan pakai setelan). Setelan tampil saat pemain tidak sedang
--- bekerja (dirakit UniformService). Tersimpan di PlayerData.fashion; dikirim ke client lewat
--- atribut Player "Fashion". Harga, kepemilikan, dan jarak ke toko dicek di sini.
+-- FashionService: Toko Costume (beli dan pakai skin baju/costume). Costume tampil saat pemain
+-- tidak sedang bekerja (dirakit UniformService). Tersimpan di PlayerData.fashion; dikirim ke
+-- client lewat atribut Player "Fashion". Harga, kepemilikan, dan jarak ke toko dicek di sini.
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -12,6 +12,7 @@ local Net = require(Shared:WaitForChild("Net"))
 local Types = require(Shared:WaitForChild("Types"))
 local Format = require(Shared:WaitForChild("Format"))
 local FashionConfig = require(Shared:WaitForChild("FashionConfig"))
+local ShopConfig = require(Shared:WaitForChild("ShopConfig"))
 
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local EconomyService = require(script.Parent:WaitForChild("EconomyService"))
@@ -72,7 +73,17 @@ local function act(player: Player, action: any, id: any): Result
 			or (root.Position - FashionConfig.SHOP_POSITION).Magnitude
 				> FashionConfig.SHOP_RANGE
 		then
-			return result(false, "Datang dulu ke Toko Baju di dalam ROBLOCK Mall ya.")
+			return result(false, "Datang dulu ke Toko Costume kaca di downtown ya.")
+		end
+		if outfit.productKey then
+			local product = ShopConfig.productByKey(outfit.productKey)
+			if product == nil or product.productId == 0 then
+				return result(
+					false,
+					"Developer Product untuk " .. outfit.name .. " belum diisi ID-nya."
+				)
+			end
+			return result(false, "Tekan tombol R$ di menu untuk membuka pembelian Roblox.")
 		end
 		if not EconomyService.trySpend(player, outfit.price, "fashion:" .. outfit.id) then
 			return result(
@@ -124,7 +135,7 @@ function FashionService.init()
 	end
 
 	local shop = Instance.new("Part")
-	shop.Name = "TokoBaju"
+	shop.Name = "TokoCostume"
 	shop.Anchored = true
 	shop.CanCollide = false
 	shop.CanQuery = false
@@ -132,8 +143,8 @@ function FashionService.init()
 	shop.Size = Vector3.new(2, 2, 2)
 	shop.Position = FashionConfig.SHOP_POSITION + Vector3.new(0, 4, 0)
 	local prompt = Instance.new("ProximityPrompt")
-	prompt.ActionText = "Lihat baju"
-	prompt.ObjectText = "Toko Baju"
+	prompt.ActionText = "Lihat costume"
+	prompt.ObjectText = "Toko Costume"
 	prompt.HoldDuration = 0.2
 	prompt.MaxActivationDistance = 14
 	prompt.RequiresLineOfSight = false
@@ -150,7 +161,7 @@ function FashionService.init()
 	label.TextScaled = true
 	label.TextColor3 = Color3.fromRGB(150, 200, 255)
 	label.TextStrokeTransparency = 0.2
-	label.Text = "👕 Toko Baju"
+	label.Text = "🧥 Toko Costume"
 	label.Parent = sign
 	sign.Enabled = false -- papan nama toko sudah ada di dalam mall
 	sign.Parent = shop

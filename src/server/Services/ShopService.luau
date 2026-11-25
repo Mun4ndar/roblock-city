@@ -8,7 +8,6 @@
 --   * Client hanya meminta jendela beli (remote ShopPrompt); Roblox yang menampilkan harga
 --     dan konfirmasi. Tidak ada harga atau jumlah koin yang dikirim client.
 
-local HttpService = game:GetService("HttpService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ProximityPromptService = game:GetService("ProximityPromptService")
@@ -18,10 +17,11 @@ local Net = require(Shared:WaitForChild("Net"))
 local Types = require(Shared:WaitForChild("Types"))
 local Format = require(Shared:WaitForChild("Format"))
 local ShopConfig = require(Shared:WaitForChild("ShopConfig"))
-local SkinConfig = require(Shared:WaitForChild("SkinConfig"))
+local FashionConfig = require(Shared:WaitForChild("FashionConfig"))
 
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local EconomyService = require(script.Parent:WaitForChild("EconomyService"))
+local UniformService = require(script.Parent:WaitForChild("UniformService"))
 
 local ShopService = {}
 
@@ -60,23 +60,32 @@ local function processReceipt(info: { [string]: any }): Enum.ProductPurchaseDeci
 			player,
 			"Terima kasih! Kamu mendapat " .. Format.money(product.coins) .. "."
 		)
-	elseif product.skin then
-		-- Skin Toko Skin (lihat SkinConfig): dicatat sebagai milik pemain, bukan koin.
-		local skins: any = data.skins
-		if type(skins) ~= "table" then
-			skins = {}
-			data.skins = skins
+	elseif product.costume then
+		-- Produk costume (Toko Costume): dicatat ke PlayerData.fashion dan langsung dipakai.
+		local outfit = FashionConfig.get(product.costume)
+		if outfit == nil then
+			return Enum.ProductPurchaseDecision.NotProcessedYet
 		end
-		if type(skins.owned) ~= "table" then
-			skins.owned = {}
+		local fashion: any = data.fashion
+		if type(fashion) ~= "table" then
+			fashion = {}
+			data.fashion = fashion
 		end
-		skins.owned[product.key] = true
-		local view = {
-			owned = skins.owned,
-			active = if type(skins.active) == "string" then skins.active else "",
-		}
-		player:SetAttribute(SkinConfig.ATTR_PLAYER, HttpService:JSONEncode(view))
-		EconomyService.notify(player, "Terima kasih! " .. product.name .. " sekarang milikmu.")
+		if type(fashion.owned) ~= "table" then
+			fashion.owned = {}
+		end
+		fashion.owned[outfit.id] = true
+		fashion.active = outfit.id
+		player:SetAttribute(
+			FashionConfig.ATTR_PLAYER,
+			game:GetService("HttpService")
+				:JSONEncode({ owned = fashion.owned, active = fashion.active })
+		)
+		UniformService.refresh(player)
+		EconomyService.notify(
+			player,
+			"Terima kasih! Costume " .. outfit.name .. " sekarang milikmu dan sudah dipakai."
+		)
 	else
 		-- Produk gadget (ROBLOCK STORE): dicatat sebagai milik pemain, bukan koin.
 		local gadgets: any = data.gadgets

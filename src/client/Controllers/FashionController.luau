@@ -1,5 +1,5 @@
 --!strict
--- FashionController: panel Toko Baju (beli dan pakai setelan). Terbuka dari tombol di Toko Baju.
+-- FashionController: panel Toko Costume (beli dan pakai skin baju/costume). Terbuka dari tombol di Toko Costume.
 -- Semua aksi lewat remote FashionAction; harga dan kepemilikan dicek FashionService.
 
 local HttpService = game:GetService("HttpService")
@@ -107,6 +107,28 @@ local function call(action: string, id: string)
 	refresh()
 end
 
+local function buyRobux(productKey: string)
+	if busy then
+		return
+	end
+	busy = true
+	local ok, value = pcall(function(): any
+		return Net.func(Net.Names.ShopPrompt):InvokeServer(productKey)
+	end)
+	if
+		ok
+		and type(value) == "table"
+		and value.ok == false
+		and type(value.message) == "string"
+		and value.message ~= ""
+	then
+		HudController.toast(value.message)
+	elseif not ok then
+		HudController.toast("Gagal membuka pembelian Roblox.")
+	end
+	busy = false
+end
+
 function refresh()
 	if not panel.Visible then
 		return
@@ -117,7 +139,6 @@ function refresh()
 		end
 	end
 	local view = getView()
-	local money = player:GetAttribute("Money")
 	for order, outfit in FashionConfig.OUTFITS do
 		local owned = view.owned[outfit.id] == true
 		local wearing = view.active == outfit.id
@@ -140,27 +161,35 @@ function refresh()
 		hat.BackgroundColor3 = outfit.look.hatColor
 		corner(hat, 6)
 		hat.Parent = jacket
-		label(jacket, {
-			Size = UDim2.fromScale(1, 1),
-			Text = outfit.icon,
-			TextSize = 20,
-			TextXAlignment = Enum.TextXAlignment.Center,
-		})
-		label(row, {
-			Position = UDim2.fromOffset(58, 0),
-			Size = UDim2.new(1, -200, 1, 0),
-			Font = Enum.Font.FredokaOne,
-			TextSize = 17,
-			Text = outfit.name,
-		})
+		label(
+			jacket,
+			{
+				Size = UDim2.fromScale(1, 1),
+				Text = outfit.icon,
+				TextSize = 20,
+				TextXAlignment = Enum.TextXAlignment.Center,
+			}
+		)
+		label(
+			row,
+			{
+				Position = UDim2.fromOffset(58, 0),
+				Size = UDim2.new(1, -200, 1, 0),
+				Font = Enum.Font.FredokaOne,
+				TextSize = 17,
+				Text = outfit.name,
+			}
+		)
 		local text, color, textColor =
-			"Beli " .. Format.money(outfit.price), COLORS.buy, COLORS.text
+			if outfit.productKey
+				then "R$ " .. tostring(outfit.robux or "?")
+				else "Beli " .. Format.money(outfit.price),
+			COLORS.buy,
+			COLORS.text
 		if wearing then
 			text, color = "Lepas", COLORS.locked
 		elseif owned then
 			text, color, textColor = "Pakai", COLORS.go, Color3.new(1, 1, 1)
-		elseif not (type(money) == "number" and money >= outfit.price) then
-			color = COLORS.locked
 		end
 		button(row, {
 			Name = "Action",
@@ -175,6 +204,8 @@ function refresh()
 				call("wear", "")
 			elseif owned then
 				call("wear", outfit.id)
+			elseif outfit.productKey then
+				buyRobux(outfit.productKey)
 			else
 				call("buy", outfit.id)
 			end
@@ -203,20 +234,26 @@ local function buildGui()
 	scale = Instance.new("UIScale")
 	scale.Parent = panel
 	panel.Parent = gui
-	label(panel, {
-		Position = UDim2.fromOffset(18, 10),
-		Size = UDim2.new(1, -80, 0, 36),
-		Font = Enum.Font.FredokaOne,
-		TextSize = 26,
-		Text = "👕 Toko Baju",
-	})
-	label(panel, {
-		Position = UDim2.fromOffset(18, 44),
-		Size = UDim2.new(1, -36, 0, 18),
-		TextSize = 12,
-		TextColor3 = rgb(110, 120, 135),
-		Text = "Setelan terlihat saat kamu tidak sedang bekerja.",
-	})
+	label(
+		panel,
+		{
+			Position = UDim2.fromOffset(18, 10),
+			Size = UDim2.new(1, -80, 0, 36),
+			Font = Enum.Font.FredokaOne,
+			TextSize = 26,
+			Text = "🧥 Toko Costume",
+		}
+	)
+	label(
+		panel,
+		{
+			Position = UDim2.fromOffset(18, 44),
+			Size = UDim2.new(1, -36, 0, 18),
+			TextSize = 12,
+			TextColor3 = rgb(110, 120, 135),
+			Text = "Skin baju/costume terlihat saat kamu tidak sedang bekerja.",
+		}
+	)
 	button(panel, {
 		Name = "Close",
 		AnchorPoint = Vector2.new(1, 0),
@@ -251,7 +288,7 @@ end
 
 function FashionController.start()
 	local PhoneController = require(script.Parent:WaitForChild("PhoneController")) :: any
-	PhoneController.addApp("👕", "Lemari Baju", function()
+	PhoneController.addApp("🧥", "Costume", function()
 		panel.Visible = true
 		refresh()
 	end)

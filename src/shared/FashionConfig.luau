@@ -1,8 +1,8 @@
 --!strict
--- Toko Baju: setelan (topi + jaket) yang dipakai saat TIDAK sedang bekerja. Saat bekerja,
--- seragam pekerjaan yang tampil. Setelan dirakit UniformService dari part, sama seperti seragam,
--- jadi bentuknya memakai jenis topi yang sama (cap/helmet/peaked).
--- Menambah setelan = menambah entri di OUTFITS.
+-- Toko Costume: skin baju/costume yang dipakai saat TIDAK sedang bekerja. Saat bekerja,
+-- seragam pekerjaan yang tampil. Costume dirakit UniformService dari part (topi, jaket,
+-- aksesoris dada/lengan/punggung) supaya tidak bergantung asset luar.
+-- Menambah costume = menambah entri di OUTFITS.
 
 local JobConfig = require(script.Parent:WaitForChild("JobConfig"))
 
@@ -12,16 +12,18 @@ export type Outfit = {
 	id: string,
 	name: string,
 	icon: string,
-	price: number,
+	price: number, -- harga uang game; 0 jika Robux
+	robux: number?, -- harga saran Robux untuk Developer Product
+	productKey: string?, -- key produk Robux di ShopConfig
 	look: JobConfig.Uniform,
 }
 
 -- Keadaan yang dikirim ke client (atribut Player "Fashion", JSON).
 export type FashionView = { owned: { [string]: boolean }, active: string }
 
--- Kasir Toko Baju di dalam ROBLOCK Mega Mall (ruang dalam di y = 2000, lihat map/BuildInteriors.luau)
-FashionConfig.SHOP_POSITION = Vector3.new(512, 2000, -623)
-FashionConfig.SHOP_RANGE = 34
+-- Toko Costume kaca di downtown/perkotaan.
+FashionConfig.SHOP_POSITION = Vector3.new(492, 1.1, -432)
+FashionConfig.SHOP_RANGE = 42
 FashionConfig.ATTR_PLAYER = "Fashion"
 FashionConfig.ATTR_PROMPT = "FashionShop"
 
@@ -38,101 +40,78 @@ end
 
 FashionConfig.OUTFITS = {
 	{
-		id = "santai",
-		name = "Santai Biru",
-		icon = "🧢",
-		price = 200,
+		id = "sayap_malaikat",
+		name = "Sayap Malaikat",
+		icon = "🪽",
+		price = 0,
+		robux = 99,
+		productKey = "costume_sayap_malaikat",
 		look = look(
-			"cap",
-			rgb(60, 120, 220),
-			rgb(90, 160, 240),
-			rgb(250, 250, 250),
-			rgb(255, 210, 70)
-		),
-	},
-	{
-		id = "ceria",
-		name = "Ceria Kuning",
-		icon = "🌞",
-		price = 250,
-		look = look(
-			"cap",
-			rgb(250, 200, 60),
+			"peaked",
+			rgb(245, 248, 255),
+			rgb(245, 248, 255),
 			rgb(255, 224, 110),
-			rgb(240, 130, 50),
-			rgb(230, 70, 70)
+			rgb(120, 235, 255)
 		),
 	},
 	{
-		id = "pink",
-		name = "Manis Pink",
-		icon = "🌸",
-		price = 300,
+		id = "naga_api",
+		name = "Naga Api",
+		icon = "🐉",
+		price = 0,
+		robux = 129,
+		productKey = "costume_naga_api",
 		look = look(
-			"cap",
-			rgb(240, 130, 180),
-			rgb(255, 180, 210),
-			rgb(250, 250, 250),
-			rgb(150, 100, 210)
+			"helmet",
+			rgb(225, 55, 55),
+			rgb(55, 22, 18),
+			rgb(255, 90, 40),
+			rgb(255, 184, 0)
 		),
 	},
 	{
-		id = "hijau",
-		name = "Petualang Hijau",
-		icon = "🌿",
-		price = 350,
+		id = "mecha_wing",
+		name = "Mecha Wing",
+		icon = "🤖",
+		price = 0,
+		robux = 149,
+		productKey = "costume_mecha_wing",
 		look = look(
-			"cap",
-			rgb(60, 130, 80),
-			rgb(110, 170, 110),
-			rgb(230, 210, 150),
-			rgb(120, 80, 50)
+			"helmet",
+			rgb(160, 180, 205),
+			rgb(45, 55, 70),
+			rgb(80, 240, 255),
+			rgb(255, 184, 0)
 		),
 	},
 	{
-		id = "sport",
-		name = "Sporty Merah",
-		icon = "🏃",
-		price = 500,
-		look = look("cap", rgb(220, 50, 50), rgb(235, 80, 70), rgb(40, 40, 46), rgb(250, 250, 250)),
-	},
-	{
-		id = "keren",
-		name = "Keren Hitam",
-		icon = "🕶️",
-		price = 800,
+		id = "penyihir_galaksi",
+		name = "Penyihir Galaksi",
+		icon = "🧙",
+		price = 0,
+		robux = 119,
+		productKey = "costume_penyihir_galaksi",
 		look = look(
 			"peaked",
-			rgb(40, 42, 50),
-			rgb(60, 62, 72),
-			rgb(200, 204, 212),
-			rgb(240, 196, 80)
+			rgb(90, 45, 150),
+			rgb(45, 25, 80),
+			rgb(170, 100, 255),
+			rgb(255, 255, 255)
 		),
 	},
 	{
-		id = "kapten",
-		name = "Kapten Laut",
-		icon = "⚓",
-		price = 1200,
-		look = look(
-			"peaked",
-			rgb(250, 250, 250),
-			rgb(40, 70, 130),
-			rgb(240, 196, 80),
-			rgb(240, 196, 80)
-		),
-	},
-	{
-		id = "emas",
-		name = "Bintang Emas",
-		icon = "⭐",
-		price = 2500,
+		id = "raja_petir",
+		name = "Raja Petir",
+		icon = "⚡",
+		price = 0,
+		robux = 159,
+		productKey = "costume_raja_petir",
 		look = look(
 			"peaked",
 			rgb(240, 196, 80),
-			rgb(250, 220, 120),
-			rgb(150, 100, 210),
-			rgb(250, 250, 250)
+			rgb(38, 40, 55),
+			rgb(255, 224, 80),
+			rgb(120, 235, 255)
 		),
 	},
 } :: { Outfit }
