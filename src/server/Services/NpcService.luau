@@ -105,6 +105,16 @@ local GROUPS = {
 		},
 	},
 	{
+		-- Penjual jus di Kafe Pantai ("JUS SEGAR & ES KELAPA"): berdiri di dalam bar bambu menghadap
+		-- pembeli, mengocok shaker (avatar modern PakKebun: topi jerami, kemeja biru muda).
+		name = "PenjualJus",
+		template = "AsetPetani",
+		only = "PakKebun",
+		spots = {
+			{ pos = Vector3.new(1622, 0.1, -300), facing = Vector3.new(0, 0, -1), work = "serve" },
+		},
+	},
+	{
 		-- Pengunjung Kafe Kota: hampir selalu duduk di teras sambil memegang cangkir kopi.
 		name = "KafeKota",
 		count = 4,
@@ -1289,7 +1299,7 @@ type Slot = {
 	group: any,
 	home: Vector3,
 	model: Model?,
-	spot: { pos: Vector3, facing: Vector3, work: boolean? }?,
+	spot: { pos: Vector3, facing: Vector3, work: (boolean | string)? }?,
 	only: string?,
 }
 local modernSlots: { Slot } = {}
@@ -1324,24 +1334,67 @@ local function workPose(model: Model)
 			local t = os.clock() - t0
 			if rightShoulder then
 				rightShoulder.Transform =
-					CFrame.Angles(math.rad(-150) + math.sin(t * 5) * 0.06, 0, math.rad(-8))
+					CFrame.Angles(math.rad(145) + math.sin(t * 5) * 0.06, 0, math.rad(8))
 			end
 			if rightElbow then
-				rightElbow.Transform = CFrame.Angles(math.rad(-22) + math.sin(t * 9) * 0.35, 0, 0)
+				rightElbow.Transform = CFrame.Angles(math.rad(20) + math.sin(t * 9) * 0.35, 0, 0)
 			end
 			if leftShoulder then
 				leftShoulder.Transform =
-					CFrame.Angles(math.rad(-142) + math.sin(t * 4 + 1) * 0.08, 0, math.rad(8))
+					CFrame.Angles(math.rad(140) + math.sin(t * 4 + 1) * 0.08, 0, math.rad(-8))
 			end
 			if leftElbow then
 				leftElbow.Transform =
-					CFrame.Angles(math.rad(-30) + math.sin(t * 7 + 2) * 0.25, 0, 0)
+					CFrame.Angles(math.rad(26) + math.sin(t * 7 + 2) * 0.25, 0, 0)
 			end
 			if neck then
-				neck.Transform = CFrame.Angles(math.rad(-28) + math.sin(t * 2) * 0.05, 0, 0)
+				neck.Transform = CFrame.Angles(math.rad(-18) + math.sin(t * 2) * 0.05, 0, 0)
 			end
 			if waist then
 				waist.Transform = CFrame.Angles(math.rad(-6), math.sin(t * 1.5) * 0.08, 0)
+			end
+			task.wait()
+		end
+	end)
+end
+
+-- Penjual jus: kedua lengan di depan dada, tangan kanan mengocok shaker, kadang menyodorkan gelas.
+local function servePose(model: Model)
+	local function joint(name: string): AnimationConstraint?
+		local found = model:FindFirstChild(name, true)
+		if found and found:IsA("AnimationConstraint") then
+			return found
+		end
+		return nil
+	end
+	local rightShoulder, rightElbow = joint("RightShoulder"), joint("RightElbow")
+	local leftShoulder, leftElbow = joint("LeftShoulder"), joint("LeftElbow")
+	local neck, waist = joint("Neck"), joint("Waist")
+	task.spawn(function()
+		local t0 = os.clock()
+		while model.Parent do
+			local t = os.clock() - t0
+			-- tiap 6 detik: 2 detik menyodorkan gelas ke pembeli, sisanya mengocok
+			local phase = t % 6
+			local offer = if phase > 4 then math.sin((phase - 4) / 2 * math.pi) else 0
+			if rightShoulder then
+				rightShoulder.Transform = CFrame.Angles(math.rad(55) + offer * 0.6, 0, 0)
+			end
+			if rightElbow then
+				rightElbow.Transform =
+					CFrame.Angles(math.rad(85) + math.sin(t * 14) * 0.18 * (1 - offer) - offer * 0.95, 0, 0)
+			end
+			if leftShoulder then
+				leftShoulder.Transform = CFrame.Angles(math.rad(50) + math.sin(t * 1.3) * 0.05, 0, 0)
+			end
+			if leftElbow then
+				leftElbow.Transform = CFrame.Angles(math.rad(75), 0, 0)
+			end
+			if neck then
+				neck.Transform = CFrame.Angles(math.rad(8) + offer * 0.1, math.sin(t * 0.7) * 0.2, 0)
+			end
+			if waist then
+				waist.Transform = CFrame.Angles(math.rad(4), math.sin(t * 0.9) * 0.1, 0)
 			end
 			task.wait()
 		end
@@ -1366,7 +1419,9 @@ local function spawnSlot(slot: Slot)
 			model:PivotTo(CFrame.lookAt(at, at + spot.facing))
 			-- pivot templat bisa berbeda dari HumanoidRootPart: geser sampai root tepat di titiknya
 			model:PivotTo(model:GetPivot() + (at - anchor.Position))
-			if spot.work then
+			if spot.work == "serve" then
+				servePose(model)
+			elseif spot.work then
 				workPose(model)
 			else
 				animate(humanoid)
