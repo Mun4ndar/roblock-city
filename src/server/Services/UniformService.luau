@@ -5,6 +5,7 @@
 -- default miliknya sendiri.
 
 local Players = game:GetService("Players")
+local ServerStorage = game:GetService("ServerStorage")
 
 local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local JobConfig = require(Shared:WaitForChild("JobConfig"))
@@ -653,6 +654,48 @@ local function buildDefaultUniform(
 	addBothArmBands(model, character, uniform.trim, "WorkBand")
 end
 
+-- Costume bermesh (dibuat dengan Meshy): templat MeshPart di ServerStorage.CostumeMesh, diberi nama
+-- id costume, dengan atribut Anchor (bagian tubuh), Scale dan Offset (CFrame relatif ke Anchor).
+local function meshTemplate(costumeId: string): BasePart?
+	local root = ServerStorage:FindFirstChild("CostumeMesh")
+	local found = if root then root:FindFirstChild(costumeId) else nil
+	return if found and found:IsA("BasePart") then found else nil
+end
+
+local function attachMesh(
+	model: Model,
+	character: Model,
+	costumeId: string,
+	anchorName: string
+): boolean
+	local template = meshTemplate(costumeId)
+	if template == nil or template:GetAttribute("Anchor") ~= anchorName then
+		return false
+	end
+	local anchor = partOrNil(character, anchorName)
+	if anchor == nil then
+		return false
+	end
+	local scale = template:GetAttribute("Scale")
+	local offset = template:GetAttribute("Offset")
+	local mesh = template:Clone()
+	mesh.Name = "Costume_" .. costumeId
+	mesh.Size = template.Size * (if type(scale) == "number" then scale else 1)
+	mesh.CFrame = anchor.CFrame * (if typeof(offset) == "CFrame" then offset else CFrame.new())
+	mesh.Anchored = false
+	mesh.Massless = true
+	mesh.CanCollide = false
+	mesh.CanTouch = false
+	mesh.CanQuery = false
+	mesh.CastShadow = false
+	local weld = Instance.new("WeldConstraint")
+	weld.Part0 = anchor
+	weld.Part1 = mesh
+	weld.Parent = mesh
+	mesh.Parent = model
+	return true
+end
+
 local function buildCostumeUniform(
 	model: Model,
 	torso: BasePart,
@@ -662,6 +705,11 @@ local function buildCostumeUniform(
 	costumeId: string
 )
 	local z = frontZ(torso)
+	if meshTemplate(costumeId) then
+		-- Costume bermesh: hanya mesh-nya (tanpa panel kotak); topi/mahkota dipasang di buildHat.
+		attachMesh(model, character, costumeId, "UpperTorso")
+		return
+	end
 	if costumeId == "sayap_malaikat" then
 		panel(model, torso, "AngelRobeFront", uniform.vest, 0.92, 0.9, z)
 		panel(model, torso, "AngelRobeBack", uniform.vest, 0.92, 0.9, backZ(torso))
@@ -885,6 +933,12 @@ local function buildHat(model: Model, character: Model, uniform: Uniform, jobId:
 	local top = height / 2
 	local color = uniform.hatColor
 	local costumeId = if jobId:sub(1, 8) == "costume:" then jobId:sub(9) else ""
+	if costumeId ~= "" and meshTemplate(costumeId) then
+		attachMesh(model, character, costumeId, "Head")
+		if costumeId ~= "sayap_malaikat" then
+			return -- naga/mecha/topi/mahkota: cukup meshnya; malaikat tetap memakai halo
+		end
+	end
 	if costumeId == "sayap_malaikat" then
 		disc(model, head, "AngelHalo", 0.08, width * 1.28, top + 0.7, uniform.trim)
 		piece(
