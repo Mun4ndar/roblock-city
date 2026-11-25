@@ -24,6 +24,7 @@ local ORDER = {
 	"PlaneController",
 	"JetSkiController",
 	"MinimapController",
+	"WindmillController",
 }
 
 local loaded: { any } = {}

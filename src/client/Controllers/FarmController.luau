@@ -37,6 +37,7 @@ local COLORS = {
 }
 local STEM = rgb(70, 150, 70)
 local REFRESH_SECONDS = 2
+local DRAW_RANGE = 150 -- petak lebih jauh dari ini dari kamera tidak digambar (hemat performa)
 
 local gui: ScreenGui
 local panel: Frame
@@ -173,10 +174,11 @@ local function drawMeshPlot(
 	growth: number
 )
 	local top = soil.CFrame * CFrame.new(0, soil.Size.Y / 2, 0)
-	local spacing = math.min(soil.Size.X, soil.Size.Z) / 3.4
+	local grid = crop.grid or 3
+	local spacing = math.min(soil.Size.X, soil.Size.Z) / (grid + 0.4)
 	local size = (crop.scale or 2) * (0.25 + 0.75 * growth)
-	for ix = -1, 1 do
-		for iz = -1, 1 do
+	for ix = 0, grid - 1 do
+		for iz = 0, grid - 1 do
 			local rng = Random.new(index * 97 + ix * 13 + iz * 5)
 			local plant = template:Clone()
 			plant:ScaleTo(size * (0.9 + 0.2 * rng:NextNumber()))
@@ -184,9 +186,9 @@ local function drawMeshPlot(
 			plant:PivotTo(
 				top
 					* CFrame.new(
-						ix * spacing + rng:NextNumber(-0.3, 0.3),
+						(ix - (grid - 1) / 2) * spacing + rng:NextNumber(-0.3, 0.3),
 						height / 2 - 0.05,
-						iz * spacing + rng:NextNumber(-0.3, 0.3)
+						(iz - (grid - 1) / 2) * spacing + rng:NextNumber(-0.3, 0.3)
 					)
 					* CFrame.Angles(0, rng:NextNumber(0, math.pi * 2), 0)
 			)
@@ -260,6 +262,17 @@ local function refreshPlots()
 				elseif growth >= 1 then "Panen"
 				else "Lihat"
 			prompt.ObjectText = if crop then crop.icon .. " " .. crop.name else "Petak " .. index
+		end
+		local camera = Workspace.CurrentCamera
+		if camera and (soil.Position - camera.CFrame.Position).Magnitude > DRAW_RANGE then
+			if drawn[index] ~= nil then
+				drawn[index] = nil
+				local far = folder:FindFirstChild("Tanaman" .. index)
+				if far then
+					far:Destroy()
+				end
+			end
+			continue
 		end
 		if drawn[index] ~= stage then
 			drawn[index] = stage

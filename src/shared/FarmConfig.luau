@@ -18,6 +18,7 @@ export type CropDef = {
 	model: string?, -- templat mesh di ReplicatedStorage.Assets.Tanaman (tanpa ini: gambar bola sederhana)
 	scale: number?, -- skala mesh saat matang
 	yield: number?, -- hasil panen per petak (bawaan 1)
+	grid: number?, -- rumpun per sisi di tiap petak (bawaan 3, jagung 2 karena modelnya berat)
 }
 
 export type PlotState = { crop: string, plantedAt: number } -- plantedAt: waktu server (detik unix)
@@ -46,56 +47,45 @@ FarmConfig.JOB_SELL_BONUS = 1.25
 local rgb = Color3.fromRGB
 
 FarmConfig.CROPS = {
+	-- Padi, gandum, dan jagung memakai mesh Creator Store (tanpa skrip); sayur lain dari Food Pack Premium.
+	-- Tiap petak menghasilkan `yield` buah.
 	{
-		id = "wortel",
-		name = "Wortel",
-		icon = "🥕",
-		seedPrice = 10,
-		sellPrice = 28,
-		growSeconds = 60,
-		color = rgb(245, 130, 40),
+		id = "padi",
+		name = "Padi",
+		icon = "🌾",
+		seedPrice = 20,
+		sellPrice = 30,
+		growSeconds = 150,
+		color = rgb(230, 200, 90),
+		model = "padi",
+		scale = 1.7,
+		yield = 4,
 	},
 	{
-		id = "tomat",
-		name = "Tomat",
-		icon = "🍅",
-		seedPrice = 20,
-		sellPrice = 58,
-		growSeconds = 120,
-		color = rgb(225, 55, 45),
+		id = "gandum",
+		name = "Gandum",
+		icon = "🌾",
+		seedPrice = 25,
+		sellPrice = 34,
+		growSeconds = 180,
+		color = rgb(225, 190, 100),
+		model = "gandum",
+		scale = 1.1,
+		yield = 4,
 	},
 	{
 		id = "jagung",
 		name = "Jagung",
 		icon = "🌽",
 		seedPrice = 35,
-		sellPrice = 105,
+		sellPrice = 55,
 		growSeconds = 200,
 		color = rgb(250, 210, 70),
+		model = "jagung",
+		scale = 0.55,
+		grid = 2,
+		yield = 3,
 	},
-	{
-		id = "semangka",
-		name = "Semangka",
-		icon = "🍉",
-		seedPrice = 60,
-		sellPrice = 190,
-		growSeconds = 320,
-		color = rgb(60, 150, 70),
-		model = "semangka",
-		scale = 3.4,
-	},
-	{
-		id = "labu",
-		name = "Labu",
-		icon = "🎃",
-		seedPrice = 100,
-		sellPrice = 330,
-		growSeconds = 480,
-		color = rgb(240, 150, 40),
-		model = "labu",
-		scale = 3.4,
-	},
-	-- Sayur berbukit dari Food Pack Premium (Creator Store): tiap petak menghasilkan 4.
 	{
 		id = "selada",
 		name = "Selada",
@@ -110,7 +100,7 @@ FarmConfig.CROPS = {
 	},
 	{
 		id = "kubis",
-		name = "Kubis",
+		name = "Kubis (Kol)",
 		icon = "🥦",
 		seedPrice = 30,
 		sellPrice = 40,
@@ -143,6 +133,28 @@ FarmConfig.CROPS = {
 		model = "kembangkol",
 		scale = 3.8,
 		yield = 4,
+	},
+	{
+		id = "semangka",
+		name = "Semangka",
+		icon = "🍉",
+		seedPrice = 60,
+		sellPrice = 190,
+		growSeconds = 320,
+		color = rgb(60, 150, 70),
+		model = "semangka",
+		scale = 3.4,
+	},
+	{
+		id = "labu",
+		name = "Labu",
+		icon = "🎃",
+		seedPrice = 100,
+		sellPrice = 330,
+		growSeconds = 480,
+		color = rgb(240, 150, 40),
+		model = "labu",
+		scale = 3.4,
 	},
 } :: { CropDef }
 
