@@ -1246,6 +1246,86 @@ local function startBaksoVendor()
 	end)
 end
 
+-- ---------------------------------------------------------------- NPC avatar modern (LOD)
+
+-- Tiap NPC bertemplat punya "slot". Modelnya hanya ada saat pemain dalam MODERN_SPAWN_RANGE stud dan
+-- dihapus lagi saat semua pemain lebih jauh dari MODERN_DESPAWN_RANGE (jarak lebih besar supaya tidak
+-- muncul-hilang berulang). Paling banyak MODERN_MAX yang aktif sekaligus.
+local MODERN_SPAWN_RANGE = 150
+local MODERN_DESPAWN_RANGE = 200
+local MODERN_MAX = 10
+local MODERN_CHECK_SECONDS = 3
+
+type Slot = {
+	template: string,
+	index: number,
+	places: { Vector3 },
+	seats: { Seat },
+	group: any,
+	home: Vector3,
+	model: Model?,
+}
+local modernSlots: { Slot } = {}
+
+local function playerWithin(position: Vector3, range: number): boolean
+	for _, player in Players:GetPlayers() do
+		local character = player.Character
+		local root = if character then character.PrimaryPart else nil
+		if root and (root.Position - position).Magnitude <= range then
+			return true
+		end
+	end
+	return false
+end
+
+local function spawnSlot(slot: Slot)
+	local model = buildFromTemplate(slot.template, slot.index)
+	if model == nil then
+		return
+	end
+	model:PivotTo(CFrame.new(slot.home))
+	model.Parent = folder
+	local root = model.PrimaryPart
+	if root then
+		pcall(function()
+			root:SetNetworkOwner(nil)
+		end)
+	end
+	slot.model = model
+	task.spawn(live, model, slot.places, slot.seats, slot.group)
+end
+
+local function startModernManager()
+	task.spawn(function()
+		while true do
+			task.wait(MODERN_CHECK_SECONDS)
+			local active = 0
+			for _, slot in modernSlots do
+				if slot.model and slot.model.Parent then
+					active += 1
+				end
+			end
+			for _, slot in modernSlots do
+				local model = slot.model
+				if model and model.Parent then
+					local root = model.PrimaryPart
+					if root and not playerWithin(root.Position, MODERN_DESPAWN_RANGE) then
+						slot.home = root.Position + Vector3.new(0, 1, 0)
+						slot.model = nil
+						model:Destroy()
+						active -= 1
+					end
+				elseif active < MODERN_MAX and playerWithin(slot.home, MODERN_SPAWN_RANGE) then
+					spawnSlot(slot)
+					if slot.model then
+						active += 1
+					end
+				end
+			end
+		end
+	end)
+end
+
 function NpcService.init()
 	PhysicsService:RegisterCollisionGroup(GROUP_NPC)
 	folder = Instance.new("Folder")
@@ -1286,9 +1366,20 @@ function NpcService.start()
 		end
 		for _ = 1, group.count do
 			index += 1
-			local model = if (group :: any).template
-				then buildFromTemplate((group :: any).template, index)
-				else buildNpc(index)
+			if (group :: any).template then
+				-- Avatar modern berat (tekstur PBR, tulang): hanya aktif saat ada pemain di dekatnya.
+				table.insert(modernSlots, {
+					template = (group :: any).template,
+					index = index,
+					places = places,
+					seats = seats,
+					group = group,
+					home = near(pick(places)),
+					model = nil,
+				})
+				continue
+			end
+			local model = buildNpc(index)
 			if model then
 				model:PivotTo(CFrame.new(near(pick(places))))
 				model.Parent = folder
@@ -1303,6 +1394,7 @@ function NpcService.start()
 			task.wait(0.2)
 		end
 	end
+	startModernManager()
 	startBaksoVendor()
 end
 
