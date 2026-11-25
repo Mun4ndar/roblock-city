@@ -70,7 +70,6 @@ return function(): number
 	end
 	local rawCenter = (mn + mx) / 2
 	local wantCenter = ORIGIN + Vector3.new(BBOX_CENTER_BL.X, BBOX_CENTER_BL.Z, -BBOX_CENTER_BL.Y)
-	local shift = wantCenter - rawCenter
 
 	local backup = ServerStorage:FindFirstChild("CadanganPeta") or Instance.new("Folder")
 	backup.Name = "CadanganPeta"
@@ -91,7 +90,11 @@ return function(): number
 		if part:IsA("MeshPart") and LOOK[part.Name] then
 			local clone = part:Clone()
 			clone:ClearAllChildren()
-			clone.CFrame = part.CFrame + shift
+			-- rotasi bawaan part hasil impor FBX berbeda-beda; susunan mesh berputar (rotasi + 180 derajat) dari susunan ideal
+			local r0 = select(2, part.CFrame:ToOrientation())
+			local undo = -(math.round(r0 / (math.pi / 2)) * (math.pi / 2) + math.pi)
+			local center = CFrame.new(wantCenter)
+			clone.CFrame = center * CFrame.Angles(0, undo, 0) * CFrame.new(part.Position - rawCenter) * part.CFrame.Rotation
 			local look = LOOK[part.Name]
 			clone.Color, clone.Material, clone.Transparency = look[1], look[2], look[3]
 			clone.Anchored, clone.CanCollide, clone.CanTouch = true, false, false
