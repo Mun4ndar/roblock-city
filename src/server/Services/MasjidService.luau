@@ -796,7 +796,7 @@ local function buildFurniture()
 		part.Name = "Sajadah" .. index
 		part.Anchored = true
 		part.CanCollide = false
-		part.Size = Vector3.new(4.6, 0.12, 2.5)
+		part.Size = Vector3.new(4.2, 0.12, 2.2)
 		part.Material = Enum.Material.Fabric
 		part.Color = PAD_COLORS[(index - 1) % #PAD_COLORS + 1]
 		part.CFrame = CFrame.new(spot.X, FLOOR_Y + 0.07, spot.Y)
@@ -805,10 +805,10 @@ local function buildFurniture()
 		edge.Anchored = true
 		edge.CanCollide = false
 		edge.CanQuery = false
-		edge.Size = Vector3.new(0.35, 0.14, 2.5)
+		edge.Size = Vector3.new(0.35, 0.14, 2.2)
 		edge.Material = Enum.Material.Fabric
 		edge.Color = rgb(236, 208, 120)
-		edge.CFrame = part.CFrame * CFrame.new(-2.05, 0, 0)
+		edge.CFrame = part.CFrame * CFrame.new(-1.85, 0, 0)
 		edge.Parent = part
 		local weld = Instance.new("WeldConstraint")
 		weld.Part0 = part

@@ -25,18 +25,18 @@ MasjidConfig.AZAN_SPOT = Vector2.new(489, -33)
 
 -- Slot sholat untuk pemain (dua saf di belakang saf NPC laki-laki, di depan saf jamaah belakang).
 MasjidConfig.PLAYER_SLOTS = {
-	Vector2.new(508, -34),
-	Vector2.new(508, -28),
-	Vector2.new(508, -22),
-	Vector2.new(508, -16),
-	Vector2.new(508, -10),
-	Vector2.new(508, -4),
-	Vector2.new(514, -34),
-	Vector2.new(514, -28),
-	Vector2.new(514, -22),
-	Vector2.new(514, -16),
-	Vector2.new(514, -10),
-	Vector2.new(514, -4),
+	Vector2.new(494, -35),
+	Vector2.new(494, -5),
+	Vector2.new(494, 0),
+	Vector2.new(494, 5),
+	Vector2.new(500, -33),
+	Vector2.new(500, -3),
+	Vector2.new(500, 3),
+	Vector2.new(506, -33),
+	Vector2.new(506, -27),
+	Vector2.new(506, -21),
+	Vector2.new(506, -15),
+	Vector2.new(506, -9),
 }
 
 -- Bantal duduk untuk mendengarkan tausiah (menghadap imam di barat).
