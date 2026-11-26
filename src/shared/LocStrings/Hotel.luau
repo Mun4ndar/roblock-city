@@ -53,12 +53,15 @@ local exact: { [string]: string } = {
 	["BAR & LOUNGE →"] = "BAR & LOUNGE →",
 	["KELUAR"] = "EXIT",
 	["KAMAR MANDI"] = "BATHROOM",
+	["Mandi"] = "Shower",
+	["Kamu mandi dengan air hangat. Ahh, segar!"] = "You take a warm shower. Ahh, refreshing!",
 	["LIFT"] = "LIFT",
 }
 
 local patterns: { { string } } = {
 	{ "LANTAI {}", "FLOOR {}" },
 	{ "Kasur kamar {}", "Bed of room {}" },
+	{ "Shower kamar {}", "Shower of room {}" },
 }
 
 return { exact = exact, patterns = patterns }

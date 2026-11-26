@@ -485,6 +485,87 @@ local function registerPad(pad: Instance)
 	end
 end
 
+-- ---------------------------------------------------------------- musik (lokal di tiap pemain)
+-- Server tidak bisa mendeteksi lagu selesai (Sound.Ended tidak andal di sana), jadi tiap client memutar daftar lagu
+-- sendiri: urutan acak sama untuk semua (benih dari server), ganti lagu otomatis, ulang dari awal kalau daftar habis.
+local musicOn = false
+local order: { number } = {}
+local orderSeed = -1
+local trackPos = 0
+local localSound: Sound? = nil
+
+local function buildOrder(seed: number)
+	order = {}
+	for _, track in Config.PLAYLIST do
+		table.insert(order, track.id)
+	end
+	local rng = Random.new(seed)
+	for i = #order, 2, -1 do
+		local j = rng:NextInteger(1, i)
+		order[i], order[j] = order[j], order[i]
+	end
+	orderSeed = seed
+	trackPos = 0
+end
+
+local function playNext()
+	local s = localSound
+	if s == nil or #order == 0 or not musicOn then
+		return
+	end
+	trackPos = (trackPos % #order) + 1
+	local id = "rbxassetid://" .. tostring(order[trackPos])
+	s.SoundId = id
+	s:Play()
+	confetti()
+	-- lagu gagal dimuat? lewati setelah 8 detik
+	task.delay(8, function()
+		if musicOn and localSound == s and s.SoundId == id and not s.IsPlaying then
+			playNext()
+		end
+	end)
+end
+
+local function updateMusic()
+	local root = rootPart()
+	local near = root ~= nil and (root.Position - Config.CENTER).Magnitude <= Config.HEAR_MAX + 60
+	if active and near then
+		if localSound == nil or localSound.Parent == nil then
+			local hidup = Workspace:FindFirstChild("KonserHidup")
+			local anchor = hidup and hidup:FindFirstChild("TitikMusik")
+			if anchor == nil then
+				return
+			end
+			local s = Instance.new("Sound")
+			s.Name = "MusikKonser"
+			s.Volume = Config.VOLUME
+			s.RollOffMode = Enum.RollOffMode.Linear
+			s.RollOffMinDistance = Config.HEAR_MIN
+			s.RollOffMaxDistance = Config.HEAR_MAX
+			s.Looped = false
+			s.Parent = anchor
+			s.Ended:Connect(function()
+				playNext()
+			end)
+			localSound = s
+			musicOn = false
+		end
+		local seed = (Workspace:GetAttribute(Config.ATTR_SEED) or 1) :: number
+		if seed ~= orderSeed then
+			buildOrder(seed)
+		end
+		if not musicOn then
+			musicOn = true
+			playNext()
+		end
+	elseif musicOn then
+		musicOn = false
+		if localSound then
+			localSound:Stop()
+		end
+	end
+end
+
 -- ---------------------------------------------------------------- loop
 local function onHeartbeat()
 	local root = rootPart()
@@ -575,6 +656,13 @@ function ConcertController.start()
 	Workspace:GetAttributeChangedSignal(Config.ATTR_TRACK):Connect(function()
 		if active then
 			confetti()
+		end
+	end)
+
+	task.spawn(function()
+		while true do
+			updateMusic()
+			task.wait(1)
 		end
 	end)
 

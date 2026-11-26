@@ -214,7 +214,7 @@ function Kit.ctx(parent, frame)
 				0.18,
 				o.frost and rgb(220, 236, 244) or Kit.C.glass,
 				M.Glass,
-				o.frost and 0.25 or 0.5
+				o.frost and 0 or 0.5
 			)
 		end
 		local handle =

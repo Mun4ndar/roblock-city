@@ -541,9 +541,7 @@ local function buildNpc(spec: Spec, startSpot: Vector2?, startDir: Vector3?): Np
 	for _, part in model:GetChildren() do
 		if part:IsA("BasePart") then
 			local n = part.Name
-			if n:match("Foot$") or n:match("Hand$") then
-				part.Color = spec.skin
-			elseif n:match("UpperArm$") or n:match("LowerArm$") or n == "UpperTorso" then
+			if n:match("UpperArm$") or n:match("LowerArm$") or n == "UpperTorso" then
 				part.Color = spec.shirt
 			elseif n == "LowerTorso" or n:match("UpperLeg$") or n:match("LowerLeg$") then
 				part.Color = spec.legs

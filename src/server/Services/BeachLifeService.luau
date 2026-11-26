@@ -80,77 +80,23 @@ local function decorate(
 	return part
 end
 
--- Wajah tertawa lebar (mata menyipit "> <", mulut terbuka dengan gigi dan lidah, pipi merah). Diberi nama
--- "Wajah" supaya FaceService tidak menimpanya dengan wajah senyum biasa.
-local function addLaughFace(head: BasePart)
-	local gui = Instance.new("SurfaceGui")
-	gui.Name = "Wajah"
-	gui.Face = Enum.NormalId.Front
-	gui.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
-	gui.CanvasSize = Vector2.new(200, 200)
-	gui.LightInfluence = 0
-	local ink = rgb(35, 30, 32)
-	local function frame(
-		x: number,
-		y: number,
-		w: number,
-		h: number,
-		color: Color3,
-		radius: number,
-		transparency: number?
-	)
-		local f = Instance.new("Frame")
-		f.AnchorPoint = Vector2.new(0.5, 0.5)
-		f.Position = UDim2.fromOffset(x, y)
-		f.Size = UDim2.fromOffset(w, h)
-		f.BackgroundColor3 = color
-		f.BackgroundTransparency = transparency or 0
-		f.BorderSizePixel = 0
-		local c = Instance.new("UICorner")
-		c.CornerRadius = UDim.new(0, radius)
-		c.Parent = f
-		f.Parent = gui
-		return f
+-- Wajah memakai Decal bawaan mesin ("rbxasset://textures/face.png", senyum klasik). SurfaceGui dulu
+-- tampil hitam di HP (kanvas tidak dirender di perangkat lemah), sedangkan Decal selalu tampil di mana
+-- saja. Decal bernama "face" sehingga FaceService tidak menambah wajah lain.
+local function addFaceDecal(head: BasePart)
+	for _, d in head:GetChildren() do
+		if d:IsA("Decal") or (d:IsA("SurfaceGui") and d.Name == "Wajah") then
+			d:Destroy()
+		end
 	end
-	local function eye(x: number, glyph: string)
-		local t = Instance.new("TextLabel")
-		t.AnchorPoint = Vector2.new(0.5, 0.5)
-		t.Position = UDim2.fromOffset(x, 80)
-		t.Size = UDim2.fromOffset(56, 56)
-		t.BackgroundTransparency = 1
-		t.Font = Enum.Font.GothamBlack
-		t.TextScaled = true
-		t.TextColor3 = ink
-		t.Text = glyph
-		t.Parent = gui
-	end
-	eye(62, ">")
-	eye(138, "<")
-	frame(40, 120, 30, 18, rgb(255, 130, 140), 9, 0.45) -- pipi
-	frame(160, 120, 30, 18, rgb(255, 130, 140), 9, 0.45)
-	local mouth = frame(100, 140, 92, 56, ink, 26)
-	mouth.ClipsDescendants = true
-	local teeth = Instance.new("Frame")
-	teeth.Size = UDim2.new(0.84, 0, 0, 14)
-	teeth.Position = UDim2.fromScale(0.08, 0)
-	teeth.BackgroundColor3 = rgb(255, 255, 255)
-	teeth.BorderSizePixel = 0
-	teeth.Parent = mouth
-	local tongue = Instance.new("Frame")
-	tongue.AnchorPoint = Vector2.new(0.5, 1)
-	tongue.Position = UDim2.new(0.5, 0, 1, 6)
-	tongue.Size = UDim2.fromOffset(54, 30)
-	tongue.BackgroundColor3 = rgb(255, 110, 130)
-	tongue.BorderSizePixel = 0
-	local tc = Instance.new("UICorner")
-	tc.CornerRadius = UDim.new(0, 15)
-	tc.Parent = tongue
-	tongue.Parent = mouth
-	gui.Parent = head
+	local decal = Instance.new("Decal")
+	decal.Name = "face"
+	decal.Face = Enum.NormalId.Front
+	decal.Texture = "rbxasset://textures/face.png"
+	decal.Parent = head
 end
 
--- Rig R15 polos (warna kulit/baju/celana sendiri, rambut dari part). Wajah tersenyum digambar
--- FaceService pada kepala yang belum punya Decal.
+-- Rig R15 polos (warna kulit/baju/celana sendiri, rambut dari part). Wajah senyum lewat Decal.
 local function buildPerson(look: Look): (Model?, Humanoid?, BasePart?)
 	local description = Instance.new("HumanoidDescription")
 	description.HeadColor = look.skin
@@ -195,7 +141,7 @@ local function buildPerson(look: Look): (Model?, Humanoid?, BasePart?)
 	end
 	for _, d in head:GetChildren() do
 		if d:IsA("Decal") then
-			d:Destroy() -- wajah bawaan diganti wajah tersenyum FaceService
+			d:Destroy() -- wajah bawaan dilepas; addFaceDecal memasang wajah baru
 		end
 	end
 	for _, part in model:GetChildren() do
@@ -223,9 +169,7 @@ local function buildPerson(look: Look): (Model?, Humanoid?, BasePart?)
 		CFrame.new(0, 0.36, 0.08),
 		true
 	)
-	if look.laugh then
-		addLaughFace(head)
-	end
+	addFaceDecal(head)
 	return model, humanoid, root
 end
 
@@ -426,16 +370,18 @@ local WAITRESS: Look = {
 	scale = 1,
 }
 
+local MENU_FIRST = "Silahkan pilih menu dulu kak, baru duduk."
+
 local GREETINGS = {
 	"Selamat datang di Kafe Pantai! 😊",
 	"Mau pesan apa, Kak? Ada es teh, kopi susu, es krim...",
 	"Minuman dingin cocok buat main di pantai! 🍹",
-	"Silakan lihat menunya ya, Kak! ✨",
+	MENU_FIRST,
 }
 
-local waitressModel: Model? = nil
+local _waitressModel: Model? = nil
 local waitressRoot: BasePart? = nil
-local say: (string, number) -> () = function() end
+local say: (string, number) -> () = function(_text: string, _seconds: number) end
 local celebrate: () -> () = function() end
 
 local function buildBubble(head: BasePart): (string, number) -> ()
@@ -567,7 +513,7 @@ local function startWaitress()
 	local p = Config.WAITRESS_POSITION
 	local ground = floorY(p.X, p.Z, p.Y + 3, p.Y)
 	placeModel(model, humanoid, root, Vector3.new(p.X, 0, p.Z), Config.WAITRESS_FACING, ground)
-	waitressModel, waitressRoot = model, root
+	_waitressModel, waitressRoot = model, root
 
 	local animator = animatorOf(humanoid)
 	loadTrack(animator, IDLE, Enum.AnimationPriority.Idle, true):Play(0)
@@ -601,7 +547,7 @@ local function startWaitress()
 	prompt.Parent = root
 	prompt.Triggered:Connect(function(player: Player)
 		Net.event(Config.OPEN_EVENT):FireClient(player)
-		say("Silakan pilih menunya, Kak! 😊", 4)
+		say(MENU_FIRST, 5)
 	end)
 
 	task.spawn(function()
@@ -630,7 +576,7 @@ local function startWaitress()
 					greeted = true
 					lastWave = os.clock()
 					wave:Play(0.2)
-					say("Halo, Kak! Selamat datang di Kafe Pantai! Mau lihat menu? 😊", 5)
+					say(MENU_FIRST, 6)
 				elseif os.clock() - lastLine > 9 then
 					lastLine = os.clock()
 					lineIndex = lineIndex % #GREETINGS + 1
@@ -641,6 +587,138 @@ local function startWaitress()
 					greeted = false
 					model:PivotTo(baseCFrame)
 				end
+			end
+			task.wait(0.5)
+		end
+	end)
+end
+
+-- ---------------------------------------------------------------- penjual es krim
+
+local ICE_GREETINGS = {
+	"Es krim dingin! Dua scoop, manis banget! 🍦",
+	"Panas-panas gini paling enak es krim, Kak! ☀️",
+	"Beli es krim di sini ya, Kak! 😊",
+}
+
+local ICE_SELLER: Look = {
+	name = "PenjualEsKrim",
+	skin = rgb(224, 172, 120),
+	top = rgb(255, 160, 195),
+	bottom = rgb(250, 248, 242),
+	shoes = rgb(245, 245, 240),
+	hair = rgb(48, 34, 28),
+	scale = 1,
+}
+
+local _iceRoot: BasePart? = nil
+
+local function startIceCream()
+	local model, humanoid, root = buildPerson(ICE_SELLER)
+	if model == nil or humanoid == nil or root == nil then
+		return
+	end
+	local head = model:FindFirstChild("Head") :: BasePart
+	local upper = model:FindFirstChild("UpperTorso") :: BasePart
+	local pink = rgb(255, 130, 175)
+	local white = rgb(255, 255, 255)
+	-- topi kertas putih-merah muda dan celemek kios
+	decorate(model, head, "TopiPutih", Vector3.new(1.3, 0.5, 1.3), white, CFrame.new(0, 0.78, 0))
+	decorate(model, head, "TopiPita", Vector3.new(1.34, 0.16, 1.34), pink, CFrame.new(0, 0.6, 0))
+	decorate(
+		model,
+		upper,
+		"CelemekEsKrim",
+		Vector3.new(1.55, 1.5, 0.12),
+		white,
+		CFrame.new(0, -0.1, -0.54)
+	)
+	local p = Config.ICECREAM_POSITION
+	local ground = floorY(p.X, p.Z, p.Y + 3, p.Y)
+	placeModel(model, humanoid, root, Vector3.new(p.X, 0, p.Z), Config.ICECREAM_FACING, ground)
+	_iceRoot = root
+
+	local animator = animatorOf(humanoid)
+	loadTrack(animator, IDLE, Enum.AnimationPriority.Idle, true):Play(0)
+	local wave = loadTrack(animator, WAVE, Enum.AnimationPriority.Action2, false)
+	local cheer = loadTrack(animator, CHEER, Enum.AnimationPriority.Action2, false)
+	local sayIce = buildBubble(head)
+
+	local itemId = Config.ICECREAM_ITEM
+	local item = StoreConfig.get(itemId)
+	if item == nil then
+		return
+	end
+	local price = Config.price(itemId)
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.Name = "BeliEsKrimPrompt"
+	prompt.ActionText = `Beli Es Krim (🪙{price})`
+	prompt.ObjectText = "Penjual Es Krim"
+	prompt.HoldDuration = 0
+	prompt.MaxActivationDistance = 12
+	prompt.RequiresLineOfSight = false
+	prompt.Parent = root
+	prompt.Triggered:Connect(function(player: Player)
+		local character = player.Character
+		local hum = if character then character:FindFirstChildOfClass("Humanoid") else nil
+		if hum == nil or hum.Health <= 0 or hum.SeatPart ~= nil then
+			return
+		end
+		if busy[player] then
+			sayIce("Habiskan dulu es krimmu ya, Kak! 😊", 3)
+			return
+		end
+		if not EconomyService.trySpend(player, price, "eskrim:" .. itemId) then
+			sayIce("Uangmu belum cukup, Kak. Nanti balik lagi ya! 🙏", 4)
+			return
+		end
+		busy[player] = true
+		sayIce(`Ini {item.name} kamu, Kak! {item.icon} Selamat menikmati!`, 4)
+		cheer:Play(0.2)
+		task.spawn(function()
+			local ok, served = pcall(StoreService.serve, player, itemId, true)
+			if not ok or served ~= true then
+				EconomyService.addMoney(player, price, "eskrim-kembali:" .. itemId)
+			end
+			busy[player] = nil
+		end)
+	end)
+
+	task.spawn(function()
+		local greeted = false
+		local lastWave = 0
+		local lastLine = 0
+		local lineIndex = 0
+		local baseCFrame = model:GetPivot()
+		while model.Parent do
+			local player, distance = nearestPlayer(root.Position)
+			if player and distance < 16 then
+				local character = player.Character
+				local theirRoot = if character
+					then character:FindFirstChild("HumanoidRootPart")
+					else nil
+				if theirRoot and theirRoot:IsA("BasePart") then
+					local here = model:GetPivot().Position
+					model:PivotTo(
+						CFrame.lookAt(
+							here,
+							Vector3.new(theirRoot.Position.X, here.Y, theirRoot.Position.Z)
+						)
+					)
+				end
+				if not greeted or os.clock() - lastWave > 14 then
+					greeted = true
+					lastWave = os.clock()
+					wave:Play(0.2)
+					sayIce("Halo, Kak! Mau es krim? Dua scoop, dingin dan manis! 🍦", 5)
+				elseif os.clock() - lastLine > 9 then
+					lastLine = os.clock()
+					lineIndex = lineIndex % #ICE_GREETINGS + 1
+					sayIce(ICE_GREETINGS[lineIndex], 5)
+				end
+			elseif greeted then
+				greeted = false
+				model:PivotTo(baseCFrame)
 			end
 			task.wait(0.5)
 		end
@@ -716,6 +794,7 @@ function BeachLifeService.start()
 		busy[player] = nil
 	end)
 	task.spawn(startWaitress)
+	task.spawn(startIceCream)
 	task.spawn(startVolley)
 end
 

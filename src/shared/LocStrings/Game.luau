@@ -172,10 +172,7 @@ local exact: { [string]: string } = {
 	["ANGKOT 07"] = "ANGKOT 07",
 	["Mini Car"] = "Mini Car",
 	["Mio Karbu"] = "Mio Karbu",
-	["Sedan"] = "Sedan",
-	["SUV"] = "SUV",
 	["Sport"] = "Sport",
-	["Sedan Mewah"] = "Luxury Sedan",
 	["BUS KOTA"] = "CITY BUS",
 
 	-- ===== Rumah: jenis, cat, hiasan =====

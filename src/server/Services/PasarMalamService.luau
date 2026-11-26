@@ -91,6 +91,7 @@ local function buildBubble(head: BasePart, accent: Color3): (string, number) -> 
 	gui.Size = UDim2.fromOffset(280, 58)
 	gui.StudsOffset = Vector3.new(0, 3.1, 0)
 	gui.MaxDistance = 45
+	gui.AlwaysOnTop = true
 	gui.Enabled = false
 	local frame = Instance.new("Frame")
 	frame.Size = UDim2.fromScale(1, 1)
@@ -360,7 +361,7 @@ local function buildPerson(name: string, title: string?, look: Config.Look, acce
 		board.Size = UDim2.fromOffset(170, 40)
 		board.StudsOffsetWorldSpace = Vector3.new(0, 2.0, 0)
 		board.MaxDistance = 26
-		board.AlwaysOnTop = false
+		board.AlwaysOnTop = true -- tetap terbaca meski di bawah atap tenda
 		board.Parent = head
 		local function line(text: string, y: number, h: number, size: number, color: Color3)
 			local l = Instance.new("TextLabel")

@@ -175,7 +175,7 @@ local function refreshCard()
 	cardButton.BackgroundColor3 = if active then C.stop else C.accent
 end
 
-local function select(dest: DestinationConfig.Destination?, move: boolean)
+local function selectDest(dest: DestinationConfig.Destination?, move: boolean)
 	selected = dest
 	MapCanvas.setSelected(if dest then dest.id else nil)
 	for id, row in rows do
@@ -279,7 +279,7 @@ local function rebuildList()
 			row.Parent = list
 			rows[dest.id] = { button = row, distance = distance, position = dest.position }
 			row.Activated:Connect(function()
-				select(dest, true)
+				selectDest(dest, true)
 			end)
 		end
 	end
@@ -635,7 +635,7 @@ local function buildGui()
 
 	MapCanvas.setPinCallback(function(dest: DestinationConfig.Destination)
 		if dragMoved < 8 then
-			select(dest, false)
+			selectDest(dest, false)
 			local row = rows[dest.id]
 			if row then
 				local y = row.button.AbsolutePosition.Y
@@ -701,15 +701,15 @@ function MapUiController.open(focusId: string?)
 	local target = NavController.getTarget()
 	local here = rootPosition()
 	if target and target.id then
-		select(DestinationConfig.get(target.id), false)
+		selectDest(DestinationConfig.get(target.id), false)
 		fitBoth(target.position)
 	else
-		select(nil, false)
+		selectDest(nil, false)
 		center = here or Vector3.new(100, 0, 200)
 		setScale(0.2)
 	end
 	if focusId then
-		select(DestinationConfig.get(focusId), true)
+		selectDest(DestinationConfig.get(focusId), true)
 	end
 	update()
 end

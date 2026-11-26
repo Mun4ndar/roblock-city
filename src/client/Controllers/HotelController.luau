@@ -238,12 +238,28 @@ local function watchInside()
 			end
 		end
 		local target = if insideNow then 1 else 0
-		local current = DayNightController.interior
-		if current ~= target then
-			DayNightController.interior = current + (target - current) * math.min(1, dt * 3)
+		local level = DayNightController.interior
+		if level ~= target then
+			DayNightController.interior = level + (target - level) * math.min(1, dt * 3)
 			if math.abs(DayNightController.interior - target) < 0.01 then
 				DayNightController.interior = target
 			end
+		end
+	end)
+end
+
+-- Saat tidur, client memaksa badan tetap telentang di kasur (di layar sendiri), sebagai cadangan kalau
+-- replikasi posisi dari server telat atau ditimpa di perangkat tertentu.
+local function holdLying()
+	RunService.PreSimulation:Connect(function()
+		if player:GetAttribute("HotelTidur") ~= true then
+			return
+		end
+		local target = player:GetAttribute("HotelBedCF")
+		local character = player.Character
+		local root = if character then character:FindFirstChild("HumanoidRootPart") else nil
+		if typeof(target) == "CFrame" and root and root:IsA("BasePart") then
+			root.CFrame = target
 		end
 	end)
 end
@@ -265,6 +281,7 @@ function HotelController.start()
 	repaintAll()
 	updateSleep()
 	watchInside()
+	holdLying()
 end
 
 return HotelController

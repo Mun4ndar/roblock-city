@@ -53,6 +53,7 @@ end
 ConcertConfig.ATTR_ACTIVE = "KonserAktif" -- boolean: konser sedang berlangsung
 ConcertConfig.ATTR_FIREWORK = "KonserKembangApi" -- angka naik tiap ada kembang api
 ConcertConfig.ATTR_TRACK = "KonserLagu" -- angka naik tiap ganti lagu (confetti)
+ConcertConfig.ATTR_SEED = "KonserBenih" -- benih urutan lagu acak, diisi server tiap konser dimulai
 
 -- Tag CollectionService (dipasang BuildPanggung).
 ConcertConfig.TAG_LAMP = "KonserLampu"

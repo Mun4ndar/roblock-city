@@ -243,12 +243,93 @@ local function buildRoom(parent, frame, RW, no, doorsFolder)
 		-- shower di pojok barat belakang
 		c.box("ShowerBak", a + 0.1, a + 3.8, 0.2, 0.5, 6.0, 9.7, C.stone, M.Granite)
 		local g1 =
-			c.box("ShowerKacaTimur", a + 3.8, a + 3.95, 0.5, 8.0, 5.9, 9.7, C.glass, M.Glass, 0.55)
+			c.box("ShowerKacaTimur", a + 3.8, a + 3.95, 0.5, 8.0, 5.9, 9.7, C.glass, M.Glass, 0.3)
 		local g2 =
-			c.box("ShowerKacaDepan", a + 0.1, a + 2.4, 0.5, 8.0, 5.85, 6.0, C.glass, M.Glass, 0.55)
+			c.box("ShowerKacaDepan", a + 0.1, a + 2.4, 0.5, 8.0, 5.85, 6.0, C.glass, M.Glass, 0.3)
 		c.box("ShowerKusen", a + 3.8, a + 3.95, 8.0, 8.15, 5.9, 9.7, C.steel, M.Metal)
 		c.box("ShowerLengan", a + 0.1, a + 1.8, 7.4, 7.55, 8.3, 8.45, C.steel, M.Metal)
 		c.cyl("ShowerKepala", a + 1.8, 7.2, 8.4, 1.4, 0.25, C.steel, M.Metal)
+		-- titik mandi (prompt "Mandi" di HotelService): pemain berdiri di bawah shower, air turun
+		do
+			local ux, vz = a + 1.95, 7.85
+			local spot = c.box(
+				"TempatMandi",
+				ux - 0.5,
+				ux + 0.5,
+				3.1,
+				4.1,
+				vz - 0.5,
+				vz + 0.5,
+				C.white,
+				M.SmoothPlastic,
+				1
+			)
+			spot.CanCollide = false
+			spot.CanQuery = false
+			spot.CFrame = frame
+				* CFrame.lookAt(Vector3.new(ux, 3.6, vz), Vector3.new(ux, 3.6, vz - 3))
+			spot:SetAttribute("ExitCF", frame * CFrame.new(a + 3.1, 3.6, 4.6))
+			CollectionService:AddTag(spot, "HotelShower")
+			local prompt = Instance.new("ProximityPrompt")
+			prompt.Name = "Mandi"
+			prompt.ActionText = "Mandi"
+			prompt.ObjectText = "Shower kamar " .. no
+			prompt.KeyboardKeyCode = Enum.KeyCode.E
+			prompt.HoldDuration = 0.3
+			prompt.MaxActivationDistance = 7
+			prompt.RequiresLineOfSight = false
+			prompt.Parent = spot
+			local rain = c.box(
+				"AirShower",
+				a + 1.2,
+				a + 2.4,
+				7.0,
+				7.15,
+				7.8,
+				9.0,
+				C.white,
+				M.SmoothPlastic,
+				1
+			)
+			rain.CanCollide = false
+			rain.CanQuery = false
+			local drops = Instance.new("ParticleEmitter")
+			drops.Name = "Tetes"
+			drops.Enabled = false
+			drops.Rate = 220
+			drops.Lifetime = NumberRange.new(0.7, 0.9)
+			drops.Speed = NumberRange.new(6, 9)
+			drops.EmissionDirection = Enum.NormalId.Bottom
+			drops.SpreadAngle = Vector2.new(16, 16)
+			drops.Acceleration = Vector3.new(0, -26, 0)
+			drops.Size = NumberSequence.new(0.32, 0.22)
+			drops.Color = ColorSequence.new(rgb(170, 215, 255))
+			drops.Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0),
+				NumberSequenceKeypoint.new(1, 0.7),
+			})
+			drops.LightEmission = 0.5
+			drops.Parent = rain
+			local steam = Instance.new("ParticleEmitter")
+			steam.Name = "Uap"
+			steam.Enabled = false
+			steam.Texture = "rbxasset://textures/particles/smoke_main.dds"
+			steam.Rate = 10
+			steam.Lifetime = NumberRange.new(1.5, 2.5)
+			steam.Speed = NumberRange.new(0.6, 1.2)
+			steam.EmissionDirection = Enum.NormalId.Top
+			steam.SpreadAngle = Vector2.new(35, 35)
+			steam.Size = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 1.2),
+				NumberSequenceKeypoint.new(1, 2.8),
+			})
+			steam.Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0.82),
+				NumberSequenceKeypoint.new(1, 1),
+			})
+			steam.Color = ColorSequence.new(rgb(235, 240, 245))
+			steam.Parent = rain
+		end
 		-- handuk
 		c.box("HandukBatang", bx - 0.5, bx - 0.3, 4.6, 4.8, 7.6, 9.2, C.gold, M.Metal)
 		c.box("Handuk1", bx - 0.6, bx - 0.3, 3.3, 4.7, 7.8, 8.6, C.white, M.Fabric)

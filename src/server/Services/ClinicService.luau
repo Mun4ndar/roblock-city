@@ -1338,7 +1338,7 @@ local function ringBell()
 	end)
 end
 
-local function updateCalls(doctorCount: number)
+local function _updateCalls(doctorCount: number)
 	if doctorCount == 0 then
 		return
 	end

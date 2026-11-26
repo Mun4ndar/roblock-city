@@ -10,7 +10,6 @@
 	Koordinat staf = titik lokal hotel (x timur, z selatan) + Kit.ORIGIN; y = tinggi lantai.
 ]]
 
-local CollectionService = game:GetService("CollectionService")
 local PhysicsService = game:GetService("PhysicsService")
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")

@@ -83,6 +83,19 @@ local exact: { [string]: string } = {
 		"Don't run in the lobby",
 	}, "\n"),
 	-- pesan
+	["Pilih lantai"] = "Choose floor",
+	["Lift Resort"] = "Resort Lift",
+	["Kasur kamar"] = "Room bed",
+	["Tidur"] = "Sleep",
+	["Bangun"] = "Wake up",
+	["LIFT"] = "LIFT",
+	["Check-in dulu di meja resepsionis untuk naik ke kamar."] = "Check in at the reception desk first to go up to the rooms.",
+	["Check-in dulu di meja resepsionis untuk menginap."] = "Check in at the reception desk first to stay the night.",
+	["Kunci kamarmu diperbarui. Naik lift di belakang lobi ke kamar!"] = "Your room key was renewed. Take the lift at the back of the lobby to your room!",
+	["Kasur ini sedang dipakai tamu lain."] = "Another guest is using this bed.",
+	["Selamat tidur! Tekan Bangun kalau sudah cukup istirahat."] = "Sleep well! Press Wake up when you have rested enough.",
+	["Kamu bangun dengan segar. Selamat beraktivitas!"] = "You wake up refreshed. Have a great day!",
+	["Lantai L (lobi)"] = "Floor L (lobby)",
 	["Kamu sudah check-in. Selamat menikmati Resort!"] = "You have already checked in. Enjoy the Resort!",
 	["Coba Jet Ski di pantai: ada tantangan 10 cincin!"] = "Try the Jet Ski at the beach: there's a 10-ring challenge!",
 	["Bianglala di dermaga punya pemandangan indah."] = "The Ferris wheel on the pier has a beautiful view.",
@@ -93,6 +106,12 @@ local exact: { [string]: string } = {
 }
 
 local patterns: { { string } } = {
+	{
+		"Selamat datang di ROBLOCK Resort! Bonus tamu ${}. Naik lift di belakang lobi ke kamar!",
+		"Welcome to ROBLOCK Resort! Guest bonus ${}. Take the lift at the back of the lobby to your room!",
+	},
+	{ "Kamar {}", "Room {}" },
+	{ "Lantai {}", "Floor {}" },
 	{
 		"Selamat datang di ROBLOCK Resort! Bonus tamu ${}",
 		"Welcome to ROBLOCK Resort! Guest bonus ${}",

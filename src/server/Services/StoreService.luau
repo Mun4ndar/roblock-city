@@ -513,7 +513,7 @@ local function useConsumable(player: Player, tool: Tool, item: StoreConfig.Item)
 	)
 end
 
-local function usePlay(player: Player, tool: Tool, item: StoreConfig.Item)
+local function usePlay(_player: Player, tool: Tool, item: StoreConfig.Item)
 	local character = characterOf(tool)
 	local handle = tool:FindFirstChild("Handle")
 	if character == nil or handle == nil or not handle:IsA("BasePart") then
