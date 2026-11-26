@@ -11,9 +11,9 @@ local RunService = game:GetService("RunService")
 local GROUP = "Ferris"
 local TAG_MOTOR = "FerrisMotor"
 local STEP_DEGREES = 45 -- 8 kabin
-local SPEED = 0.16 -- rad/detik saat berputar (kabin bawah bergerak sekitar 5,8 stud/detik)
-local ACCELERATION = 0.35 -- rad/detik^2: mulai dan berhenti halus
-local PAUSE_SECONDS = 12 -- waktu berhenti tiap kabin untuk naik/turun
+local SPEED = 0.32 -- rad/detik saat berputar (kabin bawah bergerak sekitar 11,5 stud/detik)
+local ACCELERATION = 0.6 -- rad/detik^2: mulai dan berhenti halus
+local PAUSE_SECONDS = 9 -- waktu berhenti tiap kabin untuk naik/turun
 local STUCK_SECONDS = 25 -- jika satu langkah macet selama ini, lanjut ke langkah berikut
 
 local FerrisService = {}
