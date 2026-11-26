@@ -1001,7 +1001,7 @@ local function spawnAll()
 		applyPhaseToNpcs()
 		local marbot = npcs.Marbot
 		if marbot then
-			if phase == "Iqamah" or phase == "Sholat" or phase == "Tausiah" then
+			if phase == "Azan" or phase == "Iqamah" or phase == "Sholat" or phase == "Tausiah" then
 				marbotBusy = true
 			end
 			task.spawn(marbotLoop, mine)
@@ -1074,6 +1074,7 @@ local function runEvent(prayer: Config.Prayer)
 
 	-- ADZAN
 	setPhase("Azan")
+	marbotJoinPrayer() -- marbot berhenti menyapu begitu adzan berkumandang dan ikut sholat
 	placeNpc("Muazin", Config.AZAN_SPOT, FACE_QIBLA)
 	for _, line in Config.azanLines(prayer) do
 		setText("Adzan " .. prayer.name, line.text, line.meaning)
@@ -1084,7 +1085,6 @@ local function runEvent(prayer: Config.Prayer)
 	-- IQAMAH
 	setPhase("Iqamah")
 	placeNpc("Muazin", npcs.Muazin and npcs.Muazin.spec.spot or Config.AZAN_SPOT, FACE_QIBLA)
-	marbotJoinPrayer()
 	local iqamah = Config.IQAMAH_LINE
 	setText("Iqamah " .. prayer.name, iqamah.text, iqamah.meaning)
 	npcSay("Muazin", iqamah.text, iqamah.seconds - 0.5)
