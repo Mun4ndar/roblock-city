@@ -26,7 +26,7 @@ local CENTER = Vector3.new(700, 3, 125)
 local CHECK_SECONDS = 3
 
 local IDLE = "rbxassetid://507766388"
-local WALK = "rbxassetid://507777826"
+local WALK = "rbxassetid://913402848" -- jalan R15 resmi (bukan lari)
 local WAVE = "rbxassetid://507770239"
 local CHEER = "rbxassetid://507770677"
 
@@ -179,7 +179,7 @@ local function buildPerson(name: string, title: string?, look: Config.Look, acce
 	model.Name = name
 	humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
 	humanoid.BreakJointsOnDeath = false
-	humanoid.WalkSpeed = 7
+	humanoid.WalkSpeed = 6
 	humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing, false)
 	humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming, false)
 	for _, child in model:GetChildren() do
@@ -545,7 +545,7 @@ local function shopperLoop(entry: ShopperEntry, walk: AnimationTrack, idle: Anim
 		end
 		if tries < 6 then
 			idle:Stop(0.2)
-			walk:Play(0.2)
+			walk:Play(0.2, 1, 0.55) -- diperlambat: jalan santai
 			local goal = Vector3.new(target.point.X, here.Y, target.point.Z)
 			person.humanoid:MoveTo(goal)
 			local waited = 0
