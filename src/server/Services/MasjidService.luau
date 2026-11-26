@@ -762,7 +762,8 @@ local function sitPlayer(player: Player, seat: Seat, anyDistance: boolean?)
 		return
 	end
 	if
-		seat.Occupant ~= nil or (not anyDistance and (root.Position - seat.Position).Magnitude > 16)
+		seat.Occupant ~= nil
+		or (not anyDistance and (root.Position - seat.Position).Magnitude > 16)
 	then
 		return
 	end
@@ -910,6 +911,15 @@ local function buildFurniture()
 end
 
 -- ---------------------------------------------------------------- marbot
+local function setBroom(npc: Npc, visible: boolean)
+	for _, name in { "GagangSapu", "BuluSapu" } do
+		local part = npc.model:FindFirstChild(name)
+		if part and part:IsA("BasePart") then
+			part.Transparency = if visible then 0 else 1
+		end
+	end
+end
+
 local function stopMarbotTracks(npc: Npc)
 	if npc.walk then
 		npc.walk:Stop(0.1)
@@ -1057,6 +1067,10 @@ local function spawnAll()
 		if marbot then
 			if phase == "Azan" or phase == "Iqamah" or phase == "Sholat" or phase == "Tausiah" then
 				marbotBusy = true
+				marbot.root.Anchored = true
+				marbot.model:PivotTo(spotCFrame(marbot, Config.MARBOT_SLOT, FACE_QIBLA))
+				marbot.model:SetAttribute("Ikut", true)
+				setBroom(marbot, false)
 			end
 			task.spawn(marbotLoop, mine)
 		end
@@ -1184,6 +1198,7 @@ local function marbotJoinPrayer()
 	npc.root.Anchored = true
 	npc.model:PivotTo(spotCFrame(npc, Config.MARBOT_SLOT, FACE_QIBLA))
 	npc.model:SetAttribute("Ikut", true)
+	setBroom(npc, false)
 end
 
 local function marbotLeavePrayer()
@@ -1193,6 +1208,7 @@ local function marbotLeavePrayer()
 		return
 	end
 	npc.model:SetAttribute("Ikut", false)
+	setBroom(npc, true)
 	npc.root.Anchored = false
 	npc.model:PivotTo(spotCFrame(npc, Config.SWEEP_SPOTS[1], FACE_QIBLA))
 	marbotBusy = false
