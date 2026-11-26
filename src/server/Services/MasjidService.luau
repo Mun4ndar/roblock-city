@@ -790,8 +790,8 @@ local function buildFurniture()
 	anchor.Size = Vector3.one
 	anchor.Position = Vector3.new(533, FLOOR_Y + 4.5, -21.5)
 	local sign = Instance.new("BillboardGui")
-	sign.Size = UDim2.fromOffset(200, 30)
-	sign.MaxDistance = 45
+	sign.Size = UDim2.fromOffset(110, 16)
+	sign.MaxDistance = 14
 	sign.AlwaysOnTop = false
 	local signText = Instance.new("TextLabel")
 	signText.Size = UDim2.fromScale(1, 1)
