@@ -870,12 +870,21 @@ local function buildFurniture()
 		local seat = Instance.new("Seat")
 		seat.Name = "BantalTausiah" .. index
 		seat.Anchored = true
-		seat.Shape = Enum.PartType.Cylinder
-		seat.Size = Vector3.new(0.6, 3.2, 3.2)
-		seat.Material = Enum.Material.Fabric
-		seat.Color = rgb(34, 120, 90)
+		seat.Size = Vector3.new(2.8, 0.6, 2.8)
+		seat.Transparency = 1
 		seat.Disabled = true
-		seat.CFrame = faceCFrame(Vector3.new(spot.X, FLOOR_Y + 0.3, spot.Y), FACE_QIBLA) * VERTICAL
+		seat.CFrame = faceCFrame(Vector3.new(spot.X, FLOOR_Y + 0.3, spot.Y), FACE_QIBLA)
+		local cushion = Instance.new("Part")
+		cushion.Name = "BantalBulat"
+		cushion.Anchored = true
+		cushion.CanCollide = false
+		cushion.CanQuery = false
+		cushion.Shape = Enum.PartType.Cylinder
+		cushion.Size = Vector3.new(0.6, 3.2, 3.2)
+		cushion.Material = Enum.Material.Fabric
+		cushion.Color = rgb(34, 120, 90)
+		cushion.CFrame = seat.CFrame * VERTICAL
+		cushion.Parent = seat
 		local ring = Instance.new("Part")
 		ring.Name = "BantalTepi"
 		ring.Anchored = true
@@ -885,7 +894,7 @@ local function buildFurniture()
 		ring.Size = Vector3.new(0.12, 3.5, 3.5)
 		ring.Material = Enum.Material.Fabric
 		ring.Color = rgb(236, 208, 120)
-		ring.CFrame = seat.CFrame * CFrame.new(-0.28, 0, 0)
+		ring.CFrame = cushion.CFrame * CFrame.new(-0.28, 0, 0)
 		ring.Parent = seat
 		local weld = Instance.new("WeldConstraint")
 		weld.Part0 = seat
@@ -1440,10 +1449,6 @@ local function runEvent(prayer: Config.Prayer)
 		end
 		pause(step.seconds)
 	end
-	for _, player in Players:GetPlayers() do
-		releasePlayer(player)
-	end
-
 	-- TAUSIAH
 	setPhase("Tausiah")
 	placeNpc("Imam", Config.IMAM_SPOT, FACE_JAMAAH)
@@ -1477,6 +1482,9 @@ local function runEvent(prayer: Config.Prayer)
 	npcSay("Imam", Config.CLOSING_SAY, Config.CLOSING_SECONDS - 0.5)
 	dismiss()
 	pause(Config.CLOSING_SECONDS)
+	for _, player in Players:GetPlayers() do
+		releasePlayer(player)
+	end
 	marbotLeavePrayer()
 	setPhase("Idle")
 	setText("", "", "")

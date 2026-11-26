@@ -128,6 +128,9 @@ local function desiredPose(entry: Entry, phase: string): string?
 				return Config.sholatSequence(rakaat)[index].pose
 			end
 		end
+		if phase == "Tausiah" or phase == "Selesai" then
+			return "bersila"
+		end
 		return "berdiri"
 	end
 	if role == "Marbot" then
@@ -372,7 +375,7 @@ local function refreshPanel()
 	if (phase == "Azan" or phase == "Iqamah") and not joined then
 		actionMode = "join"
 		actionButton.Text = "Ikut sholat berjamaah"
-	elseif phase == "Tausiah" or phase == "Selesai" then
+	elseif (phase == "Tausiah" or phase == "Selesai") and not joined then
 		actionMode = "sit"
 		actionButton.Text = "Duduk mendengarkan tausiah"
 	else
