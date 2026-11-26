@@ -2,7 +2,7 @@
 --[[
 	MasjidService: Masjid Al Munawaroh yang hidup.
 	  * NPC: Ustadz Hamid (imam), Pak Rizky (muazin), Pak Jaka (marbot, menyapu dan menyapa pemain),
-	    dan 10 jamaah berpeci dan bersarung. Dibuat saat ada pemain dalam SPAWN_RADIUS, dihapus saat jauh.
+	    dan 10 jamaah berpeci / bersarung / bermukena. Dibuat saat ada pemain dalam SPAWN_RADIUS, dihapus saat jauh.
 	  * Acara per waktu sholat (jadwal MasjidConfig.PRAYERS mengikuti jam dunia): adzan (teks) -> iqamah ->
 	    sholat berjamaah -> tausiah ~1 menit (isi beda tiap waktu sholat, ada balasan jamaah) -> selesai.
 	  * Pemain boleh ikut sholat (E di sajadah saat adzan/iqamah) dan duduk mendengarkan tausiah (E di bantal).
@@ -385,13 +385,14 @@ local function addOutfit(model: Model, spec: Spec, s: number)
 			nil,
 			Enum.Material.Wood
 		)
+		local handle = model:FindFirstChild("GagangSapu") :: BasePart
 		decorate(
 			model,
-			hand,
+			handle,
 			"BuluSapu",
 			v(1.3, 0.5, 0.55),
 			rgb(226, 190, 90),
-			at(0, -2.55, -1.3) * CFrame.Angles(math.rad(-24), 0, 0),
+			CFrame.new(0, -2.05 * s, 0) * CFrame.Angles(math.rad(24), 0, 0),
 			nil,
 			Enum.Material.Fabric
 		)
@@ -657,7 +658,6 @@ local function placeNpc(id: string, spot: Vector2, dir: Vector3)
 	end
 end
 
--- tunggu `seconds` tetapi berhenti lebih awal bila acara dibatalkan (tidak ada pembatalan saat ini).
 local function pause(seconds: number)
 	task.wait(seconds)
 end
@@ -762,8 +762,7 @@ local function sitPlayer(player: Player, seat: Seat, anyDistance: boolean?)
 		return
 	end
 	if
-		seat.Occupant ~= nil
-		or (not anyDistance and (root.Position - seat.Position).Magnitude > 16)
+		seat.Occupant ~= nil or (not anyDistance and (root.Position - seat.Position).Magnitude > 16)
 	then
 		return
 	end
@@ -980,8 +979,8 @@ local function marbotLoop(mine: number)
 		-- menyapu di tempat
 		stopMarbotTracks(npc)
 		npc.model:SetAttribute("Menyapu", true)
-		local until_ = os.clock() + math.random(6, 10)
-		while generation == mine and not marbotBusy and os.clock() < until_ do
+		local sweepUntil = os.clock() + math.random(6, 10)
+		while generation == mine and not marbotBusy and os.clock() < sweepUntil do
 			task.wait(0.4)
 		end
 		npc.model:SetAttribute("Menyapu", false)
@@ -1077,8 +1076,157 @@ local function spawnAll()
 	end)
 end
 
+-- ---------------------------------------------------------------- jam digital di dinding
+local clockTimeLabel: TextLabel? = nil
+local clockCells: { { frame: Frame, name: TextLabel, time: TextLabel, prayer: Config.Prayer } } = {}
+local lastClockKey = ""
+
+local function formatTime(hour: number): string
+	local hours = math.floor(hour) % 24
+	local minutes = math.floor((hour - math.floor(hour)) * 60)
+	return string.format("%02d:%02d", hours, minutes)
+end
+
+local function clockLabel(
+	parent: Instance,
+	text: string,
+	position: UDim2,
+	size: UDim2,
+	color: Color3,
+	font: Enum.Font
+): TextLabel
+	local label = Instance.new("TextLabel")
+	label.BackgroundTransparency = 1
+	label.Position = position
+	label.Size = size
+	label.Font = font
+	label.TextScaled = true
+	label.TextColor3 = color
+	label.Text = text
+	label.Parent = parent
+	return label
+end
+
+-- Papan jam di dinding mihrab (sisi barat), menghadap ke dalam ruang sholat. Opak, jadi tidak tembus dari luar.
+local function buildClock()
+	local hit = Workspace:Raycast(Vector3.new(500, 12, -38), Vector3.new(-40, 0, 0))
+	local x = if hit then hit.Position.X + 0.25 else 484
+	local board = Instance.new("Part")
+	board.Name = "JamDigital"
+	board.Anchored = true
+	board.CanCollide = false
+	board.CanQuery = false
+	board.Material = Enum.Material.SmoothPlastic
+	board.Color = rgb(12, 24, 20)
+	board.Size = Vector3.new(14, 4.2, 0.4)
+	local pos = Vector3.new(x, FLOOR_Y + 6.4, -38)
+	board.CFrame = CFrame.lookAt(pos, pos + Vector3.new(1, 0, 0))
+	local gui = Instance.new("SurfaceGui")
+	gui.Face = Enum.NormalId.Front
+	gui.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
+	gui.CanvasSize = Vector2.new(840, 252)
+	gui.LightInfluence = 0
+	gui.Parent = board
+	local back = Instance.new("Frame")
+	back.Size = UDim2.fromScale(1, 1)
+	back.BackgroundColor3 = rgb(12, 24, 20)
+	back.BorderSizePixel = 0
+	back.Parent = gui
+	local gold = rgb(246, 224, 140)
+	clockLabel(
+		back,
+		"WAKTU GAME",
+		UDim2.fromOffset(20, 14),
+		UDim2.fromOffset(270, 34),
+		gold,
+		Enum.Font.FredokaOne
+	)
+	clockTimeLabel = clockLabel(
+		back,
+		"--:--",
+		UDim2.fromOffset(20, 54),
+		UDim2.fromOffset(270, 120),
+		rgb(120, 255, 190),
+		Enum.Font.RobotoMono
+	)
+	clockLabel(
+		back,
+		"Masjid Al Munawaroh",
+		UDim2.fromOffset(20, 186),
+		UDim2.fromOffset(270, 40),
+		rgb(200, 232, 214),
+		Enum.Font.GothamMedium
+	)
+	for index, prayer in Config.PRAYERS do
+		local cell = Instance.new("Frame")
+		cell.Position = UDim2.fromOffset(310 + (index - 1) * 106, 20)
+		cell.Size = UDim2.fromOffset(98, 212)
+		cell.BackgroundColor3 = rgb(28, 64, 52)
+		cell.BorderSizePixel = 0
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 12)
+		corner.Parent = cell
+		local name = clockLabel(
+			cell,
+			prayer.name,
+			UDim2.fromOffset(4, 22),
+			UDim2.new(1, -8, 0, 62),
+			gold,
+			Enum.Font.FredokaOne
+		)
+		local time = clockLabel(
+			cell,
+			formatTime(prayer.time),
+			UDim2.fromOffset(4, 110),
+			UDim2.new(1, -8, 0, 60),
+			rgb(255, 255, 255),
+			Enum.Font.RobotoMono
+		)
+		cell.Parent = back
+		table.insert(clockCells, { frame = cell, name = name, time = time, prayer = prayer })
+	end
+	board.Parent = folder
+end
+
+local function updateClock()
+	local label = clockTimeLabel
+	if label == nil then
+		return
+	end
+	local clock = TimeService.getClock()
+	local text = formatTime(clock)
+	local current = Workspace:GetAttribute("MasjidSholat")
+	local key = text .. "|" .. tostring(current)
+	if key == lastClockKey then
+		return
+	end
+	lastClockKey = key
+	label.Text = text
+	local target = Config.PRAYERS[1]
+	for _, p in Config.PRAYERS do
+		if p.time > clock then
+			target = p
+			break
+		end
+	end
+	for _, cell in clockCells do
+		local active = cell.prayer == target
+		local now = type(current) == "string" and current == cell.prayer.name
+		cell.frame.BackgroundColor3 = if now
+			then rgb(90, 220, 150)
+			elseif active then rgb(236, 190, 70)
+			else rgb(28, 64, 52)
+		local dark = now or active
+		cell.name.TextColor3 = if dark then rgb(20, 40, 30) else rgb(246, 224, 140)
+		cell.time.TextColor3 = if dark then rgb(20, 40, 30) else rgb(255, 255, 255)
+	end
+end
+
 local function npcTick()
 	local _, distance = nearestPlayerDistance(Config.CENTER)
+	if distance < 250 then
+		updateClock()
+	end
 	if not npcActive and distance < Config.SPAWN_RADIUS then
 		spawnAll()
 	elseif npcActive and distance > Config.DESPAWN_RADIUS then
@@ -1146,7 +1294,7 @@ local function summon()
 			end
 			if spec.role ~= "Marbot" and npcs[spec.id] == nil then
 				local gz = gateZ(spec.spot.Y)
-				local npc = buildNpc(spec, Vector2.new(558, gz), FACE_QIBLA)
+				local npc = buildNpc(spec, Vector2.new(558, gz), -Config.QIBLA * -1 * -1)
 				if npc then
 					npcs[spec.id] = npc
 					local goal = if spec.id == "Muazin" then Config.AZAN_SPOT else spec.spot
@@ -1427,6 +1575,7 @@ function MasjidService.start()
 	folder.Name = "Masjid"
 	folder.Parent = Workspace
 	buildFurniture()
+	buildClock()
 	setPhase("Idle")
 	setText("", "", "")
 
