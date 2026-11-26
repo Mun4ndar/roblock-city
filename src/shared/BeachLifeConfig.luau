@@ -27,6 +27,11 @@ Config.ORDER_FUNC = "CafeOrder" -- RemoteFunction client -> server (itemId) -> {
 Config.ORDER_DISTANCE = 26
 Config.MARKUP = 1.5 -- harga kafe = harga toko x MARKUP
 
+-- Penjual es krim di kios Map.Beach.Pantai.KiosEsKrim (depan kios menghadap -X).
+Config.ICECREAM_POSITION = Vector3.new(1419.2, 0.6, -296.5)
+Config.ICECREAM_FACING = Vector3.new(-1, 0, 0)
+Config.ICECREAM_ITEM = "es_krim"
+
 -- Menu kafe: id barang dari StoreConfig (animasi makan/minum sama dengan toko).
 Config.MENU = table.freeze({
 	"es_teh",
