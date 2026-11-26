@@ -40,9 +40,13 @@ Net.Names = table.freeze({
 	RetentionAction = "RetentionAction", -- RemoteFunction: ("streak"|"mission"|"buy", id) -> { ok, message }
 	FarmSell = "FarmSell", -- RemoteFunction: () -> { ok, message } (jual semua hasil panen)
 <<<<<<< HEAD
+<<<<<<< HEAD
 	HotelLiftMenu = "HotelLiftMenu", -- RemoteEvent: server -> client, (lampuSekarang: number) buka pemilih lantai lift
 	HotelLiftGo = "HotelLiftGo", -- RemoteEvent: client -> server, (lantai: number 1..8; 1 = lobi)
 	HotelWake = "HotelWake", -- RemoteEvent: client -> server, tanpa argumen (bangun dari kasur hotel)
+=======
+	MasjidAction = "MasjidAction", -- RemoteEvent: client -> server, ("leave") berhenti ikut sholat berjamaah
+>>>>>>> claude/nervous-saha-93d1db
 =======
 	MasjidAction = "MasjidAction", -- RemoteEvent: client -> server, ("leave") berhenti ikut sholat berjamaah
 >>>>>>> claude/nervous-saha-93d1db

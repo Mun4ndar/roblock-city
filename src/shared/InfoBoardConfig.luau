@@ -129,6 +129,9 @@ InfoBoardConfig.ENTRIES = {
 	{ dest = "ladang", desc = "Perkebunan besar: tanam, rawat, panen.", cell = 20, featured = true },
 	{ dest = "terminalBandara", desc = "Naik pesawat atau jadi pilot.", cell = 21, featured = true },
 	{ dest = "masjid", desc = "Adzan, sholat berjamaah, dan tausiah tiap waktu sholat.", featured = true },
+<<<<<<< HEAD
+>>>>>>> claude/nervous-saha-93d1db
+=======
 >>>>>>> claude/nervous-saha-93d1db
 } :: { Entry }
 
