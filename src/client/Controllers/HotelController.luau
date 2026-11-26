@@ -248,6 +248,22 @@ local function watchInside()
 	end)
 end
 
+-- Saat tidur, client memaksa badan tetap telentang di kasur (di layar sendiri), sebagai cadangan kalau
+-- replikasi posisi dari server telat atau ditimpa di perangkat tertentu.
+local function holdLying()
+	RunService.PreSimulation:Connect(function()
+		if player:GetAttribute("HotelTidur") ~= true then
+			return
+		end
+		local target = player:GetAttribute("HotelBedCF")
+		local character = player.Character
+		local root = if character then character:FindFirstChild("HumanoidRootPart") else nil
+		if typeof(target) == "CFrame" and root and root:IsA("BasePart") then
+			root.CFrame = target
+		end
+	end)
+end
+
 function HotelController.init() end
 
 function HotelController.start()
@@ -265,6 +281,7 @@ function HotelController.start()
 	repaintAll()
 	updateSleep()
 	watchInside()
+	holdLying()
 end
 
 return HotelController

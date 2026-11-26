@@ -250,10 +250,14 @@ local function wake(player: Player, silent: boolean?)
 	end
 	state.prompt.ActionText = "Tidur"
 	player:SetAttribute("HotelTidur", nil)
+	player:SetAttribute("HotelBedCF", nil)
 	local root, human = rootAndHuman(player)
 	if root and human and player.Character then
 		root.Anchored = false
 		human.PlatformStand = false
+		pcall(function()
+			root:SetNetworkOwner(player)
+		end)
 		local beside = state.bed.CFrame:PointToWorldSpace(Vector3.new(4.2, 1.8, 0))
 		player.Character:PivotTo(CFrame.new(beside))
 		local head = player.Character:FindFirstChild("Head")
@@ -286,11 +290,19 @@ local function sleep(player: Player, bed: BasePart, prompt: ProximityPrompt)
 	end
 	human.Sit = false
 	human.PlatformStand = true
+	pcall(function()
+		root:SetNetworkOwner(nil) -- server memegang fisika supaya posisi baring tidak ditimpa client
+	end)
 	root.Anchored = true
 	-- sumbu Z lokal pelat = arah kepala; putar 90 derajat pada X supaya telentang menghadap atas
-	player.Character:PivotTo(
-		bed.CFrame * CFrame.new(0, LIE_LIFT, 0.4) * CFrame.Angles(math.pi / 2, 0, 0)
-	)
+	local lie = bed.CFrame * CFrame.new(0, LIE_LIFT, 0.4) * CFrame.Angles(math.pi / 2, 0, 0)
+	player.Character:PivotTo(lie)
+	player:SetAttribute("HotelBedCF", lie) -- client memakainya untuk menjaga posisi baring di layar sendiri
+	task.delay(0.3, function()
+		if sleepers[player] ~= nil and player.Character then
+			player.Character:PivotTo(lie)
+		end
+	end)
 	sleepers[player] = { bed = bed, prompt = prompt, human = human }
 	bedUser[bed] = player
 	prompt.ActionText = "Bangun"
@@ -333,6 +345,68 @@ local function registerBed(bed: Instance)
 	end)
 end
 
+-- ------------------------------------------------------------------ mandi
+
+local showering: { [Player]: boolean } = {}
+local SHOWER_SECONDS = 6
+
+local function shower(player: Player, spot: BasePart)
+	if showering[player] or sleepers[player] ~= nil then
+		return
+	end
+	local root, human = rootAndHuman(player)
+	if root == nil or human == nil or human.Health <= 0 or player.Character == nil then
+		return
+	end
+	if (root.Position - spot.Position).Magnitude > 14 then
+		return
+	end
+	showering[player] = true
+	local savedSpeed, savedJump = human.WalkSpeed, human.JumpHeight
+	human.Sit = false
+	human.WalkSpeed = 0
+	human.JumpHeight = 0
+	player.Character:PivotTo(spot.CFrame)
+	local emitters: { ParticleEmitter } = {}
+	local rain = spot.Parent and spot.Parent:FindFirstChild("AirShower", true)
+	if rain then
+		for _, child in rain:GetChildren() do
+			if child:IsA("ParticleEmitter") then
+				child.Enabled = true
+				table.insert(emitters, child)
+			end
+		end
+	end
+	EconomyService.notify(player, "Kamu mandi dengan air hangat. Ahh, segar!")
+	task.wait(SHOWER_SECONDS)
+	for _, emitter in emitters do
+		emitter.Enabled = false
+	end
+	local r2, h2 = rootAndHuman(player)
+	if r2 and h2 then
+		h2.WalkSpeed = savedSpeed
+		h2.JumpHeight = savedJump
+		local exit = spot:GetAttribute("ExitCF")
+		if typeof(exit) == "CFrame" and player.Character then
+			player.Character:PivotTo(exit)
+		end
+	end
+	showering[player] = nil
+end
+
+local function registerShower(spot: Instance)
+	if not spot:IsA("BasePart") then
+		return
+	end
+	local prompt = spot:FindFirstChildOfClass("ProximityPrompt")
+	if prompt == nil then
+		return
+	end
+	prompt.Triggered:Connect(function(player: Player)
+		task.spawn(shower, player, spot)
+	end)
+end
+
 -- ------------------------------------------------------------------ resepsionis
 
 local function registerBell(bell: Instance)
@@ -370,6 +444,10 @@ function HotelService.start()
 		registerBed(bed)
 	end
 	CollectionService:GetInstanceAddedSignal("HotelBed"):Connect(registerBed)
+	for _, spot in CollectionService:GetTagged("HotelShower") do
+		registerShower(spot)
+	end
+	CollectionService:GetInstanceAddedSignal("HotelShower"):Connect(registerShower)
 	local map = Workspace:FindFirstChild("Map")
 	local hotel = if map then map:FindFirstChild("Hotel") else nil
 	local bell = if hotel then hotel:FindFirstChild("LoncengCheckIn", true) else nil
@@ -405,6 +483,7 @@ function HotelService.start()
 	Players.PlayerAdded:Connect(onPlayer)
 	Players.PlayerRemoving:Connect(function(player: Player)
 		wake(player, true)
+		showering[player] = nil
 		lastWelcome[player] = nil
 		savedOcclusion[player] = nil
 	end)
