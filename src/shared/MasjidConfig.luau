@@ -25,18 +25,18 @@ MasjidConfig.AZAN_SPOT = Vector2.new(489, -33)
 
 -- Slot sholat untuk pemain (dua saf di belakang saf NPC laki-laki, di depan saf jamaah belakang).
 MasjidConfig.PLAYER_SLOTS = {
-	Vector2.new(508, -34),
-	Vector2.new(508, -28),
-	Vector2.new(508, -22),
-	Vector2.new(508, -16),
-	Vector2.new(508, -10),
-	Vector2.new(508, -4),
-	Vector2.new(514, -34),
-	Vector2.new(514, -28),
-	Vector2.new(514, -22),
-	Vector2.new(514, -16),
-	Vector2.new(514, -10),
-	Vector2.new(514, -4),
+	Vector2.new(494, -35),
+	Vector2.new(494, -5),
+	Vector2.new(494, 0),
+	Vector2.new(494, 5),
+	Vector2.new(500, -33),
+	Vector2.new(500, -3),
+	Vector2.new(500, 3),
+	Vector2.new(506, -33),
+	Vector2.new(506, -27),
+	Vector2.new(506, -21),
+	Vector2.new(506, -15),
+	Vector2.new(506, -9),
 }
 
 -- Bantal duduk untuk mendengarkan tausiah (menghadap imam di barat).
@@ -112,7 +112,7 @@ end
 
 -- ---------------------------------------------------------------- fase acara
 MasjidConfig.IQAMAH_SECONDS = 9
-MasjidConfig.CLOSING_SECONDS = 7
+MasjidConfig.CLOSING_SECONDS = 15
 MasjidConfig.TAUSIAH_LINE_SECONDS = 7.5
 
 -- ---------------------------------------------------------------- adzan (huruf latin + arti)
@@ -270,7 +270,7 @@ MasjidConfig.TAUSIAH = {
 			},
 			{
 				text = "Sebelum makan, berdoa dulu. Habiskan makanan, karena banyak orang yang sulit mendapatkannya.",
-				replyBy = "PakSiswo",
+				replyBy = "BuSiti",
 				reply = "Betul sekali, Ustadz.",
 			},
 			{
@@ -307,7 +307,7 @@ MasjidConfig.TAUSIAH = {
 			},
 			{
 				text = "Orang yang jujur hatinya ringan, tidurnya nyenyak, dan temannya banyak.",
-				replyBy = "PakAgus",
+				replyBy = "BuAisyah",
 				reply = "MasyaAllah.",
 			},
 			{
@@ -326,7 +326,7 @@ MasjidConfig.TAUSIAH = {
 			{ text = "Assalamu'alaikum. Sore ini kita belajar tentang berbagi dengan sesama." },
 			{
 				text = "Berbagi tidak harus menunggu kaya. Senyuman, bantuan tenaga, dan makanan kecil pun sangat berarti.",
-				replyBy = "Nurul",
+				replyBy = "KakNurul",
 				reply = "Aku sering membagi bekal ke teman!",
 			},
 			{
@@ -359,7 +359,7 @@ MasjidConfig.TAUSIAH = {
 			{ text = "Assalamu'alaikum. Menjelang malam ini kita bicara tentang orang tua kita." },
 			{
 				text = "Ayah dan ibu merawat kita sejak kecil. Mereka begadang saat kita sakit dan bekerja keras untuk kita.",
-				replyBy = "PakSiswo",
+				replyBy = "BuSiti",
 				reply = "Betul, Ustadz. Orang tua itu sayang sekali.",
 			},
 			{
@@ -392,7 +392,7 @@ MasjidConfig.TAUSIAH = {
 			{ text = "Assalamu'alaikum. Malam ini kita belajar tentang persahabatan." },
 			{
 				text = "Teman yang baik mengingatkan kita pada kebaikan dan menemani saat susah maupun senang.",
-				replyBy = "Nurul",
+				replyBy = "KakNurul",
 				reply = "Aku punya teman baik di sekolah!",
 			},
 			{
@@ -422,6 +422,34 @@ MasjidConfig.TAUSIAH = {
 		},
 	},
 } :: { [string]: Tausiah }
+
+-- Semua topik: 5 tausiah awal (per waktu sholat) + topik tambahan dari MasjidTausiah.
+local poolCache: { Tausiah }? = nil
+
+function MasjidConfig.tausiahPool(): { Tausiah }
+	if poolCache then
+		return poolCache
+	end
+	local pool: { Tausiah } = {}
+	for _, id in { "subuh", "dzuhur", "ashar", "maghrib", "isya" } do
+		table.insert(pool, MasjidConfig.TAUSIAH[id])
+	end
+	local ok, extra = pcall(function()
+		return require(script.Parent:WaitForChild("MasjidTausiah")) :: any
+	end)
+	if ok then
+		for _, topic in extra.TOPICS do
+			table.insert(pool, topic :: any)
+		end
+	end
+	poolCache = pool
+	return pool
+end
+
+-- Lama tiap baris agar satu tausiah sekitar 1 menit.
+function MasjidConfig.tausiahLineSeconds(t: Tausiah): number
+	return math.clamp(60 / math.max(#t.lines, 1), 6, 10)
+end
 
 -- Kata-kata penutup imam.
 MasjidConfig.CLOSING_SAY = "Barakallahu fiikum. Hati-hati di jalan, ya! 😊"

@@ -2,7 +2,7 @@
 --[[
 	MasjidService: Masjid Al Munawaroh yang hidup.
 	  * NPC: Ustadz Hamid (imam), Pak Rizky (muazin), Pak Jaka (marbot, menyapu dan menyapa pemain),
-	    dan 10 jamaah berpeci dan bersarung. Dibuat saat ada pemain dalam SPAWN_RADIUS, dihapus saat jauh.
+	    dan 10 jamaah berpeci / bersarung / bermukena. Dibuat saat ada pemain dalam SPAWN_RADIUS, dihapus saat jauh.
 	  * Acara per waktu sholat (jadwal MasjidConfig.PRAYERS mengikuti jam dunia): adzan (teks) -> iqamah ->
 	    sholat berjamaah -> tausiah ~1 menit (isi beda tiap waktu sholat, ada balasan jamaah) -> selesai.
 	  * Pemain boleh ikut sholat (E di sajadah saat adzan/iqamah) dan duduk mendengarkan tausiah (E di bantal).
@@ -166,37 +166,43 @@ local ROSTER: { Spec } = {
 		cap = "peci",
 	},
 	{
-		id = "PakSiswo",
-		name = "Pak Siswo",
+		id = "BuSiti",
+		name = "Bu Siti",
 		role = "Jamaah",
 		label = "Jamaah",
 		spot = Vector2.new(522, -26),
 		skin = SKIN_D,
-		shirt = WHITE,
-		legs = rgb(70, 90, 120),
-		cap = "peci",
+		shirt = MUKENA,
+		legs = MUKENA,
+		cap = "hijab",
+		capColor = MUKENA,
+		female = true,
 	},
 	{
-		id = "PakAgus",
-		name = "Pak Agus",
+		id = "BuAisyah",
+		name = "Bu Aisyah",
 		role = "Jamaah",
 		label = "Jamaah",
 		spot = Vector2.new(522, -20),
 		skin = SKIN_B,
-		shirt = SKY,
-		legs = rgb(130, 45, 55),
-		cap = "peci",
+		shirt = rgb(238, 226, 246),
+		legs = rgb(238, 226, 246),
+		cap = "hijab",
+		capColor = rgb(238, 226, 246),
+		female = true,
 	},
 	{
-		id = "Nurul",
-		name = "Nurul",
+		id = "KakNurul",
+		name = "Kak Nurul",
 		role = "Jamaah",
 		label = "Jamaah",
 		spot = Vector2.new(522, -14),
 		skin = SKIN_A,
-		shirt = CREAM,
-		legs = rgb(40, 110, 80),
-		cap = "peci",
+		shirt = rgb(250, 228, 236),
+		legs = rgb(250, 228, 236),
+		cap = "hijab",
+		capColor = rgb(250, 228, 236),
+		female = true,
 		scale = 0.86,
 	},
 	{
@@ -379,13 +385,14 @@ local function addOutfit(model: Model, spec: Spec, s: number)
 			nil,
 			Enum.Material.Wood
 		)
+		local handle = model:FindFirstChild("GagangSapu") :: BasePart
 		decorate(
 			model,
-			hand,
+			handle,
 			"BuluSapu",
 			v(1.3, 0.5, 0.55),
 			rgb(226, 190, 90),
-			at(0, -2.55, -1.3) * CFrame.Angles(math.rad(-24), 0, 0),
+			CFrame.new(0, -2.05 * s, 0) * CFrame.Angles(math.rad(24), 0, 0),
 			nil,
 			Enum.Material.Fabric
 		)
@@ -401,9 +408,9 @@ local function buildLabels(
 	local tag = Instance.new("BillboardGui")
 	tag.Name = "NamaNpc"
 	tag.Adornee = head
-	tag.Size = UDim2.fromOffset(170, 38)
+	tag.Size = UDim2.fromOffset(110, 14)
 	tag.StudsOffset = Vector3.new(0, 1.7 * s + 0.4, 0)
-	tag.MaxDistance = 26
+	tag.MaxDistance = 9
 	local text = Instance.new("TextLabel")
 	text.Size = UDim2.fromScale(1, 1)
 	text.BackgroundTransparency = 1
@@ -418,7 +425,7 @@ local function buildLabels(
 	local gui = Instance.new("BillboardGui")
 	gui.Name = "SapaanNpc"
 	gui.Adornee = head
-	gui.Size = UDim2.fromOffset(250, 56)
+	gui.Size = UDim2.fromOffset(210, 46)
 	gui.StudsOffset = Vector3.new(0, 2.9 * s + 0.6, 0)
 	gui.MaxDistance = 34
 	gui.Enabled = false
@@ -480,7 +487,7 @@ local function spotCFrame(npc: Npc, spot: Vector2, dir: Vector3): CFrame
 	return faceCFrame(Vector3.new(spot.X, standY(npc), spot.Y), dir)
 end
 
-local function buildNpc(spec: Spec): Npc?
+local function buildNpc(spec: Spec, startSpot: Vector2?, startDir: Vector3?): Npc?
 	local s = spec.scale or 1
 	local description = Instance.new("HumanoidDescription")
 	description.HeadColor = spec.skin
@@ -565,7 +572,7 @@ local function buildNpc(spec: Spec): Npc?
 		lastGreet = 0,
 		slotCFrame = nil,
 	}
-	local cf = spotCFrame(npc, spec.spot, FACE_QIBLA)
+	local cf = spotCFrame(npc, startSpot or spec.spot, startDir or FACE_QIBLA)
 	model:PivotTo(cf)
 	if spec.role == "Marbot" then
 		humanoid.WalkSpeed = 6
@@ -586,9 +593,9 @@ local function buildNpc(spec: Spec): Npc?
 	model.Parent = folder
 	local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator")
 	animator.Parent = humanoid
+	npc.animator = animator
+	npc.walk = loadTrack(animator, ANIM_WALK, Enum.AnimationPriority.Movement, true)
 	if spec.role == "Marbot" then
-		npc.animator = animator
-		npc.walk = loadTrack(animator, ANIM_WALK, Enum.AnimationPriority.Movement, true)
 		npc.idle = loadTrack(animator, ANIM_IDLE, Enum.AnimationPriority.Idle, true)
 		npc.wave = loadTrack(animator, ANIM_WAVE, Enum.AnimationPriority.Action2, false)
 	end
@@ -651,7 +658,6 @@ local function placeNpc(id: string, spot: Vector2, dir: Vector3)
 	end
 end
 
--- tunggu `seconds` tetapi berhenti lebih awal bila acara dibatalkan (tidak ada pembatalan saat ini).
 local function pause(seconds: number)
 	task.wait(seconds)
 end
@@ -695,7 +701,7 @@ local function releasePlayer(player: Player)
 	end
 end
 
-local function joinPrayer(player: Player, index: number)
+local function joinPrayer(player: Player, index: number, anyDistance: boolean?)
 	if phase ~= "Azan" and phase ~= "Iqamah" then
 		return
 	end
@@ -715,7 +721,7 @@ local function joinPrayer(player: Player, index: number)
 	then
 		return
 	end
-	if (root.Position - slot.part.Position).Magnitude > 16 then
+	if not anyDistance and (root.Position - slot.part.Position).Magnitude > 16 then
 		return
 	end
 	if humanoid.SeatPart then
@@ -745,7 +751,7 @@ local function joinPrayer(player: Player, index: number)
 	CollectionService:AddTag(character, TAG_POSE)
 end
 
-local function sitPlayer(player: Player, seat: Seat)
+local function sitPlayer(player: Player, seat: Seat, anyDistance: boolean?)
 	if phase ~= "Tausiah" and phase ~= "Selesai" then
 		return
 	end
@@ -755,7 +761,9 @@ local function sitPlayer(player: Player, seat: Seat)
 	if humanoid == nil or root == nil or not root:IsA("BasePart") or humanoid.Health <= 0 then
 		return
 	end
-	if seat.Occupant ~= nil or (root.Position - seat.Position).Magnitude > 16 then
+	if
+		seat.Occupant ~= nil or (not anyDistance and (root.Position - seat.Position).Magnitude > 16)
+	then
 		return
 	end
 	releasePlayer(player)
@@ -772,12 +780,58 @@ local PAD_COLORS = {
 }
 
 local function buildFurniture()
+	-- penanda area duduk tausiah
+	local anchor = Instance.new("Part")
+	anchor.Name = "PenandaTausiah"
+	anchor.Anchored = true
+	anchor.CanCollide = false
+	anchor.CanQuery = false
+	anchor.Transparency = 1
+	anchor.Size = Vector3.one
+	anchor.Position = Vector3.new(533, FLOOR_Y + 4.5, -21.5)
+	local sign = Instance.new("BillboardGui")
+	sign.Size = UDim2.fromOffset(110, 16)
+	sign.MaxDistance = 14
+	sign.AlwaysOnTop = false
+	local signText = Instance.new("TextLabel")
+	signText.Size = UDim2.fromScale(1, 1)
+	signText.BackgroundColor3 = Color3.fromRGB(20, 70, 56)
+	signText.BackgroundTransparency = 0.15
+	signText.Font = Enum.Font.FredokaOne
+	signText.TextScaled = true
+	signText.TextColor3 = Color3.fromRGB(246, 224, 140)
+	signText.Text = "Area duduk tausiah"
+	local signCorner = Instance.new("UICorner")
+	signCorner.CornerRadius = UDim.new(0, 8)
+	signCorner.Parent = signText
+	signText.Parent = sign
+	sign.Parent = anchor
+	anchor.Parent = folder
+	-- sajadah di bawah tiap NPC (imam, muazin, jamaah, marbot)
+	local function npcMat(x: number, z: number, index: number)
+		local mat = Instance.new("Part")
+		mat.Name = "SajadahNpc"
+		mat.Anchored = true
+		mat.CanCollide = false
+		mat.CanQuery = false
+		mat.Size = Vector3.new(4.2, 0.12, 2.2)
+		mat.Material = Enum.Material.Fabric
+		mat.Color = PAD_COLORS[(index - 1) % #PAD_COLORS + 1]
+		mat.CFrame = CFrame.new(x, FLOOR_Y + 0.07, z)
+		mat.Parent = folder
+	end
+	for index, spec in ROSTER do
+		if spec.role ~= "Marbot" then
+			npcMat(spec.spot.X, spec.spot.Y, index)
+		end
+	end
+	npcMat(Config.MARBOT_SLOT.X, Config.MARBOT_SLOT.Y, 3)
 	for index, spot in Config.PLAYER_SLOTS do
 		local part = Instance.new("Part")
 		part.Name = "Sajadah" .. index
 		part.Anchored = true
 		part.CanCollide = false
-		part.Size = Vector3.new(4.6, 0.12, 2.5)
+		part.Size = Vector3.new(4.2, 0.12, 2.2)
 		part.Material = Enum.Material.Fabric
 		part.Color = PAD_COLORS[(index - 1) % #PAD_COLORS + 1]
 		part.CFrame = CFrame.new(spot.X, FLOOR_Y + 0.07, spot.Y)
@@ -786,10 +840,10 @@ local function buildFurniture()
 		edge.Anchored = true
 		edge.CanCollide = false
 		edge.CanQuery = false
-		edge.Size = Vector3.new(0.35, 0.14, 2.5)
+		edge.Size = Vector3.new(0.35, 0.14, 2.2)
 		edge.Material = Enum.Material.Fabric
 		edge.Color = rgb(236, 208, 120)
-		edge.CFrame = part.CFrame * CFrame.new(-2.05, 0, 0)
+		edge.CFrame = part.CFrame * CFrame.new(-1.85, 0, 0)
 		edge.Parent = part
 		local weld = Instance.new("WeldConstraint")
 		weld.Part0 = part
@@ -816,12 +870,21 @@ local function buildFurniture()
 		local seat = Instance.new("Seat")
 		seat.Name = "BantalTausiah" .. index
 		seat.Anchored = true
-		seat.Shape = Enum.PartType.Cylinder
-		seat.Size = Vector3.new(0.6, 3.2, 3.2)
-		seat.Material = Enum.Material.Fabric
-		seat.Color = rgb(34, 120, 90)
+		seat.Size = Vector3.new(2.8, 0.6, 2.8)
+		seat.Transparency = 1
 		seat.Disabled = true
-		seat.CFrame = faceCFrame(Vector3.new(spot.X, FLOOR_Y + 0.3, spot.Y), FACE_QIBLA) * VERTICAL
+		seat.CFrame = faceCFrame(Vector3.new(spot.X, FLOOR_Y + 0.3, spot.Y), FACE_QIBLA)
+		local cushion = Instance.new("Part")
+		cushion.Name = "BantalBulat"
+		cushion.Anchored = true
+		cushion.CanCollide = false
+		cushion.CanQuery = false
+		cushion.Shape = Enum.PartType.Cylinder
+		cushion.Size = Vector3.new(0.6, 3.2, 3.2)
+		cushion.Material = Enum.Material.Fabric
+		cushion.Color = rgb(34, 120, 90)
+		cushion.CFrame = seat.CFrame * VERTICAL
+		cushion.Parent = seat
 		local ring = Instance.new("Part")
 		ring.Name = "BantalTepi"
 		ring.Anchored = true
@@ -831,7 +894,7 @@ local function buildFurniture()
 		ring.Size = Vector3.new(0.12, 3.5, 3.5)
 		ring.Material = Enum.Material.Fabric
 		ring.Color = rgb(236, 208, 120)
-		ring.CFrame = seat.CFrame * CFrame.new(-0.28, 0, 0)
+		ring.CFrame = cushion.CFrame * CFrame.new(-0.28, 0, 0)
 		ring.Parent = seat
 		local weld = Instance.new("WeldConstraint")
 		weld.Part0 = seat
@@ -856,6 +919,15 @@ local function buildFurniture()
 end
 
 -- ---------------------------------------------------------------- marbot
+local function setBroom(npc: Npc, visible: boolean)
+	for _, name in { "GagangSapu", "BuluSapu" } do
+		local part = npc.model:FindFirstChild(name)
+		if part and part:IsA("BasePart") then
+			part.Transparency = if visible then 0 else 1
+		end
+	end
+end
+
 local function stopMarbotTracks(npc: Npc)
 	if npc.walk then
 		npc.walk:Stop(0.1)
@@ -916,8 +988,8 @@ local function marbotLoop(mine: number)
 		-- menyapu di tempat
 		stopMarbotTracks(npc)
 		npc.model:SetAttribute("Menyapu", true)
-		local until_ = os.clock() + math.random(6, 10)
-		while generation == mine and not marbotBusy and os.clock() < until_ do
+		local sweepUntil = os.clock() + math.random(6, 10)
+		while generation == mine and not marbotBusy and os.clock() < sweepUntil do
 			task.wait(0.4)
 		end
 		npc.model:SetAttribute("Menyapu", false)
@@ -988,7 +1060,7 @@ local function spawnAll()
 			if generation ~= mine then
 				return
 			end
-			local npc = buildNpc(spec)
+			local npc = if spec.role == "Marbot" or running then buildNpc(spec) else nil
 			if npc then
 				if generation ~= mine then
 					npc.model:Destroy()
@@ -1003,14 +1075,167 @@ local function spawnAll()
 		if marbot then
 			if phase == "Azan" or phase == "Iqamah" or phase == "Sholat" or phase == "Tausiah" then
 				marbotBusy = true
+				marbot.root.Anchored = true
+				marbot.model:PivotTo(spotCFrame(marbot, Config.MARBOT_SLOT, FACE_QIBLA))
+				marbot.model:SetAttribute("Ikut", true)
+				setBroom(marbot, false)
 			end
 			task.spawn(marbotLoop, mine)
 		end
 	end)
 end
 
+-- ---------------------------------------------------------------- jam digital di dinding
+local clockTimeLabel: TextLabel? = nil
+local clockCells: { { frame: Frame, name: TextLabel, time: TextLabel, prayer: Config.Prayer } } = {}
+local lastClockKey = ""
+
+local function formatTime(hour: number): string
+	local hours = math.floor(hour) % 24
+	local minutes = math.floor((hour - math.floor(hour)) * 60)
+	return string.format("%02d:%02d", hours, minutes)
+end
+
+local function clockLabel(
+	parent: Instance,
+	text: string,
+	position: UDim2,
+	size: UDim2,
+	color: Color3,
+	font: Enum.Font
+): TextLabel
+	local label = Instance.new("TextLabel")
+	label.BackgroundTransparency = 1
+	label.Position = position
+	label.Size = size
+	label.Font = font
+	label.TextScaled = true
+	label.TextColor3 = color
+	label.Text = text
+	label.Parent = parent
+	return label
+end
+
+-- Papan jam di dinding mihrab (sisi barat), menghadap ke dalam ruang sholat. Opak, jadi tidak tembus dari luar.
+local function buildClock()
+	local hit = Workspace:Raycast(Vector3.new(500, 12, -38), Vector3.new(-40, 0, 0))
+	local x = if hit then hit.Position.X + 0.25 else 484
+	local board = Instance.new("Part")
+	board.Name = "JamDigital"
+	board.Anchored = true
+	board.CanCollide = false
+	board.CanQuery = false
+	board.Material = Enum.Material.SmoothPlastic
+	board.Color = rgb(12, 24, 20)
+	board.Size = Vector3.new(14, 4.2, 0.4)
+	local pos = Vector3.new(x, FLOOR_Y + 6.4, -38)
+	board.CFrame = CFrame.lookAt(pos, pos + Vector3.new(1, 0, 0))
+	local gui = Instance.new("SurfaceGui")
+	gui.Face = Enum.NormalId.Front
+	gui.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
+	gui.CanvasSize = Vector2.new(840, 252)
+	gui.LightInfluence = 0
+	gui.Parent = board
+	local back = Instance.new("Frame")
+	back.Size = UDim2.fromScale(1, 1)
+	back.BackgroundColor3 = rgb(12, 24, 20)
+	back.BorderSizePixel = 0
+	back.Parent = gui
+	local gold = rgb(246, 224, 140)
+	clockLabel(
+		back,
+		"WAKTU GAME",
+		UDim2.fromOffset(20, 14),
+		UDim2.fromOffset(270, 34),
+		gold,
+		Enum.Font.FredokaOne
+	)
+	clockTimeLabel = clockLabel(
+		back,
+		"--:--",
+		UDim2.fromOffset(20, 54),
+		UDim2.fromOffset(270, 120),
+		rgb(120, 255, 190),
+		Enum.Font.RobotoMono
+	)
+	clockLabel(
+		back,
+		"Masjid Al Munawaroh",
+		UDim2.fromOffset(20, 186),
+		UDim2.fromOffset(270, 40),
+		rgb(200, 232, 214),
+		Enum.Font.GothamMedium
+	)
+	for index, prayer in Config.PRAYERS do
+		local cell = Instance.new("Frame")
+		cell.Position = UDim2.fromOffset(310 + (index - 1) * 106, 20)
+		cell.Size = UDim2.fromOffset(98, 212)
+		cell.BackgroundColor3 = rgb(28, 64, 52)
+		cell.BorderSizePixel = 0
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 12)
+		corner.Parent = cell
+		local name = clockLabel(
+			cell,
+			prayer.name,
+			UDim2.fromOffset(4, 22),
+			UDim2.new(1, -8, 0, 62),
+			gold,
+			Enum.Font.FredokaOne
+		)
+		local time = clockLabel(
+			cell,
+			formatTime(prayer.time),
+			UDim2.fromOffset(4, 110),
+			UDim2.new(1, -8, 0, 60),
+			rgb(255, 255, 255),
+			Enum.Font.RobotoMono
+		)
+		cell.Parent = back
+		table.insert(clockCells, { frame = cell, name = name, time = time, prayer = prayer })
+	end
+	board.Parent = folder
+end
+
+local function updateClock()
+	local label = clockTimeLabel
+	if label == nil then
+		return
+	end
+	local clock = TimeService.getClock()
+	local text = formatTime(clock)
+	local current = Workspace:GetAttribute("MasjidSholat")
+	local key = text .. "|" .. tostring(current)
+	if key == lastClockKey then
+		return
+	end
+	lastClockKey = key
+	label.Text = text
+	local target = Config.PRAYERS[1]
+	for _, p in Config.PRAYERS do
+		if p.time > clock then
+			target = p
+			break
+		end
+	end
+	for _, cell in clockCells do
+		local active = cell.prayer == target
+		local now = type(current) == "string" and current == cell.prayer.name
+		cell.frame.BackgroundColor3 = if now
+			then rgb(90, 220, 150)
+			elseif active then rgb(236, 190, 70)
+			else rgb(28, 64, 52)
+		local dark = now or active
+		cell.name.TextColor3 = if dark then rgb(20, 40, 30) else rgb(246, 224, 140)
+		cell.time.TextColor3 = if dark then rgb(20, 40, 30) else rgb(255, 255, 255)
+	end
+end
+
 local function npcTick()
 	local _, distance = nearestPlayerDistance(Config.CENTER)
+	if distance < 250 then
+		updateClock()
+	end
 	if not npcActive and distance < Config.SPAWN_RADIUS then
 		spawnAll()
 	elseif npcActive and distance > Config.DESPAWN_RADIUS then
@@ -1020,6 +1245,98 @@ local function npcTick()
 	local marbot = npcs.Marbot
 	if marbot then
 		marbotGreet(marbot, os.clock())
+	end
+end
+
+-- ---------------------------------------------------------------- jamaah datang dan pergi
+local GATES = { -49, -39, -30, -20, -10, -1, 9 } -- tengah lengkung di sisi timur masjid
+
+local function gateZ(z: number): number
+	local best = GATES[1]
+	for _, g in GATES do
+		if math.abs(g - z) < math.abs(best - z) then
+			best = g
+		end
+	end
+	return best
+end
+
+local function walkPath(npc: Npc, points: { Vector3 }, finalDir: Vector3?, speed: number)
+	local model = npc.model
+	model:SetAttribute("Jalan", true)
+	if npc.walk then
+		npc.walk:Play(0.2)
+	end
+	local pos = Vector3.new(npc.root.Position.X, standY(npc), npc.root.Position.Z)
+	for _, point in points do
+		local target = Vector3.new(point.X, standY(npc), point.Z)
+		while model.Parent do
+			local delta = target - pos
+			local dist = delta.Magnitude
+			if dist < 0.2 then
+				break
+			end
+			pos += delta.Unit * math.min(dist, speed * 0.1)
+			model:PivotTo(CFrame.lookAt(pos, pos + Vector3.new(delta.X, 0, delta.Z)))
+			task.wait(0.1)
+		end
+	end
+	if not model.Parent then
+		return
+	end
+	if npc.walk then
+		npc.walk:Stop(0.2)
+	end
+	if finalDir then
+		model:PivotTo(CFrame.lookAt(pos, pos + finalDir))
+	end
+	model:SetAttribute("Jalan", false)
+end
+
+-- Imam, muazin, dan jamaah masuk lewat lengkung timur saat adzan mulai.
+local function summon()
+	local mine = generation
+	task.spawn(function()
+		for _, spec in ROSTER do
+			if generation ~= mine then
+				return
+			end
+			if spec.role ~= "Marbot" and npcs[spec.id] == nil then
+				local gz = gateZ(spec.spot.Y)
+				local npc = buildNpc(spec, Vector2.new(558, gz), -Config.QIBLA * -1 * -1)
+				if npc then
+					npcs[spec.id] = npc
+					local goal = if spec.id == "Muazin" then Config.AZAN_SPOT else spec.spot
+					local delay = if spec.role == "Jamaah" then math.random(0, 120) / 10 else 0
+					task.delay(delay, function()
+						walkPath(
+							npc,
+							{ Vector3.new(541, 0, gz), Vector3.new(goal.X, 0, goal.Y) },
+							FACE_QIBLA,
+							8
+						)
+					end)
+				end
+				task.wait(0.05)
+			end
+		end
+	end)
+end
+
+-- Setelah tausiah mereka keluar lewat lengkung timur lalu menghilang.
+local function dismiss()
+	for id, npc in npcs do
+		if npc.spec.role ~= "Marbot" then
+			task.spawn(function()
+				task.wait(math.random(0, 40) / 10)
+				local gz = gateZ(npc.root.Position.Z)
+				walkPath(npc, { Vector3.new(541, 0, gz), Vector3.new(558, 0, gz) }, nil, 8)
+				if npcs[id] == npc then
+					npcs[id] = nil
+				end
+				npc.model:Destroy()
+			end)
+		end
 	end
 end
 
@@ -1038,6 +1355,7 @@ local function marbotJoinPrayer()
 	npc.root.Anchored = true
 	npc.model:PivotTo(spotCFrame(npc, Config.MARBOT_SLOT, FACE_QIBLA))
 	npc.model:SetAttribute("Ikut", true)
+	setBroom(npc, false)
 end
 
 local function marbotLeavePrayer()
@@ -1047,6 +1365,7 @@ local function marbotLeavePrayer()
 		return
 	end
 	npc.model:SetAttribute("Ikut", false)
+	setBroom(npc, true)
 	npc.root.Anchored = false
 	npc.model:PivotTo(spotCFrame(npc, Config.SWEEP_SPOTS[1], FACE_QIBLA))
 	marbotBusy = false
@@ -1065,17 +1384,41 @@ local function announce(prayer: Config.Prayer)
 	end
 end
 
+local tausiahBag: { number } = {}
+local lastTausiah = 0
+
+-- Ambil tausiah berikutnya dari kantong acak: semua topik keluar sekali dulu sebelum ada yang berulang.
+local function nextTausiah(): Config.Tausiah
+	local pool = Config.tausiahPool()
+	if #tausiahBag == 0 then
+		for index = 1, #pool do
+			table.insert(tausiahBag, index)
+		end
+		for index = #tausiahBag, 2, -1 do
+			local other = math.random(1, index)
+			tausiahBag[index], tausiahBag[other] = tausiahBag[other], tausiahBag[index]
+		end
+		if #tausiahBag > 1 and tausiahBag[#tausiahBag] == lastTausiah then
+			tausiahBag[#tausiahBag], tausiahBag[1] = tausiahBag[1], tausiahBag[#tausiahBag]
+		end
+	end
+	lastTausiah = table.remove(tausiahBag) :: number
+	return pool[lastTausiah]
+end
+
 local function runEvent(prayer: Config.Prayer)
 	running = true
 	setAttr("Sholat", prayer.name)
 	setAttr("Rakaat", prayer.rakaat)
 	setAttr("Langkah", "")
 	announce(prayer)
+	if npcActive then
+		summon()
+	end
 
 	-- ADZAN
 	setPhase("Azan")
 	marbotJoinPrayer() -- marbot berhenti menyapu begitu adzan berkumandang dan ikut sholat
-	placeNpc("Muazin", Config.AZAN_SPOT, FACE_QIBLA)
 	for _, line in Config.azanLines(prayer) do
 		setText("Adzan " .. prayer.name, line.text, line.meaning)
 		npcSay("Muazin", line.text, line.seconds - 0.3)
@@ -1106,14 +1449,11 @@ local function runEvent(prayer: Config.Prayer)
 		end
 		pause(step.seconds)
 	end
-	for _, player in Players:GetPlayers() do
-		releasePlayer(player)
-	end
-
 	-- TAUSIAH
 	setPhase("Tausiah")
 	placeNpc("Imam", Config.IMAM_SPOT, FACE_JAMAAH)
-	local tausiah = Config.TAUSIAH[prayer.id]
+	local tausiah = nextTausiah()
+	local lineSeconds = Config.tausiahLineSeconds(tausiah)
 	if tausiah then
 		for _, line in tausiah.lines do
 			setText("Tausiah: " .. tausiah.title, line.text, "Ustadz Hamid")
@@ -1132,7 +1472,7 @@ local function runEvent(prayer: Config.Prayer)
 					end
 				end)
 			end
-			pause(Config.TAUSIAH_LINE_SECONDS)
+			pause(lineSeconds)
 		end
 	end
 
@@ -1140,8 +1480,11 @@ local function runEvent(prayer: Config.Prayer)
 	setPhase("Selesai")
 	setText("Selesai", Config.CLOSING_SAY, "Terima kasih sudah datang ke Masjid Al Munawaroh.")
 	npcSay("Imam", Config.CLOSING_SAY, Config.CLOSING_SECONDS - 0.5)
-	placeNpc("Imam", Config.IMAM_SPOT, FACE_QIBLA)
+	dismiss()
 	pause(Config.CLOSING_SECONDS)
+	for _, player in Players:GetPlayers() do
+		releasePlayer(player)
+	end
 	marbotLeavePrayer()
 	setPhase("Idle")
 	setText("", "", "")
@@ -1206,6 +1549,30 @@ function MasjidService.start()
 	leave.OnServerEvent:Connect(function(player: Player, action: any)
 		if action == "leave" then
 			releasePlayer(player)
+		elseif action == "join" or action == "sit" then
+			local character = player.Character
+			local root = if character then character:FindFirstChild("HumanoidRootPart") else nil
+			if root and root:IsA("BasePart") and (root.Position - Config.CENTER).Magnitude < 60 then
+				local best: number? = nil
+				local bestDistance = math.huge
+				local list: { any } = if action == "join" then slots else seats
+				for index, entry in list do
+					local free = if action == "join"
+						then entry.owner == nil
+						else entry.part.Occupant == nil
+					local distance = (entry.part.Position - root.Position).Magnitude
+					if free and distance < bestDistance then
+						best, bestDistance = index, distance
+					end
+				end
+				if best then
+					if action == "join" then
+						joinPrayer(player, best, true)
+					else
+						sitPlayer(player, seats[best].part, true)
+					end
+				end
+			end
 		end
 	end)
 	Players.PlayerRemoving:Connect(function(player: Player)
@@ -1216,6 +1583,7 @@ function MasjidService.start()
 	folder.Name = "Masjid"
 	folder.Parent = Workspace
 	buildFurniture()
+	buildClock()
 	setPhase("Idle")
 	setText("", "", "")
 

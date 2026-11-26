@@ -1,5 +1,5 @@
 --!strict
--- LocStrings.Masjid: Masjid Al Munawaroh yang hidup (MasjidService, MasjidController, MasjidConfig).
+-- LocStrings.Masjid: Masjid Al Munawaroh yang hidup.
 
 local exact: { [string]: string } = {
 	["Assalamu'alaikum, Bapak, Ibu, dan adik-adik sekalian. Pagi ini kita belajar tentang bersyukur."] = "Assalamu'alaikum, ladies, gentlemen, and children. This morning we learn about being grateful.",
@@ -100,6 +100,10 @@ local exact: { [string]: string } = {
 	["Alhamdulillah, masjidnya bersih dan nyaman. 🧹"] = "Alhamdulillah, the mosque is clean and cozy. 🧹",
 	["Pak Rizky · Muazin"] = "Pak Rizky · Muezzin",
 	["Pak Jaka · Marbot"] = "Pak Jaka · Mosque Caretaker",
+	["Adzan, sholat berjamaah, dan tausiah tiap waktu sholat."] = "Adhan, congregational prayer, and a sermon at every prayer time.",
+	["Area duduk tausiah"] = "Sermon seating area",
+	["WAKTU GAME"] = "GAME TIME",
+	["Masjid Al Munawaroh"] = "Al Munawaroh Mosque",
 }
 
 local patterns: { { string } } = {

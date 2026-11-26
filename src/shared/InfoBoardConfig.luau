@@ -118,21 +118,17 @@ InfoBoardConfig.ENTRIES = {
 	},
 	{ dest = "terminalFeri", desc = "Naik feri dan lihat pelabuhan.", cell = 18 },
 	{ dest = "pasarTani", desc = "Jual hasil panen dan beli bibit.", cell = 19 },
-<<<<<<< HEAD
 	{
 		dest = "ladang",
 		desc = "Perkebunan besar: tanam, rawat, panen.",
 		cell = 20,
 		featured = true,
 	},
-=======
-	{ dest = "ladang", desc = "Perkebunan besar: tanam, rawat, panen.", cell = 20, featured = true },
-	{ dest = "terminalBandara", desc = "Naik pesawat atau jadi pilot.", cell = 21, featured = true },
-	{ dest = "masjid", desc = "Adzan, sholat berjamaah, dan tausiah tiap waktu sholat.", featured = true },
-<<<<<<< HEAD
->>>>>>> claude/nervous-saha-93d1db
-=======
->>>>>>> claude/nervous-saha-93d1db
+	{
+		dest = "masjid",
+		desc = "Adzan, sholat berjamaah, dan tausiah tiap waktu sholat.",
+		featured = true,
+	},
 } :: { Entry }
 
 return InfoBoardConfig
