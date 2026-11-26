@@ -42,9 +42,6 @@ Net.Names = table.freeze({
 	HotelLiftMenu = "HotelLiftMenu", -- RemoteEvent: server -> client, (lampuSekarang: number) buka pemilih lantai lift
 	HotelLiftGo = "HotelLiftGo", -- RemoteEvent: client -> server, (lantai: number 1..8; 1 = lobi)
 	HotelWake = "HotelWake", -- RemoteEvent: client -> server, tanpa argumen (bangun dari kasur hotel)
-	HotelLiftMenu = "HotelLiftMenu", -- RemoteEvent: server -> client, (lampuSekarang: number) buka pemilih lantai lift
-	HotelLiftGo = "HotelLiftGo", -- RemoteEvent: client -> server, (lantai: number 1..8; 1 = lobi)
-	HotelWake = "HotelWake", -- RemoteEvent: client -> server, tanpa argumen (bangun dari kasur hotel)
 	MasjidAction = "MasjidAction", -- RemoteEvent: client -> server, ("leave") berhenti ikut sholat berjamaah
 	SetLanguage = "SetLanguage", -- RemoteEvent: client -> server, ("id"|"en") simpan pilihan bahasa pemain
 })
