@@ -128,7 +128,8 @@ function StoreController.start()
 					if
 						root
 						and inst:IsA("BasePart")
-						and (inst.Position - root.Position).Magnitude < StoreConfig.BUY_DISTANCE + 6
+						and (inst.Position - root.Position).Magnitude
+							< StoreConfig.BUY_DISTANCE + 6
 					then
 						near = true
 						break

@@ -423,6 +423,34 @@ MasjidConfig.TAUSIAH = {
 	},
 } :: { [string]: Tausiah }
 
+-- Semua topik: 5 tausiah awal (per waktu sholat) + topik tambahan dari MasjidTausiah.
+local poolCache: { Tausiah }? = nil
+
+function MasjidConfig.tausiahPool(): { Tausiah }
+	if poolCache then
+		return poolCache
+	end
+	local pool: { Tausiah } = {}
+	for _, id in { "subuh", "dzuhur", "ashar", "maghrib", "isya" } do
+		table.insert(pool, MasjidConfig.TAUSIAH[id])
+	end
+	local ok, extra = pcall(function()
+		return require(script.Parent:WaitForChild("MasjidTausiah")) :: any
+	end)
+	if ok then
+		for _, topic in extra.TOPICS do
+			table.insert(pool, topic :: any)
+		end
+	end
+	poolCache = pool
+	return pool
+end
+
+-- Lama tiap baris agar satu tausiah sekitar 1 menit.
+function MasjidConfig.tausiahLineSeconds(t: Tausiah): number
+	return math.clamp(60 / math.max(#t.lines, 1), 6, 10)
+end
+
 -- Kata-kata penutup imam.
 MasjidConfig.CLOSING_SAY = "Barakallahu fiikum. Hati-hati di jalan, ya! 😊"
 

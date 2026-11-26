@@ -402,6 +402,24 @@ function MasjidController.start()
 	CollectionService:GetInstanceAddedSignal(TAG):Connect(register)
 	CollectionService:GetInstanceRemovedSignal(TAG):Connect(unregister)
 	RunService.PreSimulation:Connect(step)
+	-- model bertag yang belum punya entri (tubuh belum lengkap saat streaming) dicoba lagi tiap detik
+	task.spawn(function()
+		while true do
+			task.wait(1)
+			for _, instance in CollectionService:GetTagged(TAG) do
+				if
+					instance:IsA("Model")
+					and entries[instance] == nil
+					and instance:IsDescendantOf(Workspace)
+				then
+					local entry = makeEntry(instance)
+					if entry then
+						entries[instance] = entry
+					end
+				end
+			end
+		end
+	end)
 
 	for _, name in { "MasjidFase", "MasjidJudul", "MasjidTeks", "MasjidArti" } do
 		Workspace:GetAttributeChangedSignal(name):Connect(refreshPanel)

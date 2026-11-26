@@ -47,7 +47,12 @@ local function keyframe(sequence: KeyframeSequence, time: number, shoulder: CFra
 	sequence:AddKeyframe(kf)
 end
 
-local function buildSequence(kind: string, duration: number, holdShoulder: CFrame, holdElbow: CFrame): KeyframeSequence
+local function buildSequence(
+	kind: string,
+	duration: number,
+	holdShoulder: CFrame,
+	holdElbow: CFrame
+): KeyframeSequence
 	local sequence = Instance.new("KeyframeSequence")
 	sequence.Name = "ConsumeArm"
 	sequence.Loop = false
@@ -79,7 +84,8 @@ local function play(kind: string, duration: number)
 		return -- bukan karakter R15: cukup gerakan barang dari server
 	end
 	active = true
-	local okSeq, sequence = pcall(buildSequence, kind, math.max(duration, 1.6), shoulder.Transform, elbow.Transform)
+	local okSeq, sequence =
+		pcall(buildSequence, kind, math.max(duration, 1.6), shoulder.Transform, elbow.Transform)
 	if not okSeq then
 		warn("[ConsumeAnim] gagal membuat animasi: " .. tostring(sequence))
 		active = false
@@ -111,7 +117,12 @@ function ConsumeAnimController.init() end
 
 function ConsumeAnimController.start()
 	Net.event("ConsumeAnim").OnClientEvent:Connect(function(kind: any, duration: any)
-		if type(kind) == "string" and type(duration) == "number" and duration > 0 and duration < 10 then
+		if
+			type(kind) == "string"
+			and type(duration) == "number"
+			and duration > 0
+			and duration < 10
+		then
 			play(kind, duration)
 		end
 	end)

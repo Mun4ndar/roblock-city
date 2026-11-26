@@ -85,8 +85,28 @@ ConcertConfig.FIREWORK_EVERY = { 35, 60 } -- detik antar pertunjukan kembang api
 
 -- Jumlah elemen per kualitas (HP memakai LOW).
 ConcertConfig.QUALITY = {
-	HIGH = { beams = 22, realLights = 6, ledCols = 24, ledRows = 10, ledHz = 10, sideCols = 4, sideRows = 8, bursts = 5, confetti = 90 },
-	LOW = { beams = 8, realLights = 3, ledCols = 12, ledRows = 5, ledHz = 5, sideCols = 2, sideRows = 4, bursts = 3, confetti = 40 },
+	HIGH = {
+		beams = 22,
+		realLights = 6,
+		ledCols = 24,
+		ledRows = 10,
+		ledHz = 10,
+		sideCols = 4,
+		sideRows = 8,
+		bursts = 5,
+		confetti = 90,
+	},
+	LOW = {
+		beams = 8,
+		realLights = 3,
+		ledCols = 12,
+		ledRows = 5,
+		ledHz = 5,
+		sideCols = 2,
+		sideRows = 4,
+		bursts = 3,
+		confetti = 40,
+	},
 }
 
 -- ---------------------------------------------------------------- lantai joget

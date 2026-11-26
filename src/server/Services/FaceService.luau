@@ -22,7 +22,14 @@ local function addFace(head: BasePart)
 	gui.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
 	gui.CanvasSize = Vector2.new(200, 200)
 	gui.LightInfluence = 0
-	local function dot(x: number, y: number, w: number, h: number, color: Color3, transparency: number?)
+	local function dot(
+		x: number,
+		y: number,
+		w: number,
+		h: number,
+		color: Color3,
+		transparency: number?
+	)
 		local f = Instance.new("Frame")
 		f.AnchorPoint = Vector2.new(0.5, 0.5)
 		f.Position = UDim2.fromOffset(x, y)

@@ -73,7 +73,8 @@ local function updateDistances()
 		return
 	end
 	for _, ref in cards do
-		local text = "📍 " .. NavController.formatDistance(flatDistance(root.Position, ref.position))
+		local text = "📍 "
+			.. NavController.formatDistance(flatDistance(root.Position, ref.position))
 		if ref.openAttr then
 			if Workspace:GetAttribute(ref.openAttr) == true then
 				text ..= " · 🟢 Buka sekarang"
@@ -85,7 +86,12 @@ local function updateDistances()
 	end
 end
 
-local function makeThumb(parent: Instance, entry: InfoBoardConfig.Entry, icon: string, color: Color3)
+local function makeThumb(
+	parent: Instance,
+	entry: InfoBoardConfig.Entry,
+	icon: string,
+	color: Color3
+)
 	local thumb = Instance.new("ImageLabel")
 	thumb.Name = "Gambar"
 	thumb.Size = UDim2.new(1, -12, 0, 98)
@@ -216,7 +222,8 @@ local function buildGui()
 		local camera = Workspace.CurrentCamera
 		if camera then
 			local size = camera.ViewportSize
-			uiScale.Scale = math.clamp(math.min(size.X / (PANEL.X + 20), size.Y / (PANEL.Y + 20)), 0.5, 1)
+			uiScale.Scale =
+				math.clamp(math.min(size.X / (PANEL.X + 20), size.Y / (PANEL.Y + 20)), 0.5, 1)
 		end
 	end
 	rescale()
@@ -344,7 +351,12 @@ function InfoBoardController.start()
 			local part = boardPart
 			local character = player.Character
 			local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
-			if panel.Visible and part and root and flatDistance(root.Position, part.Position) > CLOSE_DISTANCE then
+			if
+				panel.Visible
+				and part
+				and root
+				and flatDistance(root.Position, part.Position) > CLOSE_DISTANCE
+			then
 				panel.Visible = false
 			end
 		end
@@ -362,9 +374,16 @@ function InfoBoardController.start()
 		end
 		local character = player.Character or player.CharacterAdded:Wait()
 		local root = character:WaitForChild("HumanoidRootPart", 10) :: BasePart?
-		if part and root and flatDistance(root.Position, (part :: BasePart).Position) < InfoBoardConfig.HINT_RADIUS then
+		if
+			part
+			and root
+			and flatDistance(root.Position, (part :: BasePart).Position)
+				< InfoBoardConfig.HINT_RADIUS
+		then
 			task.wait(6)
-			HudController.toast("Baru di sini? Tekan E di Papan Info dekat air mancur untuk lihat semua tempat seru!")
+			HudController.toast(
+				"Baru di sini? Tekan E di Papan Info dekat air mancur untuk lihat semua tempat seru!"
+			)
 		end
 	end)
 end

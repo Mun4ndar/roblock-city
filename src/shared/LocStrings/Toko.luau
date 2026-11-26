@@ -45,7 +45,10 @@ local exact: { [string]: string } = {
 
 local patterns: { { string } } = {
 	{ "Kamu punya {}", "You have {}" },
-	{ "{} dibeli! Cek hotbar di bawah, klik untuk memakainya.", "{} bought! Check the hotbar below and click to use it." },
+	{
+		"{} dibeli! Cek hotbar di bawah, klik untuk memakainya.",
+		"{} bought! Check the hotbar below and click to use it.",
+	},
 	{ "{} dibeli! Cek hotbar di bawah.", "{} bought! Check the hotbar below." },
 	{ "Kamu sudah punya {}.", "You already have {}." },
 	{ "Tasmu penuh untuk {} (maksimal {}).", "Your bag is full for {} (max {})." },

@@ -1227,6 +1227,28 @@ local function announce(prayer: Config.Prayer)
 	end
 end
 
+local tausiahBag: { number } = {}
+local lastTausiah = 0
+
+-- Ambil tausiah berikutnya dari kantong acak: semua topik keluar sekali dulu sebelum ada yang berulang.
+local function nextTausiah(): Config.Tausiah
+	local pool = Config.tausiahPool()
+	if #tausiahBag == 0 then
+		for index = 1, #pool do
+			table.insert(tausiahBag, index)
+		end
+		for index = #tausiahBag, 2, -1 do
+			local other = math.random(1, index)
+			tausiahBag[index], tausiahBag[other] = tausiahBag[other], tausiahBag[index]
+		end
+		if #tausiahBag > 1 and tausiahBag[#tausiahBag] == lastTausiah then
+			tausiahBag[#tausiahBag], tausiahBag[1] = tausiahBag[1], tausiahBag[#tausiahBag]
+		end
+	end
+	lastTausiah = table.remove(tausiahBag) :: number
+	return pool[lastTausiah]
+end
+
 local function runEvent(prayer: Config.Prayer)
 	running = true
 	setAttr("Sholat", prayer.name)
@@ -1277,7 +1299,8 @@ local function runEvent(prayer: Config.Prayer)
 	-- TAUSIAH
 	setPhase("Tausiah")
 	placeNpc("Imam", Config.IMAM_SPOT, FACE_JAMAAH)
-	local tausiah = Config.TAUSIAH[prayer.id]
+	local tausiah = nextTausiah()
+	local lineSeconds = Config.tausiahLineSeconds(tausiah)
 	if tausiah then
 		for _, line in tausiah.lines do
 			setText("Tausiah: " .. tausiah.title, line.text, "Ustadz Hamid")
@@ -1296,7 +1319,7 @@ local function runEvent(prayer: Config.Prayer)
 					end
 				end)
 			end
-			pause(Config.TAUSIAH_LINE_SECONDS)
+			pause(lineSeconds)
 		end
 	end
 
