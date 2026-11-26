@@ -25,7 +25,7 @@ local MasjidController = {}
 local player = Players.LocalPlayer
 local TAG = "SholatPose"
 local POSE_DISTANCE = 120
-local PANEL_DISTANCE = 150
+local PANEL_DISTANCE = 46
 local BLEND_SECONDS = 0.85
 
 type Entry = {
@@ -111,6 +111,9 @@ end
 -- Nama pose yang dituju model sekarang, atau nil bila tidak perlu diposekan.
 local function desiredPose(entry: Entry, phase: string): string?
 	local model = entry.model
+	if model:GetAttribute("Jalan") == true then
+		return nil -- sedang berjalan: animasi jalan dari server
+	end
 	local role = model:GetAttribute("Peran")
 	if entry.isPlayer then
 		if model:GetAttribute("Sholat") ~= true then
@@ -258,8 +261,8 @@ local function buildUi()
 	panel = Instance.new("Frame")
 	panel.Name = "PanelMasjid"
 	panel.AnchorPoint = Vector2.new(0.5, 0)
-	panel.Position = UDim2.new(0.5, 0, 0, 92)
-	panel.Size = UDim2.fromOffset(470, 134)
+	panel.Position = UDim2.new(0.5, 0, 0, 6)
+	panel.Size = UDim2.fromOffset(380, 96)
 	panel.BackgroundColor3 = Color3.fromRGB(20, 70, 56)
 	panel.BackgroundTransparency = 0.12
 	panel.BorderSizePixel = 0
@@ -275,10 +278,10 @@ local function buildUi()
 	titleLabel = Instance.new("TextLabel")
 	titleLabel.Name = "Judul"
 	titleLabel.BackgroundTransparency = 1
-	titleLabel.Position = UDim2.fromOffset(14, 6)
-	titleLabel.Size = UDim2.new(1, -28, 0, 24)
+	titleLabel.Position = UDim2.fromOffset(10, 3)
+	titleLabel.Size = UDim2.new(1, -20, 0, 18)
 	titleLabel.Font = Enum.Font.FredokaOne
-	titleLabel.TextSize = 20
+	titleLabel.TextSize = 14
 	titleLabel.TextColor3 = Color3.fromRGB(246, 224, 140)
 	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 	titleLabel.Parent = panel
@@ -286,10 +289,10 @@ local function buildUi()
 	textLabel = Instance.new("TextLabel")
 	textLabel.Name = "Teks"
 	textLabel.BackgroundTransparency = 1
-	textLabel.Position = UDim2.fromOffset(14, 32)
-	textLabel.Size = UDim2.new(1, -28, 0, 62)
+	textLabel.Position = UDim2.fromOffset(10, 21)
+	textLabel.Size = UDim2.new(1, -20, 0, 50)
 	textLabel.Font = Enum.Font.FredokaOne
-	textLabel.TextSize = 24
+	textLabel.TextSize = 16
 	textLabel.TextWrapped = true
 	textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 	textLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -299,10 +302,10 @@ local function buildUi()
 	meaningLabel = Instance.new("TextLabel")
 	meaningLabel.Name = "Arti"
 	meaningLabel.BackgroundTransparency = 1
-	meaningLabel.Position = UDim2.fromOffset(14, 96)
-	meaningLabel.Size = UDim2.new(1, -28, 0, 32)
+	meaningLabel.Position = UDim2.fromOffset(10, 72)
+	meaningLabel.Size = UDim2.new(1, -20, 0, 22)
 	meaningLabel.Font = Enum.Font.GothamMedium
-	meaningLabel.TextSize = 15
+	meaningLabel.TextSize = 11
 	meaningLabel.TextWrapped = true
 	meaningLabel.TextColor3 = Color3.fromRGB(200, 232, 214)
 	meaningLabel.TextXAlignment = Enum.TextXAlignment.Left

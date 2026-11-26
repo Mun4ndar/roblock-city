@@ -130,7 +130,7 @@ local ROSTER: { Spec } = {
 		shirt = WHITE,
 		legs = rgb(40, 60, 110),
 		cap = "peci",
-		scale = 0.78,
+		scale = 0.62,
 	},
 	{
 		id = "PakRudi",
@@ -197,7 +197,7 @@ local ROSTER: { Spec } = {
 		shirt = CREAM,
 		legs = rgb(40, 110, 80),
 		cap = "peci",
-		scale = 0.86,
+		scale = 0.66,
 	},
 	{
 		id = "Marbot",
@@ -401,9 +401,9 @@ local function buildLabels(
 	local tag = Instance.new("BillboardGui")
 	tag.Name = "NamaNpc"
 	tag.Adornee = head
-	tag.Size = UDim2.fromOffset(170, 38)
+	tag.Size = UDim2.fromOffset(120, 22)
 	tag.StudsOffset = Vector3.new(0, 1.7 * s + 0.4, 0)
-	tag.MaxDistance = 26
+	tag.MaxDistance = 13
 	local text = Instance.new("TextLabel")
 	text.Size = UDim2.fromScale(1, 1)
 	text.BackgroundTransparency = 1
@@ -418,7 +418,7 @@ local function buildLabels(
 	local gui = Instance.new("BillboardGui")
 	gui.Name = "SapaanNpc"
 	gui.Adornee = head
-	gui.Size = UDim2.fromOffset(250, 56)
+	gui.Size = UDim2.fromOffset(210, 46)
 	gui.StudsOffset = Vector3.new(0, 2.9 * s + 0.6, 0)
 	gui.MaxDistance = 34
 	gui.Enabled = false
@@ -480,8 +480,8 @@ local function spotCFrame(npc: Npc, spot: Vector2, dir: Vector3): CFrame
 	return faceCFrame(Vector3.new(spot.X, standY(npc), spot.Y), dir)
 end
 
-local function buildNpc(spec: Spec): Npc?
-	local s = spec.scale or 1
+local function buildNpc(spec: Spec, startSpot: Vector2?, startDir: Vector3?): Npc?
+	local s = spec.scale or 0.78
 	local description = Instance.new("HumanoidDescription")
 	description.HeadColor = spec.skin
 	description.LeftArmColor = spec.skin
@@ -565,7 +565,7 @@ local function buildNpc(spec: Spec): Npc?
 		lastGreet = 0,
 		slotCFrame = nil,
 	}
-	local cf = spotCFrame(npc, spec.spot, FACE_QIBLA)
+	local cf = spotCFrame(npc, startSpot or spec.spot, startDir or FACE_QIBLA)
 	model:PivotTo(cf)
 	if spec.role == "Marbot" then
 		humanoid.WalkSpeed = 6
@@ -586,9 +586,9 @@ local function buildNpc(spec: Spec): Npc?
 	model.Parent = folder
 	local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator")
 	animator.Parent = humanoid
+	npc.animator = animator
+	npc.walk = loadTrack(animator, ANIM_WALK, Enum.AnimationPriority.Movement, true)
 	if spec.role == "Marbot" then
-		npc.animator = animator
-		npc.walk = loadTrack(animator, ANIM_WALK, Enum.AnimationPriority.Movement, true)
 		npc.idle = loadTrack(animator, ANIM_IDLE, Enum.AnimationPriority.Idle, true)
 		npc.wave = loadTrack(animator, ANIM_WAVE, Enum.AnimationPriority.Action2, false)
 	end
@@ -772,6 +772,25 @@ local PAD_COLORS = {
 }
 
 local function buildFurniture()
+	-- sajadah di bawah tiap NPC (imam, muazin, jamaah, marbot)
+	local function npcMat(x: number, z: number, index: number)
+		local mat = Instance.new("Part")
+		mat.Name = "SajadahNpc"
+		mat.Anchored = true
+		mat.CanCollide = false
+		mat.CanQuery = false
+		mat.Size = Vector3.new(4.2, 0.12, 2.2)
+		mat.Material = Enum.Material.Fabric
+		mat.Color = PAD_COLORS[(index - 1) % #PAD_COLORS + 1]
+		mat.CFrame = CFrame.new(x, FLOOR_Y + 0.07, z)
+		mat.Parent = folder
+	end
+	for index, spec in ROSTER do
+		if spec.role ~= "Marbot" then
+			npcMat(spec.spot.X, spec.spot.Y, index)
+		end
+	end
+	npcMat(Config.MARBOT_SLOT.X, Config.MARBOT_SLOT.Y, 3)
 	for index, spot in Config.PLAYER_SLOTS do
 		local part = Instance.new("Part")
 		part.Name = "Sajadah" .. index
@@ -988,7 +1007,7 @@ local function spawnAll()
 			if generation ~= mine then
 				return
 			end
-			local npc = buildNpc(spec)
+			local npc = if spec.role == "Marbot" or running then buildNpc(spec) else nil
 			if npc then
 				if generation ~= mine then
 					npc.model:Destroy()
@@ -1020,6 +1039,98 @@ local function npcTick()
 	local marbot = npcs.Marbot
 	if marbot then
 		marbotGreet(marbot, os.clock())
+	end
+end
+
+-- ---------------------------------------------------------------- jamaah datang dan pergi
+local GATES = { -49, -39, -30, -20, -10, -1, 9 } -- tengah lengkung di sisi timur masjid
+
+local function gateZ(z: number): number
+	local best = GATES[1]
+	for _, g in GATES do
+		if math.abs(g - z) < math.abs(best - z) then
+			best = g
+		end
+	end
+	return best
+end
+
+local function walkPath(npc: Npc, points: { Vector3 }, finalDir: Vector3?, speed: number)
+	local model = npc.model
+	model:SetAttribute("Jalan", true)
+	if npc.walk then
+		npc.walk:Play(0.2)
+	end
+	local pos = Vector3.new(npc.root.Position.X, standY(npc), npc.root.Position.Z)
+	for _, point in points do
+		local target = Vector3.new(point.X, standY(npc), point.Z)
+		while model.Parent do
+			local delta = target - pos
+			local dist = delta.Magnitude
+			if dist < 0.2 then
+				break
+			end
+			pos += delta.Unit * math.min(dist, speed * 0.1)
+			model:PivotTo(CFrame.lookAt(pos, pos + Vector3.new(delta.X, 0, delta.Z)))
+			task.wait(0.1)
+		end
+	end
+	if not model.Parent then
+		return
+	end
+	if npc.walk then
+		npc.walk:Stop(0.2)
+	end
+	if finalDir then
+		model:PivotTo(CFrame.lookAt(pos, pos + finalDir))
+	end
+	model:SetAttribute("Jalan", false)
+end
+
+-- Imam, muazin, dan jamaah masuk lewat lengkung timur saat adzan mulai.
+local function summon()
+	local mine = generation
+	task.spawn(function()
+		for _, spec in ROSTER do
+			if generation ~= mine then
+				return
+			end
+			if spec.role ~= "Marbot" and npcs[spec.id] == nil then
+				local gz = gateZ(spec.spot.Y)
+				local npc = buildNpc(spec, Vector2.new(558, gz), FACE_QIBLA)
+				if npc then
+					npcs[spec.id] = npc
+					local goal = if spec.id == "Muazin" then Config.AZAN_SPOT else spec.spot
+					local delay = if spec.role == "Jamaah" then math.random(0, 120) / 10 else 0
+					task.delay(delay, function()
+						walkPath(
+							npc,
+							{ Vector3.new(541, 0, gz), Vector3.new(goal.X, 0, goal.Y) },
+							FACE_QIBLA,
+							8
+						)
+					end)
+				end
+				task.wait(0.05)
+			end
+		end
+	end)
+end
+
+-- Setelah tausiah mereka keluar lewat lengkung timur lalu menghilang.
+local function dismiss()
+	for id, npc in npcs do
+		if npc.spec.role ~= "Marbot" then
+			task.spawn(function()
+				task.wait(math.random(0, 40) / 10)
+				local gz = gateZ(npc.root.Position.Z)
+				walkPath(npc, { Vector3.new(541, 0, gz), Vector3.new(558, 0, gz) }, nil, 8)
+				if npcs[id] == npc then
+					npcs[id] = nil
+				end
+				npc.model:Destroy()
+			end)
+		end
 	end
 end
 
@@ -1071,11 +1182,13 @@ local function runEvent(prayer: Config.Prayer)
 	setAttr("Rakaat", prayer.rakaat)
 	setAttr("Langkah", "")
 	announce(prayer)
+	if npcActive then
+		summon()
+	end
 
 	-- ADZAN
 	setPhase("Azan")
 	marbotJoinPrayer() -- marbot berhenti menyapu begitu adzan berkumandang dan ikut sholat
-	placeNpc("Muazin", Config.AZAN_SPOT, FACE_QIBLA)
 	for _, line in Config.azanLines(prayer) do
 		setText("Adzan " .. prayer.name, line.text, line.meaning)
 		npcSay("Muazin", line.text, line.seconds - 0.3)
@@ -1140,7 +1253,7 @@ local function runEvent(prayer: Config.Prayer)
 	setPhase("Selesai")
 	setText("Selesai", Config.CLOSING_SAY, "Terima kasih sudah datang ke Masjid Al Munawaroh.")
 	npcSay("Imam", Config.CLOSING_SAY, Config.CLOSING_SECONDS - 0.5)
-	placeNpc("Imam", Config.IMAM_SPOT, FACE_QIBLA)
+	dismiss()
 	pause(Config.CLOSING_SECONDS)
 	marbotLeavePrayer()
 	setPhase("Idle")

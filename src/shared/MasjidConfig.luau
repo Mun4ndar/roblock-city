@@ -112,7 +112,7 @@ end
 
 -- ---------------------------------------------------------------- fase acara
 MasjidConfig.IQAMAH_SECONDS = 9
-MasjidConfig.CLOSING_SECONDS = 7
+MasjidConfig.CLOSING_SECONDS = 15
 MasjidConfig.TAUSIAH_LINE_SECONDS = 7.5
 
 -- ---------------------------------------------------------------- adzan (huruf latin + arti)
