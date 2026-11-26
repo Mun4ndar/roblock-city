@@ -28,13 +28,17 @@ type Ski = {
 	hull: BasePart,
 	seat: VehicleSeat,
 	move: LinearVelocity,
+	lift: VectorForce,
 	turn: AngularVelocity,
 	spray: ParticleEmitter,
+	foam: ParticleEmitter,
+	wakes: { Trail },
 	speed: number,
 	idle: number,
 	checkIn: number,
 	blockedFront: boolean,
 	blockedBack: boolean,
+	waterY: number,
 }
 
 type Run = {
@@ -106,6 +110,14 @@ local function jetData(player: Player): { best: number, runs: number }?
 end
 
 -- ---------------------------------------------------------------- jet ski
+
+local function setMassless(character: Model, value: boolean)
+	for _, d in character:GetDescendants() do
+		if d:IsA("BasePart") then
+			d.Massless = value
+		end
+	end
+end
 
 local function buildSki(owner: Player): Ski
 	local model = Instance.new("Model")
@@ -185,6 +197,22 @@ local function buildSki(owner: Player): Ski
 		weld(seat)
 		seat.Parent = model
 
+		-- Penumpang dibuat tanpa massa selama duduk: berat pemain tidak menenggelamkan jet ski
+		-- (apung bergantung massa rakitan), dan dikembalikan saat turun.
+		local rider: Model? = nil
+		seat:GetPropertyChangedSignal("Occupant"):Connect(function()
+			local occupant = (seat :: any).Occupant :: Humanoid?
+			local character = if occupant then occupant.Parent else nil
+			if rider and rider ~= character then
+				setMassless(rider, false)
+				rider = nil
+			end
+			if character and character:IsA("Model") then
+				setMassless(character, true)
+				rider = character
+			end
+		end)
+
 		local prompt = Instance.new("ProximityPrompt")
 		prompt.Name = "EnterPrompt"
 		prompt.ActionText = if index == 1 then "Kemudikan" else "Naik"
@@ -229,6 +257,16 @@ local function buildSki(owner: Player): Ski
 	move.VectorVelocity = Vector3.zero
 	move.Parent = hull
 
+	-- Penahan tinggi (PD, gaya ke atas/bawah): jet ski tetap di permukaan air walau melaju kencang
+	-- (di laju tinggi air menekannya turun). Gaya sebanding massa, jadi sama untuk siapa pun.
+	local lift = Instance.new("VectorForce")
+	lift.Name = "Lift"
+	lift.Attachment0 = attachment
+	lift.RelativeTo = Enum.ActuatorRelativeTo.World
+	lift.ApplyAtCenterOfMass = true
+	lift.Force = Vector3.zero
+	lift.Parent = hull
+
 	-- Belok terhadap sumbu tegak; sekaligus menahan supaya tidak oleng atau terbalik.
 	local turn = Instance.new("AngularVelocity")
 	turn.Name = "Turn"
@@ -238,29 +276,89 @@ local function buildSki(owner: Player): Ski
 	turn.MaxTorque = 4000000
 	turn.Parent = hull
 
-	-- Cipratan air di belakang saat melaju.
+	-- Percikan air di belakang saat melaju: semburan ke atas-belakang, busa di permukaan, dan jejak.
 	local tail = Instance.new("Attachment")
 	tail.Name = "Tail"
-	tail.Position = Vector3.new(0, 0.6, 3.6)
+	tail.Position = Vector3.new(0, 0.1, 3.7)
+	tail.Orientation = Vector3.new(52, 0, 0) -- atas emisi (+Y) miring ke belakang
 	tail.Parent = hull
 	local spray = Instance.new("ParticleEmitter")
 	spray.Name = "Spray"
-	spray.Color = ColorSequence.new(Color3.fromRGB(235, 248, 255))
+	spray.Color = ColorSequence.new(Color3.fromRGB(240, 250, 255))
+	spray.LightEmission = 0.35
 	spray.Size = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 0.8),
-		NumberSequenceKeypoint.new(1, 3),
+		NumberSequenceKeypoint.new(0, 0.9),
+		NumberSequenceKeypoint.new(0.4, 1.8),
+		NumberSequenceKeypoint.new(1, 0.6),
 	})
 	spray.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.15),
+		NumberSequenceKeypoint.new(0.7, 0.45),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	spray.Lifetime = NumberRange.new(0.6, 1.0)
+	spray.Speed = NumberRange.new(14, 22)
+	spray.SpreadAngle = Vector2.new(14, 14)
+	spray.Acceleration = Vector3.new(0, -45, 0)
+	spray.Rate = 140
+	spray.Enabled = false
+	spray.Parent = tail
+
+	local foamAttachment = Instance.new("Attachment")
+	foamAttachment.Name = "Foam"
+	foamAttachment.Position = Vector3.new(0, -0.2, 4.2)
+	foamAttachment.Orientation = Vector3.new(80, 0, 0)
+	foamAttachment.Parent = hull
+	local foam = Instance.new("ParticleEmitter")
+	foam.Name = "Foam"
+	foam.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
+	foam.LightEmission = 0.2
+	foam.Size = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 2),
+		NumberSequenceKeypoint.new(1, 6),
+	})
+	foam.Transparency = NumberSequence.new({
 		NumberSequenceKeypoint.new(0, 0.3),
 		NumberSequenceKeypoint.new(1, 1),
 	})
-	spray.Lifetime = NumberRange.new(0.5, 0.9)
-	spray.Speed = NumberRange.new(5, 10)
-	spray.SpreadAngle = Vector2.new(35, 35)
-	spray.Acceleration = Vector3.new(0, -12, 0)
-	spray.Rate = 40
-	spray.Enabled = false
-	spray.Parent = tail
+	foam.Lifetime = NumberRange.new(1.0, 1.6)
+	foam.Speed = NumberRange.new(2, 5)
+	foam.SpreadAngle = Vector2.new(60, 60)
+	foam.Rate = 55
+	foam.Enabled = false
+	foam.Parent = foamAttachment
+
+	-- jejak gelombang di kiri dan kanan buritan
+	local wakes: { Trail } = {}
+	for _, side in { -1, 1 } do
+		local a0 = Instance.new("Attachment")
+		a0.Name = "WakeA" .. side
+		a0.Position = Vector3.new(side * 0.9, -0.1, 3.4)
+		a0.Parent = hull
+		local a1 = Instance.new("Attachment")
+		a1.Name = "WakeB" .. side
+		a1.Position = Vector3.new(side * 1.9, -0.1, 3.4)
+		a1.Parent = hull
+		local trail = Instance.new("Trail")
+		trail.Name = "Wake"
+		trail.Attachment0 = a0
+		trail.Attachment1 = a1
+		trail.Lifetime = 1.0
+		trail.FaceCamera = false
+		trail.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
+		trail.LightEmission = 0.2
+		trail.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.6),
+			NumberSequenceKeypoint.new(1, 1),
+		})
+		trail.WidthScale = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 1),
+			NumberSequenceKeypoint.new(1, 2.2),
+		})
+		trail.Enabled = false
+		trail.Parent = hull
+		table.insert(wakes, trail)
+	end
 
 	CollectionService:AddTag(model, JetSkiConfig.TAG)
 	return {
@@ -268,13 +366,17 @@ local function buildSki(owner: Player): Ski
 		hull = hull,
 		seat = driveSeat :: VehicleSeat,
 		move = move,
+		lift = lift,
 		turn = turn,
 		spray = spray,
+		foam = foam,
+		wakes = wakes,
 		speed = 0,
 		idle = 0,
 		checkIn = 0,
 		blockedFront = false,
 		blockedBack = false,
+		waterY = JetSkiConfig.WATER_Y,
 	}
 end
 
@@ -326,6 +428,27 @@ local function isBlocked(ski: Ski, offsetZ: number): boolean
 		or hit.Position.Y < JetSkiConfig.WATER_Y - 1.5
 end
 
+-- Tinggi permukaan air di bawah jet ski (laut bisa berubah); cadangan = nilai terakhir.
+local function waterLevel(ski: Ski): number
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	local exclude: { Instance } = { ski.model }
+	for _, player in Players:GetPlayers() do
+		if player.Character then
+			table.insert(exclude, player.Character)
+		end
+	end
+	params.FilterDescendantsInstances = exclude
+	params.IgnoreWater = false
+	local pos = ski.hull.Position
+	local hit =
+		Workspace:Raycast(Vector3.new(pos.X, pos.Y + 10, pos.Z), Vector3.new(0, -30, 0), params)
+	if hit and hit.Material == Enum.Material.Water then
+		return hit.Position.Y
+	end
+	return ski.waterY
+end
+
 local function step(ski: Ski, dt: number)
 	local seat = ski.seat
 	local throttle, steer = 0, 0
@@ -341,6 +464,7 @@ local function step(ski: Ski, dt: number)
 		-- makin kencang, makin jauh ke depan yang diperiksa
 		ski.blockedFront = isBlocked(ski, -6) or isBlocked(ski, -6 - math.max(ski.speed, 0) * 0.4)
 		ski.blockedBack = isBlocked(ski, 6)
+		ski.waterY = waterLevel(ski)
 	end
 	local target = if throttle > 0
 		then throttle * JetSkiConfig.MAX_SPEED
@@ -356,6 +480,11 @@ local function step(ski: Ski, dt: number)
 	local change = JetSkiConfig.ACCELERATION * dt
 	ski.speed += math.clamp(target - ski.speed, -change, change)
 	ski.move.VectorVelocity = Vector3.new(0, 0, -ski.speed)
+	-- pusat lambung dijaga sedikit di atas permukaan air
+	local hullY = ski.hull.Position.Y
+	local lift = JetSkiConfig.LIFT_P * (ski.waterY + JetSkiConfig.HULL_LIFT - hullY)
+		- JetSkiConfig.LIFT_D * ski.hull.AssemblyLinearVelocity.Y
+	ski.lift.Force = Vector3.new(0, ski.hull.AssemblyMass * math.clamp(lift, -60, 60), 0)
 	-- belok penuh saat melaju (saat mundur arahnya terbalik); saat diam masih bisa berputar pelan
 	-- supaya yang mentok di pantai atau tepi laut bisa diarahkan lagi
 	local grip = math.clamp(ski.speed / 12, -1, 1)
@@ -363,7 +492,12 @@ local function step(ski: Ski, dt: number)
 		grip = if grip < -0.05 then -0.35 else 0.35
 	end
 	ski.turn.AngularVelocity = Vector3.new(0, -steer * JetSkiConfig.TURN_RATE * grip, 0)
-	ski.spray.Enabled = math.abs(ski.speed) > 10
+	local fast = math.abs(ski.speed) > 8
+	ski.spray.Enabled = fast
+	ski.foam.Enabled = fast
+	for _, trail in ski.wakes do
+		trail.Enabled = fast
+	end
 end
 
 local function rent(player: Player)
@@ -402,7 +536,21 @@ local function rent(player: Player)
 	ski.model.Parent = Workspace
 	ski.hull:SetNetworkOwner(nil)
 	skis[player] = ski
-	-- penyewa langsung duduk di jet ski (tidak perlu berenang)
+	-- Penyewa langsung duduk di jet ski (tidak perlu berenang). Tunggu dulu sampai client pemain
+	-- sudah memuat jet ski (StreamingEnabled); kalau duduk terlalu cepat, client belum mengenali
+	-- kursinya dan kendali tidak terbaca sampai pemain turun lalu naik lagi.
+	pcall(function()
+		player:RequestStreamAroundAsync(ski.hull.Position, 3)
+	end)
+	if
+		skis[player] ~= ski
+		or ski.model.Parent == nil
+		or player.Character ~= character
+		or humanoid.Health <= 0
+		or humanoid.SeatPart ~= nil
+	then
+		return
+	end
 	character:PivotTo(ski.seat.CFrame * CFrame.new(0, 3, 0));
 	(ski.seat :: any):Sit(humanoid)
 	EconomyService.notify(
