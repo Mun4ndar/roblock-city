@@ -29,7 +29,6 @@ local TEXT_BOARD = "Naik Ferry di belakang kak, sebentar lagi mau berangkat."
 local TEXT_AWAY = "Ferinya sedang berlayar kak, sebentar lagi kembali ya."
 
 local officer: Model? = nil
-local post: BasePart? = nil
 local say: ((string, number) -> ())? = nil
 local wave: AnimationTrack? = nil
 local lastGreet = 0
@@ -197,11 +196,9 @@ function PelabuhanService.start()
 	if spot == nil or not spot:IsA("BasePart") then
 		return
 	end
-	post = spot
 
 	local function spawn()
-		local at = spot.CFrame
-		local model = build(at)
+		local model = build(spot.CFrame)
 		if model == nil then
 			return
 		end
