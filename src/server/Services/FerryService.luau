@@ -53,7 +53,8 @@ local function pathAt(start: Vector3, s: number): (Vector3, Vector2)
 	if s < ARC then
 		local t = s / RADIUS
 		local cx, cz = start.X + LEG, start.Z + RADIUS
-		return Vector3.new(cx + RADIUS * math.sin(t), 0, cz - RADIUS * math.cos(t)), Vector2.new(math.cos(t), math.sin(t))
+		return Vector3.new(cx + RADIUS * math.sin(t), 0, cz - RADIUS * math.cos(t)),
+			Vector2.new(math.cos(t), math.sin(t))
 	end
 	s -= ARC
 	if s < LEG then
@@ -62,7 +63,8 @@ local function pathAt(start: Vector3, s: number): (Vector3, Vector2)
 	s -= LEG
 	local t = s / RADIUS
 	local cx, cz = start.X, start.Z + RADIUS
-	return Vector3.new(cx - RADIUS * math.sin(t), 0, cz + RADIUS * math.cos(t)), Vector2.new(-math.cos(t), -math.sin(t))
+	return Vector3.new(cx - RADIUS * math.sin(t), 0, cz + RADIUS * math.cos(t)),
+		Vector2.new(-math.cos(t), -math.sin(t))
 end
 
 local function root(player: Player): (BasePart?, Humanoid?)
@@ -70,7 +72,8 @@ local function root(player: Player): (BasePart?, Humanoid?)
 	if character == nil then
 		return nil, nil
 	end
-	return character:FindFirstChild("HumanoidRootPart") :: BasePart?, character:FindFirstChildOfClass("Humanoid")
+	return character:FindFirstChild("HumanoidRootPart") :: BasePart?,
+		character:FindFirstChildOfClass("Humanoid")
 end
 
 local function seatFree(seat: Seat): boolean
@@ -93,7 +96,9 @@ local function unboard(player: Player, toDock: boolean)
 		task.delay(0.25, function()
 			local r = root(player)
 			if r and player.Character then
-				player.Character:PivotTo(CFrame.lookAt(DOCK_SPOT, DOCK_SPOT + Vector3.new(0, 0, -1)))
+				player.Character:PivotTo(
+					CFrame.lookAt(DOCK_SPOT, DOCK_SPOT + Vector3.new(0, 0, -1))
+				)
 				r.AssemblyLinearVelocity = Vector3.zero
 			end
 		end)
@@ -149,7 +154,11 @@ function FerryService.start()
 	params.FilterType = Enum.RaycastFilterType.Include
 	params.FilterDescendantsInstances = { ship }
 	for _, spot in SEAT_SPOTS do
-		local hit = Workspace:Raycast(Vector3.new(start.X + spot.X, start.Y + 40, start.Z + spot.Y), Vector3.new(0, -80, 0), params)
+		local hit = Workspace:Raycast(
+			Vector3.new(start.X + spot.X, start.Y + 40, start.Z + spot.Y),
+			Vector3.new(0, -80, 0),
+			params
+		)
 		if hit then
 			local seat = Instance.new("Seat")
 			seat.Name = "KursiFeri"
@@ -208,7 +217,10 @@ function FerryService.start()
 		if state == "cruising" then
 			EconomyService.notify(
 				player,
-				`Feri sedang berlayar. Kembali dalam {math.max(1, math.ceil(cruiseEndsAt - os.clock()))} detik.`
+				`Feri sedang berlayar. Kembali dalam {math.max(
+					1,
+					math.ceil(cruiseEndsAt - os.clock())
+				)} detik.`
 			)
 			return
 		end

@@ -59,7 +59,8 @@ function Kit.ctx(parent, frame)
 		p.Anchored = true
 		p.TopSurface = Enum.SurfaceType.Smooth
 		p.BottomSurface = Enum.SurfaceType.Smooth
-		p.Size = Vector3.new(math.max(x1 - x0, 0.05), math.max(y1 - y0, 0.05), math.max(z1 - z0, 0.05))
+		p.Size =
+			Vector3.new(math.max(x1 - x0, 0.05), math.max(y1 - y0, 0.05), math.max(z1 - z0, 0.05))
 		p.CFrame = frame * CFrame.new((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2)
 		p.Color = color
 		p.Material = mat or M.SmoothPlastic
@@ -149,7 +150,19 @@ function Kit.ctx(parent, frame)
 	-- papan teks: kotak tipis dengan teks di salah satu sisi
 	function c.sign(name, x0, x1, y0, y1, z0, z1, face, text, o)
 		o = o or {}
-		local p = c.box(name, x0, x1, y0, y1, z0, z1, o.bg or Kit.C.charcoalD, o.mat or M.SmoothPlastic, 0, o.parent)
+		local p = c.box(
+			name,
+			x0,
+			x1,
+			y0,
+			y1,
+			z0,
+			z1,
+			o.bg or Kit.C.charcoalD,
+			o.mat or M.SmoothPlastic,
+			0,
+			o.parent
+		)
 		p.CanCollide = false
 		p.CastShadow = false
 		c.text(p, face, text, o)
@@ -163,7 +176,8 @@ function Kit.ctx(parent, frame)
 		o = o or {}
 		local right = Vector3.new(dx, 0, dz).Unit
 		local center = Vector3.new(hx, y0 + h / 2, hz) + right * (w / 2)
-		local leafCF = frame * CFrame.fromMatrix(center, right, Vector3.yAxis, right:Cross(Vector3.yAxis))
+		local leafCF = frame
+			* CFrame.fromMatrix(center, right, Vector3.yAxis, right:Cross(Vector3.yAxis))
 		local model = Instance.new("Model")
 		model.Name = name
 		local function leafPart(pn, cx, cy, sx_, sy_, sz_, color, mat, tr)
@@ -191,9 +205,20 @@ function Kit.ctx(parent, frame)
 		if o.wood then
 			leafPart("Panel", 0, 0.2, w - 2 * st, h - 1.4 - st, 0.25, Kit.C.walnutL, M.Wood)
 		else
-			leafPart("Kaca", 0, 0.2, w - 2 * st, h - 1.4 - st, 0.18, o.frost and rgb(220, 236, 244) or Kit.C.glass, M.Glass, o.frost and 0.25 or 0.5)
+			leafPart(
+				"Kaca",
+				0,
+				0.2,
+				w - 2 * st,
+				h - 1.4 - st,
+				0.18,
+				o.frost and rgb(220, 236, 244) or Kit.C.glass,
+				M.Glass,
+				o.frost and 0.25 or 0.5
+			)
 		end
-		local handle = leafPart("Gagang", w / 2 - 0.9, -h * 0.05, 0.25, 2.4, 0.5, Kit.C.steel, M.Metal)
+		local handle =
+			leafPart("Gagang", w / 2 - 0.9, -h * 0.05, 0.25, 2.4, 0.5, Kit.C.steel, M.Metal)
 		handle.Size = Vector3.new(0.25, 2.4, 0.5)
 		model.WorldPivot = leafCF
 		-- sudut buka: pilih tanda supaya daun berputar ke arah (sx,sz)
@@ -260,7 +285,8 @@ function Kit.lift(c, level, h, parent)
 	-- dinding kabin: baja, cermin di belakang
 	c.box("DindingKabinKiri", -4, -3.8, 0.15, 8.35, 4.8, 12.8, C.steel, M.Metal, 0, folder)
 	c.box("DindingKabinKanan", 3.8, 4, 0.15, 8.35, 4.8, 12.8, C.steel, M.Metal, 0, folder)
-	c.box("CerminKabin", -3.8, 3.8, 0.9, 7.6, 12.6, 12.8, C.mirror, M.Metal, 0, folder).Reflectance = 0.55
+	c.box("CerminKabin", -3.8, 3.8, 0.9, 7.6, 12.6, 12.8, C.mirror, M.Metal, 0, folder).Reflectance =
+		0.55
 	c.box("PegangBelakang", -3.2, 3.2, 3.3, 3.55, 12.35, 12.6, C.gold, M.Metal, 0, folder)
 	c.box("PegangKiri", -3.8, -3.55, 3.3, 3.55, 6.0, 11.6, C.gold, M.Metal, 0, folder)
 	-- zona dalam kabin (tak terlihat): dipakai HotelService
@@ -270,7 +296,8 @@ function Kit.lift(c, level, h, parent)
 	zone.CanTouch = false
 	zone.CastShadow = false
 	-- panel pilih lantai di dinding kanan kabin (menghadap barat)
-	local plate = c.box("PanelPilih", 3.45, 3.8, 1.6, 7.0, 9.0, 11.0, C.charcoalD, M.Metal, 0, folder)
+	local plate =
+		c.box("PanelPilih", 3.45, 3.8, 1.6, 7.0, 9.0, 11.0, C.charcoalD, M.Metal, 0, folder)
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "PilihLantai"
 	prompt.ActionText = "Pilih lantai"
@@ -283,25 +310,70 @@ function Kit.lift(c, level, h, parent)
 	local names = { "L", "2", "3", "4", "5", "6", "7", "8" }
 	for i = 1, Kit.FLOORS do
 		local y = 1.9 + (i - 1) * 0.62
-		local lp = c.box("LampuLantai" .. i, 3.2, 3.45, y, y + 0.5, 9.4, 10.6, C.steelD, M.SmoothPlastic, 0, folder)
+		local lp = c.box(
+			"LampuLantai" .. i,
+			3.2,
+			3.45,
+			y,
+			y + 0.5,
+			9.4,
+			10.6,
+			C.steelD,
+			M.SmoothPlastic,
+			0,
+			folder
+		)
 		lp.CanCollide = false
 		lp:SetAttribute("Idx", i)
 		lp:SetAttribute("Level", level)
 		CollectionService:AddTag(lp, "HotelLamp")
-		c.text(lp, Enum.NormalId.Left, names[i], { color = C.white, font = Enum.Font.GothamBlack, pps = 60 })
+		c.text(
+			lp,
+			Enum.NormalId.Left,
+			names[i],
+			{ color = C.white, font = Enum.Font.GothamBlack, pps = 60 }
+		)
 	end
 	-- indikator di atas pintu (sisi luar, menghadap koridor/lobi)
 	for i = 1, Kit.FLOORS do
 		local x0 = 4.1 - (i - 1) * 1.3 -- dilihat dari depan (menghadap selatan), L di kiri
-		local lp = c.box("IndikatorLantai" .. i, x0, x0 + 1.0, 8.75, 9.75, 3.05, 3.5, C.steelD, M.SmoothPlastic, 0, folder)
+		local lp = c.box(
+			"IndikatorLantai" .. i,
+			x0,
+			x0 + 1.0,
+			8.75,
+			9.75,
+			3.05,
+			3.5,
+			C.steelD,
+			M.SmoothPlastic,
+			0,
+			folder
+		)
 		lp.CanCollide = false
 		lp:SetAttribute("Idx", i)
 		lp:SetAttribute("Level", level)
 		CollectionService:AddTag(lp, "HotelLamp")
-		c.text(lp, Enum.NormalId.Front, names[i], { color = C.white, font = Enum.Font.GothamBlack, pps = 60 })
+		c.text(
+			lp,
+			Enum.NormalId.Front,
+			names[i],
+			{ color = C.white, font = Enum.Font.GothamBlack, pps = 60 }
+		)
 	end
 	if h > 12 then
-		c.sign("PapanLift", -2.5, 2.5, 10.6, 11.6, 3.2, 3.5, Enum.NormalId.Front, "LIFT", { bg = C.charcoalD, color = C.gold, pps = 50 })
+		c.sign(
+			"PapanLift",
+			-2.5,
+			2.5,
+			10.6,
+			11.6,
+			3.2,
+			3.5,
+			Enum.NormalId.Front,
+			"LIFT",
+			{ bg = C.charcoalD, color = C.gold, pps = 50 }
+		)
 	end
 	return folder
 end

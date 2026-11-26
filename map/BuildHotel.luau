@@ -25,7 +25,10 @@ local function sub(parent, name)
 end
 
 local function at(parent, x, y, z, yaw)
-	return Kit.ctx(parent, CFrame.new(Kit.ORIGIN) * CFrame.new(x, y, z) * CFrame.Angles(0, yaw or 0, 0))
+	return Kit.ctx(
+		parent,
+		CFrame.new(Kit.ORIGIN) * CFrame.new(x, y, z) * CFrame.Angles(0, yaw or 0, 0)
+	)
 end
 
 local function buildExterior(root, F0)
@@ -61,17 +64,69 @@ local function buildExterior(root, F0)
 			e.box("PilarLobi" .. nm .. i, x0, x1, 0, 14.8, zs[i], zs[i + 1], C.cream, M.Limestone)
 		end
 		for i = 2, #zs - 1, 2 do
-			e.box("AmbangJendela" .. nm .. i, x0, x1, 0, 1.2, zs[i], zs[i + 1], C.cream, M.Limestone)
-			e.box("KepalaJendela" .. nm .. i, x0, x1, 12.4, 14.8, zs[i], zs[i + 1], C.cream, M.Limestone)
-			e.box("KacaSamping" .. nm .. i, x0 + 0.4, x1 - 0.4, 1.2, 12.4, zs[i], zs[i + 1], C.glass, M.Glass, 0.45)
-			e.box("KusenSamping" .. nm .. i, x0 + 0.3, x1 - 0.3, 1.1, 1.4, zs[i], zs[i + 1], C.gold, M.Metal)
+			e.box(
+				"AmbangJendela" .. nm .. i,
+				x0,
+				x1,
+				0,
+				1.2,
+				zs[i],
+				zs[i + 1],
+				C.cream,
+				M.Limestone
+			)
+			e.box(
+				"KepalaJendela" .. nm .. i,
+				x0,
+				x1,
+				12.4,
+				14.8,
+				zs[i],
+				zs[i + 1],
+				C.cream,
+				M.Limestone
+			)
+			e.box(
+				"KacaSamping" .. nm .. i,
+				x0 + 0.4,
+				x1 - 0.4,
+				1.2,
+				12.4,
+				zs[i],
+				zs[i + 1],
+				C.glass,
+				M.Glass,
+				0.45
+			)
+			e.box(
+				"KusenSamping" .. nm .. i,
+				x0 + 0.3,
+				x1 - 0.3,
+				1.1,
+				1.4,
+				zs[i],
+				zs[i + 1],
+				C.gold,
+				M.Metal
+			)
 		end
 		-- lantai koridor: dinding batu dengan jendela ujung koridor
 		e.box("TembokKoridor" .. nm .. "U", x0, x1, 14.8, 26, -26, -3.2, C.cream, M.Limestone)
 		e.box("TembokKoridor" .. nm .. "S", x0, x1, 14.8, 26, 3.2, 26, C.cream, M.Limestone)
 		e.box("TembokKoridor" .. nm .. "Bwh", x0, x1, 14.8, 17.4, -3.2, 3.2, C.cream, M.Limestone)
 		e.box("TembokKoridor" .. nm .. "Ats", x0, x1, 25.2, 26, -3.2, 3.2, C.cream, M.Limestone)
-		e.box("KacaUjungKoridor" .. nm, x0 + 0.4, x1 - 0.4, 17.4, 25.2, -3.2, 3.2, C.glass, M.Glass, 0.4)
+		e.box(
+			"KacaUjungKoridor" .. nm,
+			x0 + 0.4,
+			x1 - 0.4,
+			17.4,
+			25.2,
+			-3.2,
+			3.2,
+			C.glass,
+			M.Glass,
+			0.4
+		)
 	end
 	-- selatan lobi + inti belakang
 	e.box("TembokSelatanLobi", -48, 48, 0, 14.8, 24.8, 26, C.cream, M.Limestone)
@@ -93,10 +148,40 @@ local function buildExterior(root, F0)
 			e.box("KacaKamarUtara", -46.8, 46.8, 16, 26, z0, z1, C.glass, M.Glass, 0.45)
 		end
 		for _, x in fins do
-			e.box("SirippKamar", x - 0.5, x + 0.5, 14.8, 27.2, if dir < 0 then zc - 1.2 else zc - 0.2, if dir < 0 then zc + 0.2 else zc + 1.2, C.stone, M.Limestone)
+			e.box(
+				"SirippKamar",
+				x - 0.5,
+				x + 0.5,
+				14.8,
+				27.2,
+				if dir < 0 then zc - 1.2 else zc - 0.2,
+				if dir < 0 then zc + 0.2 else zc + 1.2,
+				C.stone,
+				M.Limestone
+			)
 		end
-		e.box("TiangUjungKiri", -48, -46.8, 14.8, 27.2, if dir < 0 then zc - 1.2 else zc - 0.4, if dir < 0 then zc + 0.4 else zc + 1.2, C.stone, M.Limestone)
-		e.box("TiangUjungKanan", 46.8, 48, 14.8, 27.2, if dir < 0 then zc - 1.2 else zc - 0.4, if dir < 0 then zc + 0.4 else zc + 1.2, C.stone, M.Limestone)
+		e.box(
+			"TiangUjungKiri",
+			-48,
+			-46.8,
+			14.8,
+			27.2,
+			if dir < 0 then zc - 1.2 else zc - 0.4,
+			if dir < 0 then zc + 0.4 else zc + 1.2,
+			C.stone,
+			M.Limestone
+		)
+		e.box(
+			"TiangUjungKanan",
+			46.8,
+			48,
+			14.8,
+			27.2,
+			if dir < 0 then zc - 1.2 else zc - 0.4,
+			if dir < 0 then zc + 0.4 else zc + 1.2,
+			C.stone,
+			M.Limestone
+		)
 	end
 	facade(-26, -1, { -24, 0, 24 })
 	facade(26, 1, { -26, -6, 6, 26 })
@@ -108,19 +193,62 @@ local function buildExterior(root, F0)
 		local b = 27.2 + 9 * k
 		for _, dir in { -1, 1 } do
 			local z = 26 * dir
-			local z0, z1 = if dir < 0 then z - 0.3 else z - 0.3, if dir < 0 then z + 0.3 else z + 0.3
-			e.box("SpandrelUtaraSelatan", -48, 48, b, b + 1.6, z - 1.0 * math.abs(dir) * 0.5 - 0.3, z + 0.5 * math.abs(dir) + 0.3, C.stone, M.Limestone)
-			local g = e.box("KacaMenara", -46.8, 46.8, b + 1.6, b + 9, z - 0.15, z + 0.15, C.glassD, M.Glass, 0.3)
+			local z0, z1 =
+				if dir < 0 then z - 0.3 else z - 0.3, if dir < 0 then z + 0.3 else z + 0.3
+			e.box(
+				"SpandrelUtaraSelatan",
+				-48,
+				48,
+				b,
+				b + 1.6,
+				z - 1.0 * math.abs(dir) * 0.5 - 0.3,
+				z + 0.5 * math.abs(dir) + 0.3,
+				C.stone,
+				M.Limestone
+			)
+			local g = e.box(
+				"KacaMenara",
+				-46.8,
+				46.8,
+				b + 1.6,
+				b + 9,
+				z - 0.15,
+				z + 0.15,
+				C.glassD,
+				M.Glass,
+				0.3
+			)
 			CollectionService:AddTag(g, "NightWindow")
 			for x = -40, 40, 8 do
-				e.box("SirippMenara", x - 0.4, x + 0.4, b + 1.6, b + 9, if dir < 0 then z - 1.3 else z - 0.2, if dir < 0 then z + 0.2 else z + 1.3, C.creamD, M.Limestone)
+				e.box(
+					"SirippMenara",
+					x - 0.4,
+					x + 0.4,
+					b + 1.6,
+					b + 9,
+					if dir < 0 then z - 1.3 else z - 0.2,
+					if dir < 0 then z + 0.2 else z + 1.3,
+					C.creamD,
+					M.Limestone
+				)
 			end
 		end
 		for _, side in { -1, 1 } do
 			local x = 47.4 * side
 			e.box("SpandrelSamping", x - 0.7, x + 0.7, b, b + 1.6, -26, 26, C.stone, M.Limestone)
 			for _, zc in { -15, 15 } do
-				local g = e.box("KacaMenaraSamping", x - 0.2, x + 0.2, b + 2.2, b + 8.4, zc - 7, zc + 7, C.glassD, M.Glass, 0.3)
+				local g = e.box(
+					"KacaMenaraSamping",
+					x - 0.2,
+					x + 0.2,
+					b + 2.2,
+					b + 8.4,
+					zc - 7,
+					zc + 7,
+					C.glassD,
+					M.Glass,
+					0.3
+				)
 				CollectionService:AddTag(g, "NightWindow")
 			end
 		end
@@ -140,8 +268,18 @@ local function buildExterior(root, F0)
 	e.cyl("Antena", 38, 82.4, -10, 0.5, 16, C.steelD, M.Metal)
 	e.ball("LampuAntena", 38, 98.6, -10, 1.2, rgb(255, 60, 60), M.Neon)
 	-- papan nama di atap (menghadap utara)
-	local board = e.sign("PapanNamaAtap", -26, 26, 85, 92, -24.6, -24.0, Enum.NormalId.Front, "HOTEL BINTANG KOTA",
-		{ bg = C.charcoalD, color = C.gold, pps = 40, font = Enum.Font.GothamBlack, mat = M.Metal })
+	local board = e.sign(
+		"PapanNamaAtap",
+		-26,
+		26,
+		85,
+		92,
+		-24.6,
+		-24.0,
+		Enum.NormalId.Front,
+		"HOTEL BINTANG KOTA",
+		{ bg = C.charcoalD, color = C.gold, pps = 40, font = Enum.Font.GothamBlack, mat = M.Metal }
+	)
 	e.box("PapanTiangKiri", -20, -19, 82.4, 85, -24.6, -24.0, C.charcoal, M.Metal)
 	e.box("PapanTiangKanan", 19, 20, 82.4, 85, -24.6, -24.0, C.charcoal, M.Metal)
 	e.box("PapanBingkaiAtas", -26.4, 26.4, 92, 92.5, -24.9, -23.8, C.gold, M.Metal)
@@ -149,8 +287,18 @@ local function buildExterior(root, F0)
 	-- kanopi pintu masuk
 	e.box("Kanopi", -22, 22, 11.4, 12.6, -38, -26, C.charcoal, M.Metal)
 	e.box("KanopiTepi", -22.4, 22.4, 11.2, 12.8, -38.4, -37.6, C.gold, M.Metal)
-	e.sign("PapanKanopi", -16, 16, 11.4, 12.6, -38.6, -38.4, Enum.NormalId.Front, "HOTEL BINTANG KOTA",
-		{ bg = C.charcoalD, color = C.gold, pps = 40, font = Enum.Font.GothamBold })
+	e.sign(
+		"PapanKanopi",
+		-16,
+		16,
+		11.4,
+		12.6,
+		-38.6,
+		-38.4,
+		Enum.NormalId.Front,
+		"HOTEL BINTANG KOTA",
+		{ bg = C.charcoalD, color = C.gold, pps = 40, font = Enum.Font.GothamBold }
+	)
 	for _, x in { -20, -8, 8, 20 } do
 		e.cyl("TiangKanopi", x, 0, -37, 1.4, 11.4, C.stone, M.Marble)
 		e.cyl("CincinTiang", x, 0.4, -37, 1.8, 0.4, C.gold, M.Metal)
@@ -158,7 +306,8 @@ local function buildExterior(root, F0)
 	end
 	for _, x in { -15, -5, 5, 15 } do
 		for _, z in { -30, -35 } do
-			local lt = e.box("LampuKanopi", x - 0.8, x + 0.8, 11.3, 11.4, z - 0.8, z + 0.8, C.warm, M.Neon)
+			local lt =
+				e.box("LampuKanopi", x - 0.8, x + 0.8, 11.3, 11.4, z - 0.8, z + 0.8, C.warm, M.Neon)
 			CollectionService:AddTag(lt, "NightLight")
 			e.light(lt, 14, 0.3)
 		end
@@ -207,12 +356,23 @@ local function buildLobby(root, F0)
 	-- plafon + lampu sorot
 	c.box("PlafonLobi", -46.8, 46.8, 14.5, 14.8, -25.7, 24.8, C.cream, M.SmoothPlastic)
 	for _, x in { -36, -18, 18, 36 } do
-		local s = c.box("LampuPlafon", x - 0.4, x + 0.4, 14.4, 14.5, -22, 21, C.warm, M.SmoothPlastic)
+		local s =
+			c.box("LampuPlafon", x - 0.4, x + 0.4, 14.4, 14.5, -22, 21, C.warm, M.SmoothPlastic)
 		CollectionService:AddTag(s, "NightLight")
 	end
 	for _, x in { -36, -18, 18, 36 } do
 		for _, z in { -14, 10 } do
-			local p = c.box("TitikCahaya", x - 0.3, x + 0.3, 14.3, 14.4, z - 0.3, z + 0.3, C.warm, M.SmoothPlastic)
+			local p = c.box(
+				"TitikCahaya",
+				x - 0.3,
+				x + 0.3,
+				14.3,
+				14.4,
+				z - 0.3,
+				z + 0.3,
+				C.warm,
+				M.SmoothPlastic
+			)
 			c.light(p, 22, 0.22)
 		end
 	end
@@ -239,11 +399,20 @@ local function buildLobby(root, F0)
 		k.cyl("CincinLampu", 0, 10.2, 0, 7.0, 0.3, C.gold, M.Metal)
 		for i = 0, 11 do
 			local a = i / 12 * math.pi * 2
-			local b = k.ball("BohlamLampu", math.cos(a) * 3.2, 9.7, math.sin(a) * 3.2, 0.9, C.warm, M.Neon)
+			local b = k.ball(
+				"BohlamLampu",
+				math.cos(a) * 3.2,
+				9.7,
+				math.sin(a) * 3.2,
+				0.9,
+				C.warm,
+				M.Neon
+			)
 			if i % 4 == 0 then
 				k.light(b, 26, 0.3)
 			end
-			k.ball("KristalLampu", math.cos(a) * 2.2, 8.9, math.sin(a) * 2.2, 0.6, C.white, M.Glass).Transparency = 0.3
+			k.ball("KristalLampu", math.cos(a) * 2.2, 8.9, math.sin(a) * 2.2, 0.6, C.white, M.Glass).Transparency =
+				0.3
 		end
 		local mid = k.ball("BolaTengah", 0, 9.4, 0, 2.0, C.warm, M.Neon)
 		CollectionService:AddTag(mid, "NightLight")
@@ -256,8 +425,19 @@ local function buildLobby(root, F0)
 		r.box("MejaResepsionisAtas", -11.4, 11.4, 3.6, 4.0, -1.6, 1.4, C.cream, M.Marble)
 		for _, x in { -6, 0, 6 } do
 			r.box("MonitorTiang", x - 0.15, x + 0.15, 4.0, 4.9, 0.6, 0.9, C.black, M.Metal)
-			local mon = r.box("Monitor", x - 1.3, x + 1.3, 4.7, 6.3, 0.5, 0.7, C.black, M.SmoothPlastic)
-			local scr = r.box("MonitorLayar", x - 1.15, x + 1.15, 4.85, 6.15, 0.45, 0.5, rgb(64, 120, 190), M.Neon)
+			local mon =
+				r.box("Monitor", x - 1.3, x + 1.3, 4.7, 6.3, 0.5, 0.7, C.black, M.SmoothPlastic)
+			local scr = r.box(
+				"MonitorLayar",
+				x - 1.15,
+				x + 1.15,
+				4.85,
+				6.15,
+				0.45,
+				0.5,
+				rgb(64, 120, 190),
+				M.Neon
+			)
 			scr.CanCollide = false
 		end
 		local bell = r.cyl("LoncengMeja", -9, 4.0, -0.2, 0.9, 0.25, C.gold, M.Metal)
@@ -278,10 +458,31 @@ local function buildLobby(root, F0)
 		r.box("RakKunci", -9, 9, 5.4, 9.4, 4.8, 5.1, C.walnut, M.Wood)
 		for i = 0, 8 do
 			for j = 0, 3 do
-				r.box("KunciKamar", -8.3 + i * 2.05, -7.1 + i * 2.05, 5.8 + j * 0.9, 6.4 + j * 0.9, 4.6, 4.8, C.gold, M.Metal)
+				r.box(
+					"KunciKamar",
+					-8.3 + i * 2.05,
+					-7.1 + i * 2.05,
+					5.8 + j * 0.9,
+					6.4 + j * 0.9,
+					4.6,
+					4.8,
+					C.gold,
+					M.Metal
+				)
 			end
 		end
-		r.sign("LogoResepsionis", -9, 9, 9.8, 11.4, 4.7, 4.8, Enum.NormalId.Back, "RESEPSIONIS", { bg = C.charcoalD, color = C.gold, pps = 40 })
+		r.sign(
+			"LogoResepsionis",
+			-9,
+			9,
+			9.8,
+			11.4,
+			4.7,
+			4.8,
+			Enum.NormalId.Back,
+			"RESEPSIONIS",
+			{ bg = C.charcoalD, color = C.gold, pps = 40 }
+		)
 		-- tiang tali antrean
 		for _, x in { -6, 6 } do
 			r.cyl("TiangAntre", x, 0, -5, 0.5, 3, C.gold, M.Metal)
@@ -318,10 +519,35 @@ local function buildLobby(root, F0)
 		local shelf = at(lob, 31, 0, 23.6)
 		shelf.box("RakBar", -12, 12, 3.6, 9.6, -0.5, 0.2, C.walnut, M.Wood)
 		for r = 0, 2 do
-			shelf.box("RakBarPapan", -12, 12, 4.2 + r * 2.2, 4.4 + r * 2.2, -1.0, 0.2, C.walnutL, M.Wood)
+			shelf.box(
+				"RakBarPapan",
+				-12,
+				12,
+				4.2 + r * 2.2,
+				4.4 + r * 2.2,
+				-1.0,
+				0.2,
+				C.walnutL,
+				M.Wood
+			)
 			for i = 0, 15 do
-				local colorList = { rgb(240, 150, 60), rgb(120, 200, 100), rgb(240, 90, 120), rgb(255, 230, 120), rgb(100, 160, 240) }
-				shelf.cyl("Botol", -11 + i * 1.45, 4.4 + r * 2.2, -0.4, 0.7, 1.6, colorList[(i + r) % 5 + 1], M.Glass)
+				local colorList = {
+					rgb(240, 150, 60),
+					rgb(120, 200, 100),
+					rgb(240, 90, 120),
+					rgb(255, 230, 120),
+					rgb(100, 160, 240),
+				}
+				shelf.cyl(
+					"Botol",
+					-11 + i * 1.45,
+					4.4 + r * 2.2,
+					-0.4,
+					0.7,
+					1.6,
+					colorList[(i + r) % 5 + 1],
+					M.Glass
+				)
 			end
 		end
 		for _, x in { -8, 0, 8 } do
@@ -329,7 +555,18 @@ local function buildLobby(root, F0)
 			b.cyl("KabelLampuBar", x, 8.5, 0, 0.1, 6.0, C.charcoalD, M.Metal)
 			b.light(lampBulb, 14, 0.25)
 		end
-		b.sign("PapanBar", -6, 6, 11.5, 13.0, -0.7, -0.5, Enum.NormalId.Front, "BAR & LOUNGE", { bg = C.charcoalD, color = C.gold, pps = 40 })
+		b.sign(
+			"PapanBar",
+			-6,
+			6,
+			11.5,
+			13.0,
+			-0.7,
+			-0.5,
+			Enum.NormalId.Front,
+			"BAR & LOUNGE",
+			{ bg = C.charcoalD, color = C.gold, pps = 40 }
+		)
 		b.box("TiangPapanBarKiri", -6.2, -5.8, 9.6, 13.0, -0.7, -0.5, C.gold, M.Metal)
 		-- mesin kopi sederhana
 		b.box("MesinKopi", -10, -7, 4.0, 6.0, -0.2, 1.0, C.steel, M.Metal)
@@ -351,7 +588,17 @@ local function buildLobby(root, F0)
 		for _, sx in { -1.9, 1.9 } do
 			for _, sz in { -1.1, 1.1 } do
 				k.cyl("RodaTroli", sx, 0, sz, 0.7, 0.2, C.charcoalD, M.Metal)
-				k.box("KakiTroli", sx - 0.08, sx + 0.08, 0.2, 5.4, sz - 0.08, sz + 0.08, C.gold, M.Metal)
+				k.box(
+					"KakiTroli",
+					sx - 0.08,
+					sx + 0.08,
+					0.2,
+					5.4,
+					sz - 0.08,
+					sz + 0.08,
+					C.gold,
+					M.Metal
+				)
 			end
 		end
 		k.box("PalangTroli", -1.95, 1.95, 5.3, 5.5, -1.2, 1.2, C.gold, M.Metal)
@@ -361,14 +608,48 @@ local function buildLobby(root, F0)
 	end
 	-- papan petunjuk gantung
 	for _, d in { { -22, "← RESEPSIONIS" }, { 22, "BAR & LOUNGE →" } } do
-		local p = c.sign("PetunjukGantung", d[1] - 5, d[1] + 5, 10.2, 12, -3.2, -2.8, Enum.NormalId.Front, d[2], { bg = C.charcoalD, color = C.gold, pps = 40 })
-		local back = c.sign("PetunjukGantungBelakang", d[1] - 5, d[1] + 5, 10.2, 12, -2.8, -2.7, Enum.NormalId.Back, d[2], { bg = C.charcoalD, color = C.gold, pps = 40 })
+		local p = c.sign(
+			"PetunjukGantung",
+			d[1] - 5,
+			d[1] + 5,
+			10.2,
+			12,
+			-3.2,
+			-2.8,
+			Enum.NormalId.Front,
+			d[2],
+			{ bg = C.charcoalD, color = C.gold, pps = 40 }
+		)
+		local back = c.sign(
+			"PetunjukGantungBelakang",
+			d[1] - 5,
+			d[1] + 5,
+			10.2,
+			12,
+			-2.8,
+			-2.7,
+			Enum.NormalId.Back,
+			d[2],
+			{ bg = C.charcoalD, color = C.gold, pps = 40 }
+		)
 		c.cyl("TaliPetunjukKiri", d[1] - 4, 12, -3.0, 0.1, 2.5, C.gold, M.Metal)
 		c.cyl("TaliPetunjukKanan", d[1] + 4, 12, -3.0, 0.1, 2.5, C.gold, M.Metal)
 	end
 	-- lukisan di dinding barat dan timur
-	Furn.painting(at(lob, -46.6, 4.2, -14, math.pi / 2), 8, 5, { rgb(40, 70, 110), rgb(208, 168, 86), rgb(140, 40, 60) }, "LukisanLobiBarat")
-	Furn.painting(at(lob, 46.6, 4.2, -14, -math.pi / 2), 8, 5, { rgb(30, 90, 100), rgb(240, 220, 170), rgb(60, 60, 90) }, "LukisanLobiTimur")
+	Furn.painting(
+		at(lob, -46.6, 4.2, -14, math.pi / 2),
+		8,
+		5,
+		{ rgb(40, 70, 110), rgb(208, 168, 86), rgb(140, 40, 60) },
+		"LukisanLobiBarat"
+	)
+	Furn.painting(
+		at(lob, 46.6, 4.2, -14, -math.pi / 2),
+		8,
+		5,
+		{ rgb(30, 90, 100), rgb(240, 220, 170), rgb(60, 60, 90) },
+		"LukisanLobiTimur"
+	)
 end
 
 return function()
