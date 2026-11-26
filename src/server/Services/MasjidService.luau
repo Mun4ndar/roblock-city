@@ -166,37 +166,43 @@ local ROSTER: { Spec } = {
 		cap = "peci",
 	},
 	{
-		id = "PakSiswo",
-		name = "Pak Siswo",
+		id = "BuSiti",
+		name = "Bu Siti",
 		role = "Jamaah",
 		label = "Jamaah",
 		spot = Vector2.new(522, -26),
 		skin = SKIN_D,
-		shirt = WHITE,
-		legs = rgb(70, 90, 120),
-		cap = "peci",
+		shirt = MUKENA,
+		legs = MUKENA,
+		cap = "hijab",
+		capColor = MUKENA,
+		female = true,
 	},
 	{
-		id = "PakAgus",
-		name = "Pak Agus",
+		id = "BuAisyah",
+		name = "Bu Aisyah",
 		role = "Jamaah",
 		label = "Jamaah",
 		spot = Vector2.new(522, -20),
 		skin = SKIN_B,
-		shirt = SKY,
-		legs = rgb(130, 45, 55),
-		cap = "peci",
+		shirt = rgb(238, 226, 246),
+		legs = rgb(238, 226, 246),
+		cap = "hijab",
+		capColor = rgb(238, 226, 246),
+		female = true,
 	},
 	{
-		id = "Nurul",
-		name = "Nurul",
+		id = "KakNurul",
+		name = "Kak Nurul",
 		role = "Jamaah",
 		label = "Jamaah",
 		spot = Vector2.new(522, -14),
 		skin = SKIN_A,
-		shirt = CREAM,
-		legs = rgb(40, 110, 80),
-		cap = "peci",
+		shirt = rgb(250, 228, 236),
+		legs = rgb(250, 228, 236),
+		cap = "hijab",
+		capColor = rgb(250, 228, 236),
+		female = true,
 		scale = 0.86,
 	},
 	{
@@ -695,7 +701,7 @@ local function releasePlayer(player: Player)
 	end
 end
 
-local function joinPrayer(player: Player, index: number)
+local function joinPrayer(player: Player, index: number, anyDistance: boolean?)
 	if phase ~= "Azan" and phase ~= "Iqamah" then
 		return
 	end
@@ -715,7 +721,7 @@ local function joinPrayer(player: Player, index: number)
 	then
 		return
 	end
-	if (root.Position - slot.part.Position).Magnitude > 16 then
+	if not anyDistance and (root.Position - slot.part.Position).Magnitude > 16 then
 		return
 	end
 	if humanoid.SeatPart then
@@ -745,7 +751,7 @@ local function joinPrayer(player: Player, index: number)
 	CollectionService:AddTag(character, TAG_POSE)
 end
 
-local function sitPlayer(player: Player, seat: Seat)
+local function sitPlayer(player: Player, seat: Seat, anyDistance: boolean?)
 	if phase ~= "Tausiah" and phase ~= "Selesai" then
 		return
 	end
@@ -755,7 +761,9 @@ local function sitPlayer(player: Player, seat: Seat)
 	if humanoid == nil or root == nil or not root:IsA("BasePart") or humanoid.Health <= 0 then
 		return
 	end
-	if seat.Occupant ~= nil or (root.Position - seat.Position).Magnitude > 16 then
+	if
+		seat.Occupant ~= nil or (not anyDistance and (root.Position - seat.Position).Magnitude > 16)
+	then
 		return
 	end
 	releasePlayer(player)
@@ -772,6 +780,33 @@ local PAD_COLORS = {
 }
 
 local function buildFurniture()
+	-- penanda area duduk tausiah
+	local anchor = Instance.new("Part")
+	anchor.Name = "PenandaTausiah"
+	anchor.Anchored = true
+	anchor.CanCollide = false
+	anchor.CanQuery = false
+	anchor.Transparency = 1
+	anchor.Size = Vector3.one
+	anchor.Position = Vector3.new(533, FLOOR_Y + 4.5, -21.5)
+	local sign = Instance.new("BillboardGui")
+	sign.Size = UDim2.fromOffset(200, 30)
+	sign.MaxDistance = 45
+	sign.AlwaysOnTop = false
+	local signText = Instance.new("TextLabel")
+	signText.Size = UDim2.fromScale(1, 1)
+	signText.BackgroundColor3 = Color3.fromRGB(20, 70, 56)
+	signText.BackgroundTransparency = 0.15
+	signText.Font = Enum.Font.FredokaOne
+	signText.TextScaled = true
+	signText.TextColor3 = Color3.fromRGB(246, 224, 140)
+	signText.Text = "Area duduk tausiah"
+	local signCorner = Instance.new("UICorner")
+	signCorner.CornerRadius = UDim.new(0, 8)
+	signCorner.Parent = signText
+	signText.Parent = sign
+	sign.Parent = anchor
+	anchor.Parent = folder
 	-- sajadah di bawah tiap NPC (imam, muazin, jamaah, marbot)
 	local function npcMat(x: number, z: number, index: number)
 		local mat = Instance.new("Part")
@@ -1319,6 +1354,30 @@ function MasjidService.start()
 	leave.OnServerEvent:Connect(function(player: Player, action: any)
 		if action == "leave" then
 			releasePlayer(player)
+		elseif action == "join" or action == "sit" then
+			local character = player.Character
+			local root = if character then character:FindFirstChild("HumanoidRootPart") else nil
+			if root and root:IsA("BasePart") and (root.Position - Config.CENTER).Magnitude < 60 then
+				local best: number? = nil
+				local bestDistance = math.huge
+				local list: { any } = if action == "join" then slots else seats
+				for index, entry in list do
+					local free = if action == "join"
+						then entry.owner == nil
+						else entry.part.Occupant == nil
+					local distance = (entry.part.Position - root.Position).Magnitude
+					if free and distance < bestDistance then
+						best, bestDistance = index, distance
+					end
+				end
+				if best then
+					if action == "join" then
+						joinPrayer(player, best, true)
+					else
+						sitPlayer(player, seats[best].part, true)
+					end
+				end
+			end
 		end
 	end)
 	Players.PlayerRemoving:Connect(function(player: Player)

@@ -250,6 +250,8 @@ local titleLabel: TextLabel
 local textLabel: TextLabel
 local meaningLabel: TextLabel
 local leaveButton: TextButton
+local actionButton: TextButton
+local actionMode = ""
 
 local function buildUi()
 	local gui = Instance.new("ScreenGui")
@@ -328,6 +330,26 @@ local function buildUi()
 	leaveCorner.Parent = leaveButton
 	leaveButton.Parent = panel
 
+	actionButton = Instance.new("TextButton")
+	actionButton.Name = "AksiMasjid"
+	actionButton.AnchorPoint = Vector2.new(0.5, 0)
+	actionButton.Position = UDim2.new(0.5, 0, 1, 8)
+	actionButton.Size = UDim2.fromOffset(250, 36)
+	actionButton.BackgroundColor3 = Color3.fromRGB(40, 150, 100)
+	actionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	actionButton.Font = Enum.Font.FredokaOne
+	actionButton.TextSize = 17
+	actionButton.Visible = false
+	local actionCorner = Instance.new("UICorner")
+	actionCorner.CornerRadius = UDim.new(0, 12)
+	actionCorner.Parent = actionButton
+	actionButton.Parent = panel
+	actionButton.Activated:Connect(function()
+		if actionMode ~= "" then
+			Net.event(Net.Names.MasjidAction):FireServer(actionMode)
+		end
+	end)
+
 	panel.Parent = gui
 	UiScale.attach(panel)
 	gui.Parent = player:WaitForChild("PlayerGui")
@@ -345,7 +367,18 @@ local function refreshPanel()
 	textLabel.Text = if type(text) == "string" then text else ""
 	local meaning = Workspace:GetAttribute("MasjidArti")
 	meaningLabel.Text = if type(meaning) == "string" then meaning else ""
-	leaveButton.Visible = player:GetAttribute("MasjidSlot") ~= nil and phase ~= "Idle"
+	local joined = player:GetAttribute("MasjidSlot") ~= nil
+	leaveButton.Visible = joined and phase ~= "Idle"
+	if (phase == "Azan" or phase == "Iqamah") and not joined then
+		actionMode = "join"
+		actionButton.Text = "Ikut sholat berjamaah"
+	elseif phase == "Tausiah" or phase == "Selesai" then
+		actionMode = "sit"
+		actionButton.Text = "Duduk mendengarkan tausiah"
+	else
+		actionMode = ""
+	end
+	actionButton.Visible = actionMode ~= ""
 end
 
 local function updateVisibility()

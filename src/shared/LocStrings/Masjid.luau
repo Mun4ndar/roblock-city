@@ -100,6 +100,7 @@ local exact: { [string]: string } = {
 	["Alhamdulillah, masjidnya bersih dan nyaman. 🧹"] = "Alhamdulillah, the mosque is clean and cozy. 🧹",
 	["Pak Rizky · Muazin"] = "Pak Rizky · Muezzin",
 	["Pak Jaka · Marbot"] = "Pak Jaka · Mosque Caretaker",
+	["Area duduk tausiah"] = "Sermon seating area",
 }
 
 local patterns: { { string } } = {

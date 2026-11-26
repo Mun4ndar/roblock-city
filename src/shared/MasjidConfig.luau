@@ -270,7 +270,7 @@ MasjidConfig.TAUSIAH = {
 			},
 			{
 				text = "Sebelum makan, berdoa dulu. Habiskan makanan, karena banyak orang yang sulit mendapatkannya.",
-				replyBy = "PakSiswo",
+				replyBy = "BuSiti",
 				reply = "Betul sekali, Ustadz.",
 			},
 			{
@@ -307,7 +307,7 @@ MasjidConfig.TAUSIAH = {
 			},
 			{
 				text = "Orang yang jujur hatinya ringan, tidurnya nyenyak, dan temannya banyak.",
-				replyBy = "PakAgus",
+				replyBy = "BuAisyah",
 				reply = "MasyaAllah.",
 			},
 			{
@@ -326,7 +326,7 @@ MasjidConfig.TAUSIAH = {
 			{ text = "Assalamu'alaikum. Sore ini kita belajar tentang berbagi dengan sesama." },
 			{
 				text = "Berbagi tidak harus menunggu kaya. Senyuman, bantuan tenaga, dan makanan kecil pun sangat berarti.",
-				replyBy = "Nurul",
+				replyBy = "KakNurul",
 				reply = "Aku sering membagi bekal ke teman!",
 			},
 			{
@@ -359,7 +359,7 @@ MasjidConfig.TAUSIAH = {
 			{ text = "Assalamu'alaikum. Menjelang malam ini kita bicara tentang orang tua kita." },
 			{
 				text = "Ayah dan ibu merawat kita sejak kecil. Mereka begadang saat kita sakit dan bekerja keras untuk kita.",
-				replyBy = "PakSiswo",
+				replyBy = "BuSiti",
 				reply = "Betul, Ustadz. Orang tua itu sayang sekali.",
 			},
 			{
@@ -392,7 +392,7 @@ MasjidConfig.TAUSIAH = {
 			{ text = "Assalamu'alaikum. Malam ini kita belajar tentang persahabatan." },
 			{
 				text = "Teman yang baik mengingatkan kita pada kebaikan dan menemani saat susah maupun senang.",
-				replyBy = "Nurul",
+				replyBy = "KakNurul",
 				reply = "Aku punya teman baik di sekolah!",
 			},
 			{
