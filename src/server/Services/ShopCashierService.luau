@@ -25,7 +25,15 @@ local GREETINGS = {
 	"Terima kasih sudah mampir! ✨",
 }
 
-local function decorate(model: Model, on: BasePart, name: string, size: Vector3, color: Color3, offset: CFrame, ball: boolean?)
+local function decorate(
+	model: Model,
+	on: BasePart,
+	name: string,
+	size: Vector3,
+	color: Color3,
+	offset: CFrame,
+	ball: boolean?
+)
 	local part = Instance.new("Part")
 	part.Name = name
 	part.Shape = if ball then Enum.PartType.Ball else Enum.PartType.Block
@@ -119,7 +127,13 @@ local function spawnCashier()
 	local humanoid = model:FindFirstChildOfClass("Humanoid")
 	local head = model:FindFirstChild("Head")
 	local root = model:FindFirstChild("HumanoidRootPart")
-	if humanoid == nil or head == nil or not head:IsA("BasePart") or root == nil or not root:IsA("BasePart") then
+	if
+		humanoid == nil
+		or head == nil
+		or not head:IsA("BasePart")
+		or root == nil
+		or not root:IsA("BasePart")
+	then
 		model:Destroy()
 		return
 	end
@@ -151,19 +165,48 @@ local function spawnCashier()
 		end
 	end
 	-- rambut dan topi biru TOKO
-	decorate(model, head, "Rambut", Vector3.new(1.42, 1.2, 1.42), rgb(40, 30, 28), CFrame.new(0, 0.34, 0.08), true)
-	decorate(model, head, "Topi", Vector3.new(1.5, 0.45, 1.5), rgb(35, 110, 210), CFrame.new(0, 0.62, 0))
-	decorate(model, head, "TopiLidah", Vector3.new(1.1, 0.12, 0.7), rgb(35, 110, 210), CFrame.new(0, 0.42, -0.85))
+	decorate(
+		model,
+		head,
+		"Rambut",
+		Vector3.new(1.42, 1.2, 1.42),
+		rgb(40, 30, 28),
+		CFrame.new(0, 0.34, 0.08),
+		true
+	)
+	decorate(
+		model,
+		head,
+		"Topi",
+		Vector3.new(1.5, 0.45, 1.5),
+		rgb(35, 110, 210),
+		CFrame.new(0, 0.62, 0)
+	)
+	decorate(
+		model,
+		head,
+		"TopiLidah",
+		Vector3.new(1.1, 0.12, 0.7),
+		rgb(35, 110, 210),
+		CFrame.new(0, 0.42, -0.85)
+	)
 
 	local y = FLOOR_Y + humanoid.HipHeight + root.Size.Y / 2
-	local base = CFrame.lookAt(Vector3.new(POSITION.X, y, POSITION.Z), Vector3.new(POSITION.X + FACING.X, y, POSITION.Z + FACING.Z))
+	local base = CFrame.lookAt(
+		Vector3.new(POSITION.X, y, POSITION.Z),
+		Vector3.new(POSITION.X + FACING.X, y, POSITION.Z + FACING.Z)
+	)
 	model:PivotTo(base)
 	root.Anchored = true
 	model.Parent = Workspace
 
 	local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator")
 	animator.Parent = humanoid
-	local function track(id: string, priority: Enum.AnimationPriority, looped: boolean): AnimationTrack
+	local function track(
+		id: string,
+		priority: Enum.AnimationPriority,
+		looped: boolean
+	): AnimationTrack
 		local animation = Instance.new("Animation")
 		animation.AnimationId = id
 		local t = animator:LoadAnimation(animation)
@@ -183,10 +226,17 @@ local function spawnCashier()
 		local player, distance = nearestPlayer(root.Position)
 		if player and distance < GREET_DISTANCE then
 			local character = player.Character
-			local theirRoot = if character then character:FindFirstChild("HumanoidRootPart") else nil
+			local theirRoot = if character
+				then character:FindFirstChild("HumanoidRootPart")
+				else nil
 			if theirRoot and theirRoot:IsA("BasePart") then
 				local here = model:GetPivot().Position
-				model:PivotTo(CFrame.lookAt(here, Vector3.new(theirRoot.Position.X, here.Y, theirRoot.Position.Z)))
+				model:PivotTo(
+					CFrame.lookAt(
+						here,
+						Vector3.new(theirRoot.Position.X, here.Y, theirRoot.Position.Z)
+					)
+				)
 			end
 			if not greeted or os.clock() - lastWave > 20 then
 				greeted = true

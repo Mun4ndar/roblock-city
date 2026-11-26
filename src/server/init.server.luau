@@ -20,6 +20,7 @@ local ORDER = {
 	"DoorService",
 	"BalaiKotaService",
 	"ResortService",
+	"HotelService",
 	"ClinicService",
 	"HouseService",
 	"SocialService",

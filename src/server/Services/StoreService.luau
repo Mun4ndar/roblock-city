@@ -7,7 +7,8 @@
 --   * makanan/minuman: klik untuk makan/minum (barang naik ke arah mulut, ada gelembung/remah dan
 --     emoji), jumlahnya berkurang, lalu "kenyang semangat" (lari lebih cepat sebentar).
 --   * mainan/payung: dibeli sekali, klik untuk bermain (tanpa damage).
---   * kasir: part bertag "StoreCounter" mendapat ProximityPrompt "Belanja".
+--   * rak/kulkas: part bertag "StoreShelf" (atribut Items, Label) mendapat prompt "Pilih Barang": barang masuk
+--     keranjang. Kasir: part bertag "StoreCounter" mendapat prompt "Bayar" (bayar isi keranjang).
 --   * model: ServerStorage.StoreTemplates[id] kalau ada, kalau belum ada dipakai bentuk sementara.
 
 local CollectionService = game:GetService("CollectionService")
@@ -36,6 +37,7 @@ local animRemote: RemoteEvent
 local lastBuy: { [Player]: number } = {}
 local busy: { [Tool]: boolean } = {}
 local lastUse: { [Tool]: number } = {}
+local carts: { [Player]: { [string]: number } } = {}
 
 -- ---------------------------------------------------------------- tas pemain
 
@@ -92,7 +94,13 @@ local function rgb(r: number, g: number, b: number): Color3
 end
 
 -- Silinder tegak (sumbu panjang = Y): tinggi h, diameter d.
-local function vcyl(h: number, d: number, y: number, color: Color3, extra: { [string]: any }?): Piece
+local function vcyl(
+	h: number,
+	d: number,
+	y: number,
+	color: Color3,
+	extra: { [string]: any }?
+): Piece
 	local piece: any = {
 		shape = "Cylinder",
 		size = Vector3.new(h, d, d),
@@ -141,7 +149,12 @@ local LOOKS: { [string]: { Piece } } = {
 		vcyl(0.9, 0.5, 0, rgb(205, 130, 60), GLASS),
 		vcyl(0.08, 0.56, 0.48, WHITE),
 		block(Vector3.new(0.07, 0.8, 0.07), Vector3.new(0.1, 0.8, 0), rgb(230, 60, 60)),
-		block(Vector3.new(0.18, 0.18, 0.18), Vector3.new(-0.08, 0.25, 0.05), rgb(235, 250, 255), GLASS),
+		block(
+			Vector3.new(0.18, 0.18, 0.18),
+			Vector3.new(-0.08, 0.25, 0.05),
+			rgb(235, 250, 255),
+			GLASS
+		),
 	},
 	kopi_susu = {
 		vcyl(0.9, 0.5, 0, rgb(120, 75, 50), GLASS),
@@ -188,7 +201,12 @@ local LOOKS: { [string]: { Piece } } = {
 	},
 	payung = {
 		block(Vector3.new(0.06, 1.2, 0.06), Vector3.new(0, 0.1, 0), rgb(120, 80, 50)),
-		ball(Vector3.new(1.8, 0.8, 1.8), Vector3.new(0, 0.75, 0), rgb(255, 205, 40), { name = "Canopy" }),
+		ball(
+			Vector3.new(1.8, 0.8, 1.8),
+			Vector3.new(0, 0.75, 0),
+			rgb(255, 205, 40),
+			{ name = "Canopy" }
+		),
 		block(Vector3.new(0.16, 0.06, 0.06), Vector3.new(0.05, -0.5, 0), rgb(120, 80, 50)),
 	},
 	bola_mainan = {
@@ -199,10 +217,30 @@ local LOOKS: { [string]: { Piece } } = {
 	mobil_mainan = {
 		block(Vector3.new(0.7, 0.3, 1.1), Vector3.new(0, 0, 0), rgb(230, 60, 60)),
 		block(Vector3.new(0.55, 0.25, 0.5), Vector3.new(0, 0.27, 0.05), rgb(170, 220, 255)),
-		{ shape = "Cylinder", size = Vector3.new(0.12, 0.3, 0.3), off = CFrame.new(0.38, -0.15, 0.35), color = rgb(30, 30, 35) },
-		{ shape = "Cylinder", size = Vector3.new(0.12, 0.3, 0.3), off = CFrame.new(-0.38, -0.15, 0.35), color = rgb(30, 30, 35) },
-		{ shape = "Cylinder", size = Vector3.new(0.12, 0.3, 0.3), off = CFrame.new(0.38, -0.15, -0.35), color = rgb(30, 30, 35) },
-		{ shape = "Cylinder", size = Vector3.new(0.12, 0.3, 0.3), off = CFrame.new(-0.38, -0.15, -0.35), color = rgb(30, 30, 35) },
+		{
+			shape = "Cylinder",
+			size = Vector3.new(0.12, 0.3, 0.3),
+			off = CFrame.new(0.38, -0.15, 0.35),
+			color = rgb(30, 30, 35),
+		},
+		{
+			shape = "Cylinder",
+			size = Vector3.new(0.12, 0.3, 0.3),
+			off = CFrame.new(-0.38, -0.15, 0.35),
+			color = rgb(30, 30, 35),
+		},
+		{
+			shape = "Cylinder",
+			size = Vector3.new(0.12, 0.3, 0.3),
+			off = CFrame.new(0.38, -0.15, -0.35),
+			color = rgb(30, 30, 35),
+		},
+		{
+			shape = "Cylinder",
+			size = Vector3.new(0.12, 0.3, 0.3),
+			off = CFrame.new(-0.38, -0.15, -0.35),
+			color = rgb(30, 30, 35),
+		},
 	},
 	boneka_beruang = {
 		ball(Vector3.new(0.65, 0.75, 0.55), Vector3.new(0, 0, 0), rgb(160, 105, 65)),
@@ -330,9 +368,11 @@ local function floatEmoji(anchor: BasePart, emoji: string, count: number)
 		label:SetAttribute("NoLoc", true)
 		label.Parent = gui
 		gui.Parent = anchor
-		TweenService:Create(gui, TweenInfo.new(1.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-			StudsOffset = gui.StudsOffset + Vector3.new(0, 3.2, 0),
-		}):Play()
+		TweenService
+			:Create(gui, TweenInfo.new(1.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				StudsOffset = gui.StudsOffset + Vector3.new(0, 3.2, 0),
+			})
+			:Play()
 		TweenService:Create(label, TweenInfo.new(1.4), { TextTransparency = 1 }):Play()
 		task.delay(1.5, function()
 			gui:Destroy()
@@ -485,7 +525,9 @@ local function usePlay(player: Player, tool: Tool, item: StoreConfig.Item)
 		tool:SetAttribute("Open", not open)
 		if canopy and canopy:IsA("BasePart") then
 			local target = if open then Vector3.new(0.5, 1.4, 0.5) else Vector3.new(1.8, 0.8, 1.8)
-			TweenService:Create(canopy, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Size = target }):Play()
+			TweenService
+				:Create(canopy, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Size = target })
+				:Play()
 		end
 		floatEmoji(handle, "☔", 1)
 		return
@@ -501,7 +543,10 @@ local function usePlay(player: Player, tool: Tool, item: StoreConfig.Item)
 	if anim and anim:IsA("StringValue") then
 		anim.Value = "Slash"
 	end
-	local emoji = if item.id == "bola_mainan" then "⚽" elseif item.id == "mobil_mainan" then "📣" else "💖"
+	local emoji = if item.id == "bola_mainan"
+		then "⚽"
+		elseif item.id == "mobil_mainan" then "📣"
+		else "💖"
 	floatEmoji(handle, emoji, if item.id == "boneka_beruang" then 3 else 2)
 end
 
@@ -568,17 +613,17 @@ end
 
 -- ---------------------------------------------------------------- beli
 
-local function nearCounter(player: Player): boolean
+local function nearTag(player: Player, tag: string, distance: number): boolean
 	local character = player.Character
 	local root = if character then character.PrimaryPart else nil
 	if root == nil then
 		return false
 	end
-	for _, inst in CollectionService:GetTagged(StoreConfig.TAG_COUNTER) do
+	for _, inst in CollectionService:GetTagged(tag) do
 		if
 			inst:IsA("BasePart")
 			and inst:IsDescendantOf(Workspace)
-			and (inst.Position - root.Position).Magnitude <= StoreConfig.BUY_DISTANCE
+			and (inst.Position - root.Position).Magnitude <= distance
 		then
 			return true
 		end
@@ -586,41 +631,153 @@ local function nearCounter(player: Player): boolean
 	return false
 end
 
-local function buy(player: Player, id: any): { ok: boolean, message: string, bag: { [string]: number }? }
-	local now = os.clock()
-	local last = lastBuy[player]
-	if last and now - last < BUY_COOLDOWN then
-		return { ok = false, message = "Pelan-pelan ya." }
+local function nearCounter(player: Player): boolean
+	return nearTag(player, StoreConfig.TAG_COUNTER, StoreConfig.BUY_DISTANCE)
+end
+
+type CartReply = {
+	ok: boolean,
+	message: string,
+	cart: { [string]: number },
+	bag: { [string]: number }?,
+}
+
+local function cartOf(player: Player): { [string]: number }
+	local cart = carts[player]
+	if cart == nil then
+		cart = {}
+		carts[player] = cart
 	end
-	lastBuy[player] = now
+	return cart
+end
+
+local function cartSnapshot(cart: { [string]: number }): { [string]: number }
+	local copy = {}
+	for _, item in StoreConfig.ITEMS do
+		local n = cart[item.id]
+		if type(n) == "number" and n > 0 then
+			copy[item.id] = n
+		end
+	end
+	return copy
+end
+
+-- Rak/kulkas: pemain memasukkan barang ke keranjang (belum bayar). Bayar di kasir.
+local function cartChange(player: Player, action: any, id: any): CartReply
+	local cart = cartOf(player)
+	if action == "clear" then
+		table.clear(cart)
+		return { ok = true, message = "Keranjang dikosongkan.", cart = {} }
+	end
 	local item = StoreConfig.get(id)
-	if item == nil then
-		return { ok = false, message = "Barang itu tidak dijual di sini." }
+	if item == nil or (action ~= "add" and action ~= "remove") then
+		return {
+			ok = false,
+			message = "Barang itu tidak dijual di sini.",
+			cart = cartSnapshot(cart),
+		}
 	end
 	local bag = getBag(player)
 	if bag == nil then
-		return { ok = false, message = "Data kamu masih dimuat..." }
+		return { ok = false, message = "Data kamu masih dimuat...", cart = cartSnapshot(cart) }
+	end
+	if
+		not (
+			nearTag(player, StoreConfig.TAG_SHELF, StoreConfig.SHELF_DISTANCE)
+			or nearCounter(player)
+		)
+	then
+		return { ok = false, message = "Dekati rak barangnya dulu ya.", cart = cartSnapshot(cart) }
+	end
+	local inCart = cart[item.id] or 0
+	if action == "add" then
+		local limit = if item.reusable then 1 else item.maxStack
+		if countOf(bag, item.id) + inCart >= limit then
+			return {
+				ok = false,
+				message = if item.reusable
+					then `Kamu sudah punya {item.name}.`
+					else `Tasmu penuh untuk {item.name} (maksimal {item.maxStack}).`,
+				cart = cartSnapshot(cart),
+			}
+		end
+		cart[item.id] = inCart + 1
+		return {
+			ok = true,
+			message = `{item.icon} {item.name} masuk keranjang. Bayar di kasir ya!`,
+			cart = cartSnapshot(cart),
+		}
+	end
+	if inCart <= 1 then
+		cart[item.id] = nil
+	else
+		cart[item.id] = inCart - 1
+	end
+	return {
+		ok = true,
+		message = `{item.name} dikeluarkan dari keranjang.`,
+		cart = cartSnapshot(cart),
+	}
+end
+
+-- Kasir: bayar semua isi keranjang sekaligus (harga dihitung server).
+local function checkout(player: Player): CartReply
+	local cart = cartOf(player)
+	local now = os.clock()
+	local last = lastBuy[player]
+	if last and now - last < BUY_COOLDOWN then
+		return { ok = false, message = "Pelan-pelan ya.", cart = cartSnapshot(cart) }
+	end
+	lastBuy[player] = now
+	local bag = getBag(player)
+	if bag == nil then
+		return { ok = false, message = "Data kamu masih dimuat...", cart = cartSnapshot(cart) }
 	end
 	if not nearCounter(player) then
-		return { ok = false, message = "Dekati kasir toko dulu ya." }
+		return { ok = false, message = "Dekati kasir toko dulu ya.", cart = cartSnapshot(cart) }
 	end
-	local count = countOf(bag, item.id)
-	if item.reusable and count >= 1 then
-		return { ok = false, message = `Kamu sudah punya {item.name}.` , bag = snapshot(bag) }
+	local total = 0
+	for id, n in cart do
+		local item = StoreConfig.get(id)
+		if item == nil or n < 1 then
+			cart[id] = nil
+		else
+			local limit = if item.reusable then 1 else item.maxStack
+			if countOf(bag, item.id) + n > limit then
+				return {
+					ok = false,
+					message = `Tasmu penuh untuk {item.name} (maksimal {item.maxStack}).`,
+					cart = cartSnapshot(cart),
+					bag = snapshot(bag),
+				}
+			end
+			total += item.price * n
+		end
 	end
-	if count >= item.maxStack then
-		return { ok = false, message = `Tasmu penuh untuk {item.name} (maksimal {item.maxStack}).`, bag = snapshot(bag) }
+	if next(cart) == nil then
+		return {
+			ok = false,
+			message = "Keranjangmu masih kosong. Ambil barang di rak dulu ya.",
+			cart = {},
+		}
 	end
-	if not EconomyService.trySpend(player, item.price, "toko:" .. item.id) then
-		return { ok = false, message = "Uangmu belum cukup.", bag = snapshot(bag) }
+	if not EconomyService.trySpend(player, total, "toko:keranjang") then
+		return {
+			ok = false,
+			message = "Uangmu belum cukup.",
+			cart = cartSnapshot(cart),
+			bag = snapshot(bag),
+		}
 	end
-	bag[item.id] = count + 1
+	for id, n in cart do
+		bag[id] = countOf(bag, id) + n
+	end
+	table.clear(cart)
 	StoreService.refresh(player)
 	return {
 		ok = true,
-		message = if item.reusable
-			then `{item.icon} {item.name} dibeli! Cek hotbar di bawah.`
-			else `{item.icon} {item.name} dibeli! Cek hotbar di bawah, klik untuk memakainya.`,
+		message = "Terima kasih sudah belanja! Cek hotbar di bawah, klik barangnya untuk memakai.",
+		cart = {},
 		bag = snapshot(bag),
 	}
 end
@@ -631,7 +788,13 @@ function StoreService.serve(player: Player, itemId: string, withBuff: boolean?):
 	local item = StoreConfig.get(itemId)
 	local character = player.Character
 	local humanoid = if character then character:FindFirstChildOfClass("Humanoid") else nil
-	if item == nil or item.reusable or character == nil or humanoid == nil or humanoid.Health <= 0 then
+	if
+		item == nil
+		or item.reusable
+		or character == nil
+		or humanoid == nil
+		or humanoid.Health <= 0
+	then
 		return false
 	end
 	local tool = buildTool(item, 1)
@@ -642,7 +805,11 @@ function StoreService.serve(player: Player, itemId: string, withBuff: boolean?):
 	task.wait(0.4)
 	local handle = tool:FindFirstChild("Handle")
 	local emitter = if handle and handle:IsA("BasePart")
-		then burst(handle, if item.kind == "drink" then rgb(200, 235, 255) else rgb(235, 190, 110), item.kind)
+		then burst(
+			handle,
+			if item.kind == "drink" then rgb(200, 235, 255) else rgb(235, 190, 110),
+			item.kind
+		)
 		else nil
 	local doneAnim = false
 	task.spawn(function()
@@ -672,20 +839,64 @@ end
 
 -- ---------------------------------------------------------------- kasir
 
+local function openPanel(player: Player, mode: string, items: { string }?, label: string?)
+	local bag = getBag(player)
+	openRemote:FireClient(player, {
+		mode = mode,
+		bag = if bag then snapshot(bag) else {},
+		cart = cartSnapshot(cartOf(player)),
+		items = items,
+		label = label,
+	})
+end
+
+-- Kasir: hanya membayar isi keranjang (NPC kasir menyapa pemain).
 local function registerCounter(inst: Instance)
 	if not inst:IsA("BasePart") or inst:FindFirstChild("BelanjaPrompt") then
 		return
 	end
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "BelanjaPrompt"
-	prompt.ActionText = "Belanja"
-	prompt.ObjectText = "Toko"
+	prompt.ActionText = "Bayar"
+	prompt.ObjectText = "Kasir"
 	prompt.HoldDuration = 0.2
 	prompt.MaxActivationDistance = 12
 	prompt.RequiresLineOfSight = false
 	prompt.Triggered:Connect(function(player: Player)
-		local bag = getBag(player)
-		openRemote:FireClient(player, if bag then snapshot(bag) else {})
+		openPanel(player, "kasir", nil, nil)
+	end)
+	prompt.Parent = inst
+end
+
+-- Rak/kulkas: pilih barang dan masukkan ke keranjang.
+local function registerShelf(inst: Instance)
+	if not inst:IsA("BasePart") or inst:FindFirstChild("RakPrompt") then
+		return
+	end
+	local ids: { string } = {}
+	local raw = inst:GetAttribute("Items")
+	if type(raw) == "string" then
+		for _, id in string.split(raw, ",") do
+			id = string.gsub(id, "%s", "")
+			if StoreConfig.get(id) then
+				table.insert(ids, id)
+			end
+		end
+	end
+	if #ids == 0 then
+		return
+	end
+	local label = inst:GetAttribute("Label")
+	local labelText = if type(label) == "string" then label else "Rak"
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.Name = "RakPrompt"
+	prompt.ActionText = "Pilih Barang"
+	prompt.ObjectText = labelText
+	prompt.HoldDuration = 0.1
+	prompt.MaxActivationDistance = 9
+	prompt.RequiresLineOfSight = false
+	prompt.Triggered:Connect(function(player: Player)
+		openPanel(player, "rak", ids, labelText)
 	end)
 	prompt.Parent = inst
 end
@@ -695,17 +906,33 @@ end
 function StoreService.init()
 	openRemote = Net.event(StoreConfig.OPEN_EVENT)
 	animRemote = Net.event("ConsumeAnim")
-	Net.func(StoreConfig.BUY_FUNC).OnServerInvoke = function(player: Player, id: any): any
-		local ok, value = pcall(buy, player, id)
+	Net.func(StoreConfig.BUY_FUNC).OnServerInvoke = function(player: Player): any
+		local ok, value = pcall(checkout, player)
 		if ok then
 			return value
 		end
-		warn("[Store] beli error: " .. tostring(value))
-		return { ok = false, message = "Terjadi kesalahan, coba lagi." }
+		warn("[Store] bayar error: " .. tostring(value))
+		return { ok = false, message = "Terjadi kesalahan, coba lagi.", cart = {} }
+	end
+	Net.func(StoreConfig.CART_FUNC).OnServerInvoke = function(
+		player: Player,
+		action: any,
+		id: any
+	): any
+		local ok, value = pcall(cartChange, player, action, id)
+		if ok then
+			return value
+		end
+		warn("[Store] keranjang error: " .. tostring(value))
+		return { ok = false, message = "Terjadi kesalahan, coba lagi.", cart = {} }
 	end
 	CollectionService:GetInstanceAddedSignal(StoreConfig.TAG_COUNTER):Connect(registerCounter)
 	for _, inst in CollectionService:GetTagged(StoreConfig.TAG_COUNTER) do
 		registerCounter(inst)
+	end
+	CollectionService:GetInstanceAddedSignal(StoreConfig.TAG_SHELF):Connect(registerShelf)
+	for _, inst in CollectionService:GetTagged(StoreConfig.TAG_SHELF) do
+		registerShelf(inst)
 	end
 end
 
@@ -729,6 +956,7 @@ function StoreService.start()
 	end)
 	Players.PlayerRemoving:Connect(function(player: Player)
 		lastBuy[player] = nil
+		carts[player] = nil
 	end)
 end
 

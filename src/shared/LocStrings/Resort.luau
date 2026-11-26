@@ -93,7 +93,10 @@ local exact: { [string]: string } = {
 }
 
 local patterns: { { string } } = {
-	{ "Selamat datang di ROBLOCK Resort! Bonus tamu ${}", "Welcome to ROBLOCK Resort! Guest bonus ${}" },
+	{
+		"Selamat datang di ROBLOCK Resort! Bonus tamu ${}",
+		"Welcome to ROBLOCK Resort! Guest bonus ${}",
+	},
 }
 
 return { exact = exact, patterns = patterns }

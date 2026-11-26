@@ -122,6 +122,15 @@ local function build()
 				sc.CornerRadius = UDim.new(0, 12)
 				sc.Parent = strip
 				label(strip, dest.icon .. " " .. dest.name, UDim2.fromOffset(0, 0), UDim2.fromScale(1, 1), 22, Color3.new(1, 1, 1))
+				if entry.enter then
+					local badge = label(tile, " 🚪 Bisa masuk ", UDim2.fromOffset(8, 8), UDim2.fromOffset(0, 30), 20, Color3.new(1, 1, 1))
+					badge.AutomaticSize = Enum.AutomaticSize.X
+					badge.BackgroundTransparency = 0.1
+					badge.BackgroundColor3 = Color3.fromRGB(64, 190, 100)
+					local bc = Instance.new("UICorner")
+					bc.CornerRadius = UDim.new(0, 15)
+					bc.Parent = badge
+				end
 				tile.Parent = sg
 				shown += 1
 			end

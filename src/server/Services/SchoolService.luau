@@ -75,7 +75,15 @@ local function colorAttr(marker: BasePart, name: string, fallback: Color3): Colo
 	return if typeof(c) == "Color3" then c else fallback
 end
 
-local function decorate(model: Model, on: BasePart, name: string, size: Vector3, color: Color3, offset: CFrame, ball: boolean?)
+local function decorate(
+	model: Model,
+	on: BasePart,
+	name: string,
+	size: Vector3,
+	color: Color3,
+	offset: CFrame,
+	ball: boolean?
+)
 	local part = Instance.new("Part")
 	part.Name = name
 	part.Shape = if ball then Enum.PartType.Ball else Enum.PartType.Block
@@ -119,7 +127,12 @@ local function addHair(model: Model, head: BasePart, style: string, color: Color
 	end
 end
 
-local function buildLabels(head: BasePart, name: string, role: string, s: number): (string, number) -> ()
+local function buildLabels(
+	head: BasePart,
+	name: string,
+	role: string,
+	s: number
+): (string, number) -> ()
 	local tag = Instance.new("BillboardGui")
 	tag.Name = "NamaNpc"
 	tag.Adornee = head
@@ -195,7 +208,12 @@ local npcs: { Npc } = {}
 local active = false
 local generation = 0
 
-local function track(animator: Animator, id: string, priority: Enum.AnimationPriority, looped: boolean): AnimationTrack
+local function track(
+	animator: Animator,
+	id: string,
+	priority: Enum.AnimationPriority,
+	looped: boolean
+): AnimationTrack
 	local animation = Instance.new("Animation")
 	animation.AnimationId = id
 	local t = animator:LoadAnimation(animation)
@@ -254,7 +272,13 @@ local function spawnNpc(marker: BasePart, parent: Folder): Npc?
 	local humanoid = model:FindFirstChildOfClass("Humanoid")
 	local head = model:FindFirstChild("Head")
 	local root = model:FindFirstChild("HumanoidRootPart")
-	if humanoid == nil or head == nil or not head:IsA("BasePart") or root == nil or not root:IsA("BasePart") then
+	if
+		humanoid == nil
+		or head == nil
+		or not head:IsA("BasePart")
+		or root == nil
+		or not root:IsA("BasePart")
+	then
 		model:Destroy()
 		return nil
 	end
@@ -414,7 +438,9 @@ local function tick()
 		if distance < GREET_DISTANCE then
 			if not npc.sitting then
 				local here = npc.base.Position
-				npc.model:PivotTo(CFrame.lookAt(here, Vector3.new(hrp.Position.X, here.Y, hrp.Position.Z)))
+				npc.model:PivotTo(
+					CFrame.lookAt(here, Vector3.new(hrp.Position.X, here.Y, hrp.Position.Z))
+				)
 			end
 			if now - npc.lastGreet > 25 then
 				npc.lastGreet = now

@@ -40,6 +40,7 @@ type CardRef = {
 	distance: TextLabel,
 	position: Vector3,
 	zone: string,
+	enter: boolean,
 	openAttr: string?,
 	opensAt: string?,
 }
@@ -58,7 +59,9 @@ end
 
 local function applyFilter()
 	for _, ref in cards do
-		ref.button.Visible = activeZone == "all" or ref.zone == activeZone
+		ref.button.Visible = activeZone == "all"
+			or (activeZone == "enter" and ref.enter)
+			or ref.zone == activeZone
 	end
 	for id, chip in chips do
 		chip.BackgroundColor3 = if id == activeZone then C.accent else C.chip
@@ -73,7 +76,8 @@ local function updateDistances()
 		return
 	end
 	for _, ref in cards do
-		local text = "📍 " .. NavController.formatDistance(flatDistance(root.Position, ref.position))
+		local text = "📍 "
+			.. NavController.formatDistance(flatDistance(root.Position, ref.position))
 		if ref.openAttr then
 			if Workspace:GetAttribute(ref.openAttr) == true then
 				text ..= " · 🟢 Buka sekarang"
@@ -85,7 +89,12 @@ local function updateDistances()
 	end
 end
 
-local function makeThumb(parent: Instance, entry: InfoBoardConfig.Entry, icon: string, color: Color3)
+local function makeThumb(
+	parent: Instance,
+	entry: InfoBoardConfig.Entry,
+	icon: string,
+	color: Color3
+)
 	local thumb = Instance.new("ImageLabel")
 	thumb.Name = "Gambar"
 	thumb.Size = UDim2.new(1, -12, 0, 98)
@@ -127,6 +136,23 @@ local function buildCards()
 		button.Text = ""
 		UiKit.corner(button, 12)
 		makeThumb(button, entry, dest.icon, zone.color)
+		if entry.enter then
+			local badge = UiKit.label(button, {
+				Name = "Lencana",
+				Position = UDim2.fromOffset(12, 12),
+				Size = UDim2.fromOffset(0, 20),
+				AutomaticSize = Enum.AutomaticSize.X,
+				Text = " 🚪 Bisa masuk ",
+				Font = Enum.Font.FredokaOne,
+				TextSize = 12,
+				TextColor3 = Color3.new(1, 1, 1),
+				TextWrapped = false,
+				BackgroundTransparency = 0.1,
+				BackgroundColor3 = Color3.fromRGB(64, 190, 100),
+				ZIndex = 3,
+			})
+			UiKit.corner(badge, 10)
+		end
 
 		UiKit.label(button, {
 			Name = "Nama",
@@ -186,6 +212,7 @@ local function buildCards()
 			distance = distance,
 			position = dest.position,
 			zone = dest.zone,
+			enter = entry.enter == true,
 			openAttr = entry.openAttr,
 			opensAt = entry.opensAt,
 		})
@@ -216,7 +243,8 @@ local function buildGui()
 		local camera = Workspace.CurrentCamera
 		if camera then
 			local size = camera.ViewportSize
-			uiScale.Scale = math.clamp(math.min(size.X / (PANEL.X + 20), size.Y / (PANEL.Y + 20)), 0.5, 1)
+			uiScale.Scale =
+				math.clamp(math.min(size.X / (PANEL.X + 20), size.Y / (PANEL.Y + 20)), 0.5, 1)
 		end
 	end
 	rescale()
@@ -286,6 +314,7 @@ local function buildGui()
 		chips[id] = chip
 	end
 	addChip("all", "✨ Semua")
+	addChip("enter", "🚪 Bisa Dimasuki")
 	local used: { [string]: boolean } = {}
 	for _, entry in InfoBoardConfig.ENTRIES do
 		local dest = DestinationConfig.get(entry.dest)
@@ -344,7 +373,12 @@ function InfoBoardController.start()
 			local part = boardPart
 			local character = player.Character
 			local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
-			if panel.Visible and part and root and flatDistance(root.Position, part.Position) > CLOSE_DISTANCE then
+			if
+				panel.Visible
+				and part
+				and root
+				and flatDistance(root.Position, part.Position) > CLOSE_DISTANCE
+			then
 				panel.Visible = false
 			end
 		end
@@ -362,9 +396,16 @@ function InfoBoardController.start()
 		end
 		local character = player.Character or player.CharacterAdded:Wait()
 		local root = character:WaitForChild("HumanoidRootPart", 10) :: BasePart?
-		if part and root and flatDistance(root.Position, (part :: BasePart).Position) < InfoBoardConfig.HINT_RADIUS then
+		if
+			part
+			and root
+			and flatDistance(root.Position, (part :: BasePart).Position)
+				< InfoBoardConfig.HINT_RADIUS
+		then
 			task.wait(6)
-			HudController.toast("Baru di sini? Tekan E di Papan Info dekat air mancur untuk lihat semua tempat seru!")
+			HudController.toast(
+				"Baru di sini? Tekan E di Papan Info dekat air mancur untuk lihat semua tempat seru!"
+			)
 		end
 	end)
 end

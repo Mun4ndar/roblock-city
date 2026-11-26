@@ -100,13 +100,48 @@ local GROUPS = {
 				-- Mondar-mandir di kanopi: bekerja di depan mobil, istirahat sebentar di sisi lift, bekerja di
 				-- belakang mobil, meja kerja, lemari alat, rak oli. Jalur menghindari tiang lift dan kolong mobil.
 				route = {
-					{ pos = Vector3.new(188, 1.3, 279), face = Vector3.new(188, 1.3, 289), act = "work", seconds = 7 },
-					{ pos = Vector3.new(198, 1.3, 289), face = Vector3.new(188, 1.3, 289), act = "idle", seconds = 2 },
-					{ pos = Vector3.new(192, 1.3, 303), face = Vector3.new(188, 1.3, 293), act = "work", seconds = 7 },
-					{ pos = Vector3.new(180, 1.3, 307), face = Vector3.new(171, 1.3, 307), act = "work", seconds = 6 },
-					{ pos = Vector3.new(180, 1.3, 301), face = Vector3.new(171, 1.3, 301), act = "idle", seconds = 3 },
-					{ pos = Vector3.new(177.5, 1.3, 292), face = Vector3.new(177.5, 1.3, 285), act = "walk", seconds = 0 },
-					{ pos = Vector3.new(180, 1.3, 283), face = Vector3.new(171, 1.3, 283), act = "idle", seconds = 4 },
+					{
+						pos = Vector3.new(188, 1.3, 279),
+						face = Vector3.new(188, 1.3, 289),
+						act = "work",
+						seconds = 7,
+					},
+					{
+						pos = Vector3.new(198, 1.3, 289),
+						face = Vector3.new(188, 1.3, 289),
+						act = "idle",
+						seconds = 2,
+					},
+					{
+						pos = Vector3.new(192, 1.3, 303),
+						face = Vector3.new(188, 1.3, 293),
+						act = "work",
+						seconds = 7,
+					},
+					{
+						pos = Vector3.new(180, 1.3, 307),
+						face = Vector3.new(171, 1.3, 307),
+						act = "work",
+						seconds = 6,
+					},
+					{
+						pos = Vector3.new(180, 1.3, 301),
+						face = Vector3.new(171, 1.3, 301),
+						act = "idle",
+						seconds = 3,
+					},
+					{
+						pos = Vector3.new(177.5, 1.3, 292),
+						face = Vector3.new(177.5, 1.3, 285),
+						act = "walk",
+						seconds = 0,
+					},
+					{
+						pos = Vector3.new(180, 1.3, 283),
+						face = Vector3.new(171, 1.3, 283),
+						act = "idle",
+						seconds = 4,
+					},
 				},
 			},
 		},
@@ -116,7 +151,11 @@ local GROUPS = {
 		name = "PenjagaSPBU",
 		template = "AsetSPBU",
 		spots = {
-			{ pos = Vector3.new(783, 1.6, -313.4), facing = Vector3.new(0, 0, -1), work = "cashier" },
+			{
+				pos = Vector3.new(783, 1.6, -313.4),
+				facing = Vector3.new(0, 0, -1),
+				work = "cashier",
+			},
 		},
 	},
 	-- Penjual jus lama (petani bertopi jerami) diganti pelayan perempuan di BeachLifeService.

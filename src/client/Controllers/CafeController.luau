@@ -4,6 +4,7 @@
 -- Pesanan dikirim ke server (CafeConfig.ORDER_FUNC); server memotong uang dan memutar animasi makan/minum.
 
 local Players = game:GetService("Players")
+local ProximityPromptService = game:GetService("ProximityPromptService")
 
 local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local CafeConfig = require(Shared:WaitForChild("CafeConfig"))
@@ -243,8 +244,55 @@ end
 
 function CafeController.init() end
 
+-- Tombol "Lihat Menu" (barista, pelayan, konter) disembunyikan di client ini selama pemain duduk,
+-- supaya tidak menutupi pandangan saat menunggu pesanan. Muncul lagi begitu pemain berdiri.
+local function isSeated(): boolean
+	local character = player.Character
+	local humanoid = if character then character:FindFirstChildOfClass("Humanoid") else nil
+	return humanoid ~= nil and humanoid.SeatPart ~= nil
+end
+
+local function watchMenuPrompts()
+	local shown: { [ProximityPrompt]: boolean } = {}
+	local hidden: { [ProximityPrompt]: boolean } = {}
+	ProximityPromptService.PromptShown:Connect(function(prompt: ProximityPrompt)
+		if prompt.ActionText ~= "Lihat Menu" then
+			return
+		end
+		if isSeated() then
+			hidden[prompt] = true
+			prompt.Enabled = false
+		else
+			shown[prompt] = true
+		end
+	end)
+	ProximityPromptService.PromptHidden:Connect(function(prompt: ProximityPrompt)
+		shown[prompt] = nil
+	end)
+	task.spawn(function()
+		while true do
+			task.wait(0.3)
+			if isSeated() then
+				for prompt in shown do
+					shown[prompt] = nil
+					hidden[prompt] = true
+					prompt.Enabled = false
+				end
+			else
+				for prompt in hidden do
+					hidden[prompt] = nil
+					if prompt.Parent then
+						prompt.Enabled = true
+					end
+				end
+			end
+		end
+	end)
+end
+
 function CafeController.start()
 	Net.event(CafeConfig.OPEN_EVENT).OnClientEvent:Connect(openMenu)
+	watchMenuPrompts()
 end
 
 return CafeController

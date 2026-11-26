@@ -49,7 +49,10 @@ local function nextTrack()
 	trackIndex = (trackIndex % #playlist) + 1
 	music.SoundId = "rbxassetid://" .. tostring(playlist[trackIndex])
 	music:Play()
-	Workspace:SetAttribute(Config.ATTR_TRACK, ((Workspace:GetAttribute(Config.ATTR_TRACK) or 0) :: number) + 1)
+	Workspace:SetAttribute(
+		Config.ATTR_TRACK,
+		((Workspace:GetAttribute(Config.ATTR_TRACK) or 0) :: number) + 1
+	)
 end
 
 -- ---------------------------------------------------------------- penampil NPC
@@ -60,7 +63,13 @@ local function weld(a: BasePart, b: BasePart)
 	w.Parent = b
 end
 
-local function prop(parent: Instance, shape: Enum.PartType?, size: Vector3, color: Color3, material: Enum.Material?): Part
+local function prop(
+	parent: Instance,
+	shape: Enum.PartType?,
+	size: Vector3,
+	color: Color3,
+	material: Enum.Material?
+): Part
 	local p = Instance.new("Part")
 	if shape then
 		p.Shape = shape
@@ -82,24 +91,49 @@ local function addProp(model: Model, role: string)
 	local lower = model:FindFirstChild("LowerTorso") :: BasePart?
 	if role == "vokal" and rightHand then
 		-- mikrofon di tangan kanan
-		local grip = prop(model, nil, Vector3.new(0.18, 0.9, 0.18), rgb(40, 40, 46), Enum.Material.Metal)
-		grip.CFrame = rightHand.CFrame * CFrame.new(0, -0.1, -0.2) * CFrame.Angles(math.rad(70), 0, 0)
+		local grip =
+			prop(model, nil, Vector3.new(0.18, 0.9, 0.18), rgb(40, 40, 46), Enum.Material.Metal)
+		grip.CFrame = rightHand.CFrame
+			* CFrame.new(0, -0.1, -0.2)
+			* CFrame.Angles(math.rad(70), 0, 0)
 		weld(rightHand, grip)
-		local head = prop(model, Enum.PartType.Ball, Vector3.new(0.42, 0.42, 0.42), rgb(200, 205, 215), Enum.Material.Metal)
+		local head = prop(
+			model,
+			Enum.PartType.Ball,
+			Vector3.new(0.42, 0.42, 0.42),
+			rgb(200, 205, 215),
+			Enum.Material.Metal
+		)
 		head.CFrame = grip.CFrame * CFrame.new(0, 0.55, 0)
 		weld(grip, head)
 	elseif role == "gitar" and torso then
-		local body = prop(model, nil, Vector3.new(1.5, 1.9, 0.35), rgb(255, 120, 40), Enum.Material.SmoothPlastic)
+		local body = prop(
+			model,
+			nil,
+			Vector3.new(1.5, 1.9, 0.35),
+			rgb(255, 120, 40),
+			Enum.Material.SmoothPlastic
+		)
 		body.CFrame = torso.CFrame * CFrame.new(0.2, -0.5, -0.7) * CFrame.Angles(0, 0, math.rad(25))
 		weld(torso, body)
-		local neck = prop(model, nil, Vector3.new(0.28, 2.6, 0.2), rgb(120, 80, 50), Enum.Material.Wood)
+		local neck =
+			prop(model, nil, Vector3.new(0.28, 2.6, 0.2), rgb(120, 80, 50), Enum.Material.Wood)
 		neck.CFrame = body.CFrame * CFrame.new(0, 2.1, 0)
 		weld(body, neck)
 	elseif role == "kendang" and lower then
-		local drum = prop(model, Enum.PartType.Cylinder, Vector3.new(2.6, 1.3, 1.3), rgb(170, 100, 50), Enum.Material.Wood)
-		drum.CFrame = lower.CFrame * CFrame.new(0, 0.2, -1.4) * CFrame.Angles(0, math.rad(90), math.rad(0))
+		local drum = prop(
+			model,
+			Enum.PartType.Cylinder,
+			Vector3.new(2.6, 1.3, 1.3),
+			rgb(170, 100, 50),
+			Enum.Material.Wood
+		)
+		drum.CFrame = lower.CFrame
+			* CFrame.new(0, 0.2, -1.4)
+			* CFrame.Angles(0, math.rad(90), math.rad(0))
 		weld(lower, drum)
-		local skin = prop(model, Enum.PartType.Cylinder, Vector3.new(0.1, 1.2, 1.2), rgb(245, 232, 200))
+		local skin =
+			prop(model, Enum.PartType.Cylinder, Vector3.new(0.1, 1.2, 1.2), rgb(245, 232, 200))
 		skin.CFrame = drum.CFrame * CFrame.new(1.32, 0, 0)
 		weld(drum, skin)
 	end
@@ -138,7 +172,13 @@ local function buildPerformer(who: any, phase: number): Model?
 	local humanoid = model:FindFirstChildOfClass("Humanoid")
 	local head = model:FindFirstChild("Head")
 	local root = model:FindFirstChild("HumanoidRootPart")
-	if humanoid == nil or head == nil or not head:IsA("BasePart") or root == nil or not root:IsA("BasePart") then
+	if
+		humanoid == nil
+		or head == nil
+		or not head:IsA("BasePart")
+		or root == nil
+		or not root:IsA("BasePart")
+	then
 		model:Destroy()
 		return nil
 	end
@@ -302,14 +342,22 @@ function ConcertService.start()
 				stopShow()
 			end
 			if active then
-				if #performersFolder:GetChildren() == 0 and not building and playerNear(Config.NPC_RANGE) then
+				if
+					#performersFolder:GetChildren() == 0
+					and not building
+					and playerNear(Config.NPC_RANGE)
+				then
 					task.spawn(spawnPerformers)
 				elseif #performersFolder:GetChildren() > 0 and not playerNear(Config.NPC_KEEP) then
 					clearPerformers()
 				end
 				if os.clock() >= nextFirework then
-					nextFirework = os.clock() + rng:NextNumber(Config.FIREWORK_EVERY[1], Config.FIREWORK_EVERY[2])
-					Workspace:SetAttribute(Config.ATTR_FIREWORK, ((Workspace:GetAttribute(Config.ATTR_FIREWORK) or 0) :: number) + 1)
+					nextFirework = os.clock()
+						+ rng:NextNumber(Config.FIREWORK_EVERY[1], Config.FIREWORK_EVERY[2])
+					Workspace:SetAttribute(
+						Config.ATTR_FIREWORK,
+						((Workspace:GetAttribute(Config.ATTR_FIREWORK) or 0) :: number) + 1
+					)
 				end
 			end
 			task.wait(2)

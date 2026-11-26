@@ -27,7 +27,15 @@ local LOW = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabl
 local Q = if LOW then Config.QUALITY.LOW else Config.QUALITY.HIGH
 
 type Lamp = { part: BasePart, light: SpotLight?, row: number, index: number, beam: Part? }
-type Screen = { part: BasePart, kind: string, cols: number, rows: number, cells: { Frame }, text: TextLabel, gui: SurfaceGui }
+type Screen = {
+	part: BasePart,
+	kind: string,
+	cols: number,
+	rows: number,
+	cells: { Frame },
+	text: TextLabel,
+	gui: SurfaceGui,
+}
 
 local lamps: { Lamp } = {}
 local screens: { Screen } = {}
@@ -199,7 +207,15 @@ local function buildScreen(part: BasePart)
 	stroke.Parent = text
 	text.Parent = bg
 	gui.Parent = player:WaitForChild("PlayerGui")
-	table.insert(screens, { part = part, kind = kind, cols = cols, rows = rows, cells = cells, text = text, gui = gui })
+	table.insert(screens, {
+		part = part,
+		kind = kind,
+		cols = cols,
+		rows = rows,
+		cells = cells,
+		text = text,
+		gui = gui,
+	})
 end
 
 local MODES = 4
@@ -213,17 +229,29 @@ local function drawScreens(t: number, loud: number)
 				local cell = s.cells[y * cols + x + 1]
 				local color: Color3
 				if mode == 1 then -- gelombang pelangi
-					color = Color3.fromHSV((x / cols * 0.7 + y / rows * 0.25 + t * 0.25) % 1, 0.85, 0.55 + 0.45 * loud)
+					color = Color3.fromHSV(
+						(x / cols * 0.7 + y / rows * 0.25 + t * 0.25) % 1,
+						0.85,
+						0.55 + 0.45 * loud
+					)
 				elseif mode == 2 then -- equalizer
 					local h = (math.sin(t * 6 + x * 1.7) * 0.5 + 0.5) * (0.25 + loud * 0.75)
 					local on = (1 - y / rows) <= h
-					color = if on then Color3.fromHSV((x / cols + t * 0.1) % 1, 0.9, 1) else Color3.fromRGB(14, 8, 36)
+					color = if on
+						then Color3.fromHSV((x / cols + t * 0.1) % 1, 0.9, 1)
+						else Color3.fromRGB(14, 8, 36)
 				elseif mode == 3 then -- papan catur berkedip
 					local flip = (math.floor(t * (2 + loud * 3)) + x + y) % 2 == 0
-					color = if flip then Color3.fromHSV((t * 0.2) % 1, 0.8, 1) else Color3.fromHSV((t * 0.2 + 0.5) % 1, 0.8, 0.8)
+					color = if flip
+						then Color3.fromHSV((t * 0.2) % 1, 0.8, 1)
+						else Color3.fromHSV((t * 0.2 + 0.5) % 1, 0.8, 0.8)
 				else -- cincin bergerak + teks
 					local d = math.sqrt(((x - cols / 2) / cols) ^ 2 + ((y - rows / 2) / rows) ^ 2)
-					color = Color3.fromHSV((d * 1.5 - t * 0.3) % 1, 0.8, 0.45 + 0.4 * math.sin(d * 14 - t * 5) ^ 2)
+					color = Color3.fromHSV(
+						(d * 1.5 - t * 0.3) % 1,
+						0.8,
+						0.45 + 0.4 * math.sin(d * 14 - t * 5) ^ 2
+					)
 					showText = s.kind == "main"
 				end
 				cell.BackgroundColor3 = color
@@ -282,7 +310,8 @@ local function burst(position: Vector3, color: Color3)
 	pe.SpreadAngle = Vector2.new(180, 180)
 	pe.Drag = 1.8
 	pe.Acceleration = Vector3.new(0, -14, 0)
-	pe.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 4), NumberSequenceKeypoint.new(1, 0) })
+	pe.Size =
+		NumberSequence.new({ NumberSequenceKeypoint.new(0, 4), NumberSequenceKeypoint.new(1, 0) })
 	pe.Rate = 0
 	pe.Parent = a
 	pe:Emit(if LOW then 35 else 70)
@@ -299,11 +328,16 @@ local function launch(from: Vector3, height: number, color: Color3)
 	trail.LightEmission = 1
 	trail.Lifetime = NumberRange.new(0.5, 0.8)
 	trail.Speed = NumberRange.new(2, 5)
-	trail.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1.6), NumberSequenceKeypoint.new(1, 0) })
+	trail.Size =
+		NumberSequence.new({ NumberSequenceKeypoint.new(0, 1.6), NumberSequenceKeypoint.new(1, 0) })
 	trail.Rate = if LOW then 25 else 60
 	trail.Parent = a
 	local goal = from + Vector3.new(0, height, 0)
-	local tween = TweenService:Create(rocket, TweenInfo.new(1.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Position = goal })
+	local tween = TweenService:Create(
+		rocket,
+		TweenInfo.new(1.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{ Position = goal }
+	)
 	tween:Play()
 	tween.Completed:Once(function()
 		trail.Enabled = false

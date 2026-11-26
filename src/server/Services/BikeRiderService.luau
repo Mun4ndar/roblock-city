@@ -21,7 +21,14 @@ local function clear(hum: Humanoid)
 	end
 end
 
-local function addIK(hum: Humanoid, char: Model, rootName: string, endName: string, target: BasePart, weight: number)
+local function addIK(
+	hum: Humanoid,
+	char: Model,
+	rootName: string,
+	endName: string,
+	target: BasePart,
+	weight: number
+)
 	local root = char:FindFirstChild(rootName)
 	local effector = char:FindFirstChild(endName)
 	if not (root and effector and root:IsA("BasePart") and effector:IsA("BasePart")) then

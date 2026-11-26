@@ -30,3 +30,6 @@ Image/
 *.blend1
 marketing/*.mp4
 marketing/rekaman/
+
+# File Blender besar (>100 MB, melebihi batas GitHub) - tetap ada di komputer, tidak di-upload
+*.blend

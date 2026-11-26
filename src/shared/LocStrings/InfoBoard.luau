@@ -37,6 +37,13 @@ local exact: { [string]: string } = {
 	["Jual hasil panen dan beli bibit."] = "Sell your harvest and buy seeds.",
 	["Perkebunan besar: tanam, rawat, panen."] = "Big plantation: plant, tend, harvest.",
 	["Naik pesawat atau jadi pilot."] = "Take a flight or become a pilot.",
+	["🚪 Bisa Dimasuki"] = "🚪 Enterable",
+	[" 🚪 Bisa masuk "] = " 🚪 Enterable ",
+	["6 kelas, ruang guru, dan kepala sekolah."] = "6 classrooms, the staff room and the principal's office.",
+	["Toko serba ada: masuk dan belanja."] = "General store: walk in and shop.",
+	["Kafe bebek: pesan kopi dan kue di dalam."] = "Duck cafe: order coffee and cake inside.",
+	["Hotel modern: lobi, lift, dan kamar untuk tidur."] = "Modern hotel: a lobby, a lift and rooms to sleep in.",
+	["Kafe kota: barista, menu, dan kursi nyaman."] = "City cafe: baristas, a menu and comfy seats.",
 }
 
 local patterns: { { string } } = {
@@ -47,6 +54,7 @@ local patterns: { { string } } = {
 exact["PASAR MALAM"] = "NIGHT MARKET"
 exact["Jajanan, permainan, dan lampu-lampu cantik"] = "Street snacks, games and pretty lights"
 exact["Buka jam 17.30 – 02.00 (waktu dalam game)"] = "Open 5:30 PM – 2:00 AM (game time)"
-exact["Akhir pekan: Festival Kuliner, jajanan diskon!"] = "Weekends: Food Festival with discounted snacks!"
+exact["Akhir pekan: Festival Kuliner, jajanan diskon!"] =
+	"Weekends: Food Festival with discounted snacks!"
 
 return { exact = exact, patterns = patterns }
