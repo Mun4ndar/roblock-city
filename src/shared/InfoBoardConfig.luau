@@ -52,6 +52,7 @@ InfoBoardConfig.ENTRIES = {
 	{ dest = "pasarTani", desc = "Jual hasil panen dan beli bibit.", cell = 19 },
 	{ dest = "ladang", desc = "Perkebunan besar: tanam, rawat, panen.", cell = 20, featured = true },
 	{ dest = "terminalBandara", desc = "Naik pesawat atau jadi pilot.", cell = 21, featured = true },
+	{ dest = "masjid", desc = "Adzan, sholat berjamaah, dan tausiah tiap waktu sholat.", featured = true },
 } :: { Entry }
 
 return InfoBoardConfig

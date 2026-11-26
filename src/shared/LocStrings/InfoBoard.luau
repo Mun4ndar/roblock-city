@@ -2,6 +2,7 @@
 -- LocStrings.InfoBoard: Papan Info di taman spawn (InfoBoardController, map/BuildPapanInfo, InfoBoardConfig).
 
 local exact: { [string]: string } = {
+	["Adzan, sholat berjamaah, dan tausiah tiap waktu sholat."] = "Adhan, congregational prayer, and a sermon at every prayer time.",
 	["🗺️ Papan Info ROBLOCK CITY"] = "🗺️ ROBLOCK CITY Info Board",
 	["Ketuk satu tempat, GPS langsung menuntunmu lewat jalan."] = "Tap a place and the GPS guides you along the roads.",
 	["Ketuk satu tempat, GPS menuntunmu lewat jalan"] = "Tap a place and the GPS guides you along the roads",
