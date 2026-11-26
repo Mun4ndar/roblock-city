@@ -44,6 +44,7 @@ local ORDER = {
 	"JetSkiService",
 	"CafePantaiService",
 	"FerryService",
+	"PelabuhanService",
 	"FerrisService",
 	"NpcService",
 	"SportsService",
