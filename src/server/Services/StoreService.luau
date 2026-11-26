@@ -683,9 +683,8 @@ local function cartChange(player: Player, action: any, id: any): CartReply
 	end
 	if
 		not (
-			nearTag(player, StoreConfig.TAG_SHELF, StoreConfig.SHELF_DISTANCE) or nearCounter(
-				player
-			)
+			nearTag(player, StoreConfig.TAG_SHELF, StoreConfig.SHELF_DISTANCE)
+			or nearCounter(player)
 		)
 	then
 		return { ok = false, message = "Dekati rak barangnya dulu ya.", cart = cartSnapshot(cart) }

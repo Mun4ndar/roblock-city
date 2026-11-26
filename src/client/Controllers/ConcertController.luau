@@ -207,10 +207,15 @@ local function buildScreen(part: BasePart)
 	stroke.Parent = text
 	text.Parent = bg
 	gui.Parent = player:WaitForChild("PlayerGui")
-	table.insert(
-		screens,
-		{ part = part, kind = kind, cols = cols, rows = rows, cells = cells, text = text, gui = gui }
-	)
+	table.insert(screens, {
+		part = part,
+		kind = kind,
+		cols = cols,
+		rows = rows,
+		cells = cells,
+		text = text,
+		gui = gui,
+	})
 end
 
 local MODES = 4
