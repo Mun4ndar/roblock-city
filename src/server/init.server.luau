@@ -52,6 +52,7 @@ local ORDER = {
 	"ConcertService",
 	"BeachLifeService",
 	"CafeService",
+	"CampService",
 	"SchoolService",
 	"FaceService",
 	"DebugService",
