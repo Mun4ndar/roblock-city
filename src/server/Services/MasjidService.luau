@@ -130,7 +130,7 @@ local ROSTER: { Spec } = {
 		shirt = WHITE,
 		legs = rgb(40, 60, 110),
 		cap = "peci",
-		scale = 0.62,
+		scale = 0.78,
 	},
 	{
 		id = "PakRudi",
@@ -197,7 +197,7 @@ local ROSTER: { Spec } = {
 		shirt = CREAM,
 		legs = rgb(40, 110, 80),
 		cap = "peci",
-		scale = 0.66,
+		scale = 0.86,
 	},
 	{
 		id = "Marbot",
@@ -401,9 +401,9 @@ local function buildLabels(
 	local tag = Instance.new("BillboardGui")
 	tag.Name = "NamaNpc"
 	tag.Adornee = head
-	tag.Size = UDim2.fromOffset(120, 22)
+	tag.Size = UDim2.fromOffset(110, 14)
 	tag.StudsOffset = Vector3.new(0, 1.7 * s + 0.4, 0)
-	tag.MaxDistance = 13
+	tag.MaxDistance = 9
 	local text = Instance.new("TextLabel")
 	text.Size = UDim2.fromScale(1, 1)
 	text.BackgroundTransparency = 1
@@ -481,7 +481,7 @@ local function spotCFrame(npc: Npc, spot: Vector2, dir: Vector3): CFrame
 end
 
 local function buildNpc(spec: Spec, startSpot: Vector2?, startDir: Vector3?): Npc?
-	local s = spec.scale or 0.78
+	local s = spec.scale or 1
 	local description = Instance.new("HumanoidDescription")
 	description.HeadColor = spec.skin
 	description.LeftArmColor = spec.skin
