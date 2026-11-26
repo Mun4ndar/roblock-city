@@ -330,7 +330,7 @@ local function buildSki(owner: Player): Ski
 
 	-- jejak gelombang di kiri dan kanan buritan
 	local wakes: { Trail } = {}
-	for _, side in { -1, 1 } do
+	for _, side in {} :: { number } do -- jejak datar dimatikan (tampak seperti lantai kaca); busa + percikan cukup
 		local a0 = Instance.new("Attachment")
 		a0.Name = "WakeA" .. side
 		a0.Position = Vector3.new(side * 0.9, -0.1, 3.4)
