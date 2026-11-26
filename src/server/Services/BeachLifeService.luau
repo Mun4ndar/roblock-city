@@ -379,9 +379,9 @@ local GREETINGS = {
 	MENU_FIRST,
 }
 
-local waitressModel: Model? = nil
+local _waitressModel: Model? = nil
 local waitressRoot: BasePart? = nil
-local say: (string, number) -> () = function() end
+local say: (string, number) -> () = function(_text: string, _seconds: number) end
 local celebrate: () -> () = function() end
 
 local function buildBubble(head: BasePart): (string, number) -> ()
@@ -513,7 +513,7 @@ local function startWaitress()
 	local p = Config.WAITRESS_POSITION
 	local ground = floorY(p.X, p.Z, p.Y + 3, p.Y)
 	placeModel(model, humanoid, root, Vector3.new(p.X, 0, p.Z), Config.WAITRESS_FACING, ground)
-	waitressModel, waitressRoot = model, root
+	_waitressModel, waitressRoot = model, root
 
 	local animator = animatorOf(humanoid)
 	loadTrack(animator, IDLE, Enum.AnimationPriority.Idle, true):Play(0)
@@ -611,7 +611,7 @@ local ICE_SELLER: Look = {
 	scale = 1,
 }
 
-local iceRoot: BasePart? = nil
+local _iceRoot: BasePart? = nil
 
 local function startIceCream()
 	local model, humanoid, root = buildPerson(ICE_SELLER)
@@ -636,7 +636,7 @@ local function startIceCream()
 	local p = Config.ICECREAM_POSITION
 	local ground = floorY(p.X, p.Z, p.Y + 3, p.Y)
 	placeModel(model, humanoid, root, Vector3.new(p.X, 0, p.Z), Config.ICECREAM_FACING, ground)
-	iceRoot = root
+	_iceRoot = root
 
 	local animator = animatorOf(humanoid)
 	loadTrack(animator, IDLE, Enum.AnimationPriority.Idle, true):Play(0)

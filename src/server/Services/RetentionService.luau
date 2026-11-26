@@ -149,7 +149,7 @@ end
 
 local function bump(
 	player: Player,
-	r: any,
+	_r: any,
 	list: { RetentionConfig.MissionDef },
 	store: any,
 	kind: string,

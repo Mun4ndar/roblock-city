@@ -49,7 +49,7 @@ type Session = {
 local CampService = {}
 
 local rgb = Color3.fromRGB
-local SP, FB = Enum.Material.SmoothPlastic, Enum.Material.Fabric
+local SP = Enum.Material.SmoothPlastic
 local BLOCK, BALL, CYL = Enum.PartType.Block, Enum.PartType.Ball, Enum.PartType.Cylinder
 local IDLE = "rbxassetid://507766388"
 local WAVE = "rbxassetid://507770239"
@@ -66,7 +66,7 @@ local npcFolder: Folder
 local tentsFolder: Folder
 local vendor: Person? = nil
 local guitarist: Person? = nil
-local music: Sound? = nil
+local _music: Sound? = nil
 local tokenCounter = 0
 local songToken = 0
 
@@ -470,7 +470,7 @@ local function spawnGuitarist()
 	sound.RollOffMinDistance = 12
 	sound.RollOffMaxDistance = 95
 	sound.Parent = head
-	music = sound
+	_music = sound
 	songToken += 1
 	local mine = songToken
 	task.spawn(function()
@@ -509,7 +509,7 @@ local function despawnNpc()
 		guitarist.model:Destroy()
 		guitarist = nil
 	end
-	music = nil
+	_music = nil
 end
 
 local function nearestPlayerDistance(position: Vector3): number
@@ -1172,9 +1172,6 @@ local function register(inst: Instance)
 			local res = if sessions[player] then reelIn(player, data) else castLine(player, data)
 			EconomyService.notify(player, res.message)
 		end)
-	end
-	if inst:GetAttribute("Gitaris") == true then
-		-- prompt "Ikut Nyanyi" dipasang di badan NPC saat dibuat; lihat watchGuitarPrompt
 	end
 end
 

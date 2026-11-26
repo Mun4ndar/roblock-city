@@ -238,9 +238,9 @@ local function watchInside()
 			end
 		end
 		local target = if insideNow then 1 else 0
-		local current = DayNightController.interior
-		if current ~= target then
-			DayNightController.interior = current + (target - current) * math.min(1, dt * 3)
+		local level = DayNightController.interior
+		if level ~= target then
+			DayNightController.interior = level + (target - level) * math.min(1, dt * 3)
 			if math.abs(DayNightController.interior - target) < 0.01 then
 				DayNightController.interior = target
 			end

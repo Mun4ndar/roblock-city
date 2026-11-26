@@ -454,9 +454,9 @@ function MasjidController.start()
 	player:GetAttributeChangedSignal("MasjidSlot"):Connect(refreshPanel)
 	player:GetAttributeChangedSignal("MasjidSlot"):Connect(syncJoinPrompts)
 	game:GetService("ProximityPromptService").PromptShown:Connect(function(prompt: ProximityPrompt)
-		if prompt.Name == "IkutSholat" and player:GetAttribute("MasjidSlot") ~= nil then
-			prompt.Enabled = false
-		elseif prompt.Name == "DudukTausiah" and isSeated() then
+		local hideJoin = prompt.Name == "IkutSholat" and player:GetAttribute("MasjidSlot") ~= nil
+		local hideSit = prompt.Name == "DudukTausiah" and isSeated()
+		if hideJoin or hideSit then
 			prompt.Enabled = false
 		end
 	end)

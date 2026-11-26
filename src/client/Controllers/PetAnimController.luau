@@ -201,7 +201,7 @@ moods.wag = function(p, t)
 	p.Head[1] = 0.3
 end
 
-moods.melt = function(p, t)
+moods.melt = function(p, _t)
 	p.Body[5] = -0.3
 	p.Body[1] = -0.15
 	p.Head[1] = -0.4
