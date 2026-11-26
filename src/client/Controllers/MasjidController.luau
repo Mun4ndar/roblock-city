@@ -392,6 +392,21 @@ local function updateVisibility()
 	panel.Visible = near and type(phase) == "string" and phase ~= "Idle" and titleLabel.Text ~= ""
 end
 
+-- Selama pemain ikut sholat, prompt "Ikut sholat berjamaah" disembunyikan (hanya di layar pemain ini).
+local function syncJoinPrompts()
+	local joined = player:GetAttribute("MasjidSlot") ~= nil
+	local phase = Workspace:GetAttribute("MasjidFase")
+	local folder = Workspace:FindFirstChild("Masjid")
+	if folder == nil then
+		return
+	end
+	for _, descendant in folder:GetDescendants() do
+		if descendant:IsA("ProximityPrompt") and descendant.Name == "IkutSholat" then
+			descendant.Enabled = (not joined) and (phase == "Azan" or phase == "Iqamah")
+		end
+	end
+end
+
 function MasjidController.init() end
 
 function MasjidController.start()
@@ -425,6 +440,12 @@ function MasjidController.start()
 		Workspace:GetAttributeChangedSignal(name):Connect(refreshPanel)
 	end
 	player:GetAttributeChangedSignal("MasjidSlot"):Connect(refreshPanel)
+	player:GetAttributeChangedSignal("MasjidSlot"):Connect(syncJoinPrompts)
+	game:GetService("ProximityPromptService").PromptShown:Connect(function(prompt: ProximityPrompt)
+		if prompt.Name == "IkutSholat" and player:GetAttribute("MasjidSlot") ~= nil then
+			prompt.Enabled = false
+		end
+	end)
 	refreshPanel()
 	task.spawn(function()
 		while true do
