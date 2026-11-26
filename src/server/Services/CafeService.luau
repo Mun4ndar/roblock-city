@@ -48,26 +48,56 @@ type Staff = { root: BasePart, say: (string, number) -> (), celebrate: () -> () 
 local LOOKS: { [string]: { barista: Look, waiter: Look } } = {
 	startduck = {
 		barista = {
-			name = "Dinda", title = "Barista", skin = rgb(224, 172, 120), top = rgb(252, 244, 228),
-			bottom = rgb(60, 46, 40), shoes = rgb(60, 46, 40), hair = rgb(40, 28, 26), hairStyle = "bun",
-			apron = rgb(110, 70, 44), accent = rgb(255, 200, 50),
+			name = "Dinda",
+			title = "Barista",
+			skin = rgb(224, 172, 120),
+			top = rgb(252, 244, 228),
+			bottom = rgb(60, 46, 40),
+			shoes = rgb(60, 46, 40),
+			hair = rgb(40, 28, 26),
+			hairStyle = "bun",
+			apron = rgb(110, 70, 44),
+			accent = rgb(255, 200, 50),
 		},
 		waiter = {
-			name = "Raka", title = "Pelayan", skin = rgb(214, 160, 116), top = rgb(252, 244, 228),
-			bottom = rgb(60, 46, 40), shoes = rgb(50, 40, 36), hair = rgb(34, 26, 24), hairStyle = "short",
-			apron = nil, accent = rgb(255, 200, 50), cap = nil,
+			name = "Raka",
+			title = "Pelayan",
+			skin = rgb(214, 160, 116),
+			top = rgb(252, 244, 228),
+			bottom = rgb(60, 46, 40),
+			shoes = rgb(50, 40, 36),
+			hair = rgb(34, 26, 24),
+			hairStyle = "short",
+			apron = nil,
+			accent = rgb(255, 200, 50),
+			cap = nil,
 		},
 	},
 	kafekota = {
 		barista = {
-			name = "Bayu", title = "Barista", skin = rgb(214, 160, 116), top = rgb(60, 64, 72),
-			bottom = rgb(34, 36, 40), shoes = rgb(30, 30, 34), hair = rgb(30, 24, 22), hairStyle = "short",
-			apron = rgb(30, 32, 36), accent = rgb(255, 160, 60), cap = rgb(255, 160, 60),
+			name = "Bayu",
+			title = "Barista",
+			skin = rgb(214, 160, 116),
+			top = rgb(60, 64, 72),
+			bottom = rgb(34, 36, 40),
+			shoes = rgb(30, 30, 34),
+			hair = rgb(30, 24, 22),
+			hairStyle = "short",
+			apron = rgb(30, 32, 36),
+			accent = rgb(255, 160, 60),
+			cap = rgb(255, 160, 60),
 		},
 		waiter = {
-			name = "Sari", title = "Pelayan", skin = rgb(240, 190, 140), top = rgb(245, 245, 240),
-			bottom = rgb(34, 36, 40), shoes = rgb(30, 30, 34), hair = rgb(60, 36, 28), hairStyle = "pony",
-			apron = rgb(30, 32, 36), accent = rgb(255, 160, 60),
+			name = "Sari",
+			title = "Pelayan",
+			skin = rgb(240, 190, 140),
+			top = rgb(245, 245, 240),
+			bottom = rgb(34, 36, 40),
+			shoes = rgb(30, 30, 34),
+			hair = rgb(60, 36, 28),
+			hairStyle = "pony",
+			apron = rgb(30, 32, 36),
+			accent = rgb(255, 160, 60),
 		},
 	},
 }
@@ -92,7 +122,16 @@ local baristas: { [string]: Staff } = {}
 local waiters: { [string]: Staff } = {}
 local busy: { [Player]: boolean } = {}
 
-local function decorate(model: Model, on: BasePart, name: string, size: Vector3, color: Color3, offset: CFrame, ball: boolean?, material: Enum.Material?)
+local function decorate(
+	model: Model,
+	on: BasePart,
+	name: string,
+	size: Vector3,
+	color: Color3,
+	offset: CFrame,
+	ball: boolean?,
+	material: Enum.Material?
+)
 	local part = Instance.new("Part")
 	part.Name = name
 	part.Shape = if ball then Enum.PartType.Ball else Enum.PartType.Block
@@ -189,7 +228,13 @@ local function buildPerson(look: Look): (Model?, Humanoid?, BasePart?, BasePart?
 	local humanoid = model:FindFirstChildOfClass("Humanoid")
 	local head = model:FindFirstChild("Head")
 	local root = model:FindFirstChild("HumanoidRootPart")
-	if humanoid == nil or head == nil or not head:IsA("BasePart") or root == nil or not root:IsA("BasePart") then
+	if
+		humanoid == nil
+		or head == nil
+		or not head:IsA("BasePart")
+		or root == nil
+		or not root:IsA("BasePart")
+	then
 		model:Destroy()
 		return nil, nil, nil, nil
 	end
@@ -225,35 +270,143 @@ local function buildPerson(look: Look): (Model?, Humanoid?, BasePart?, BasePart?
 	if upper and lower and upper:IsA("BasePart") and lower:IsA("BasePart") then
 		if look.apron then
 			local a = look.apron
-			decorate(model, upper, "CelemekAtas", Vector3.new(1.55, 1.15, 0.12), a, CFrame.new(0, -0.2, -0.54))
-			decorate(model, lower, "CelemekBawah", Vector3.new(1.7, 1.0, 0.12), a, CFrame.new(0, -0.5, -0.54))
-			decorate(model, upper, "KantongCelemek", Vector3.new(0.7, 0.35, 0.05), look.accent, CFrame.new(0, -0.3, -0.62))
-			decorate(model, upper, "TaliKiri", Vector3.new(0.18, 0.75, 0.1), a, CFrame.new(-0.5, 0.45, -0.52))
-			decorate(model, upper, "TaliKanan", Vector3.new(0.18, 0.75, 0.1), a, CFrame.new(0.5, 0.45, -0.52))
+			decorate(
+				model,
+				upper,
+				"CelemekAtas",
+				Vector3.new(1.55, 1.15, 0.12),
+				a,
+				CFrame.new(0, -0.2, -0.54)
+			)
+			decorate(
+				model,
+				lower,
+				"CelemekBawah",
+				Vector3.new(1.7, 1.0, 0.12),
+				a,
+				CFrame.new(0, -0.5, -0.54)
+			)
+			decorate(
+				model,
+				upper,
+				"KantongCelemek",
+				Vector3.new(0.7, 0.35, 0.05),
+				look.accent,
+				CFrame.new(0, -0.3, -0.62)
+			)
+			decorate(
+				model,
+				upper,
+				"TaliKiri",
+				Vector3.new(0.18, 0.75, 0.1),
+				a,
+				CFrame.new(-0.5, 0.45, -0.52)
+			)
+			decorate(
+				model,
+				upper,
+				"TaliKanan",
+				Vector3.new(0.18, 0.75, 0.1),
+				a,
+				CFrame.new(0.5, 0.45, -0.52)
+			)
 		else
 			-- rompi kayu + dasi kupu-kupu
-			decorate(model, upper, "RompiKiri", Vector3.new(0.62, 1.2, 0.1), rgb(110, 70, 44), CFrame.new(-0.42, -0.2, -0.54))
-			decorate(model, upper, "RompiKanan", Vector3.new(0.62, 1.2, 0.1), rgb(110, 70, 44), CFrame.new(0.42, -0.2, -0.54))
-			decorate(model, upper, "DasiKupu", Vector3.new(0.6, 0.25, 0.1), look.accent, CFrame.new(0, 0.5, -0.58))
+			decorate(
+				model,
+				upper,
+				"RompiKiri",
+				Vector3.new(0.62, 1.2, 0.1),
+				rgb(110, 70, 44),
+				CFrame.new(-0.42, -0.2, -0.54)
+			)
+			decorate(
+				model,
+				upper,
+				"RompiKanan",
+				Vector3.new(0.62, 1.2, 0.1),
+				rgb(110, 70, 44),
+				CFrame.new(0.42, -0.2, -0.54)
+			)
+			decorate(
+				model,
+				upper,
+				"DasiKupu",
+				Vector3.new(0.6, 0.25, 0.1),
+				look.accent,
+				CFrame.new(0, 0.5, -0.58)
+			)
 		end
 	end
 	local style = look.hairStyle
-	decorate(model, head, "Rambut", Vector3.new(1.42, 1.15, 1.42), look.hair, CFrame.new(0, 0.34, 0.08), true)
+	decorate(
+		model,
+		head,
+		"Rambut",
+		Vector3.new(1.42, 1.15, 1.42),
+		look.hair,
+		CFrame.new(0, 0.34, 0.08),
+		true
+	)
 	if style == "bun" then
-		decorate(model, head, "Sanggul", Vector3.new(0.8, 0.8, 0.8), look.hair, CFrame.new(0, 0.95, 0.25), true)
-		decorate(model, head, "IkatRambut", Vector3.new(0.45, 0.2, 0.45), look.accent, CFrame.new(0, 0.7, 0.35), true)
+		decorate(
+			model,
+			head,
+			"Sanggul",
+			Vector3.new(0.8, 0.8, 0.8),
+			look.hair,
+			CFrame.new(0, 0.95, 0.25),
+			true
+		)
+		decorate(
+			model,
+			head,
+			"IkatRambut",
+			Vector3.new(0.45, 0.2, 0.45),
+			look.accent,
+			CFrame.new(0, 0.7, 0.35),
+			true
+		)
 	elseif style == "pony" then
-		decorate(model, head, "Kuncir", Vector3.new(0.5, 1.1, 0.5), look.hair, CFrame.new(0, 0.0, 0.8), true)
-		decorate(model, head, "IkatRambut", Vector3.new(0.4, 0.2, 0.4), look.accent, CFrame.new(0, 0.45, 0.78), true)
+		decorate(
+			model,
+			head,
+			"Kuncir",
+			Vector3.new(0.5, 1.1, 0.5),
+			look.hair,
+			CFrame.new(0, 0.0, 0.8),
+			true
+		)
+		decorate(
+			model,
+			head,
+			"IkatRambut",
+			Vector3.new(0.4, 0.2, 0.4),
+			look.accent,
+			CFrame.new(0, 0.45, 0.78),
+			true
+		)
 	end
 	if look.cap then
 		decorate(model, head, "Topi", Vector3.new(1.5, 0.4, 1.5), look.cap, CFrame.new(0, 0.62, 0))
-		decorate(model, head, "TopiLidah", Vector3.new(1.1, 0.12, 0.7), look.cap, CFrame.new(0, 0.42, -0.85))
+		decorate(
+			model,
+			head,
+			"TopiLidah",
+			Vector3.new(1.1, 0.12, 0.7),
+			look.cap,
+			CFrame.new(0, 0.42, -0.85)
+		)
 	end
 	return model, humanoid, head, root
 end
 
-local function track(animator: Animator, id: string, priority: Enum.AnimationPriority, looped: boolean): AnimationTrack
+local function track(
+	animator: Animator,
+	id: string,
+	priority: Enum.AnimationPriority,
+	looped: boolean
+): AnimationTrack
 	local animation = Instance.new("Animation")
 	animation.AnimationId = id
 	local t = animator:LoadAnimation(animation)
@@ -284,7 +437,12 @@ local function markersOf(venue: string): { [string]: any }
 	return found
 end
 
-local function addPrompt(parent: Instance, objectText: string, venueKey: string, say: ((string, number) -> ())?)
+local function addPrompt(
+	parent: Instance,
+	objectText: string,
+	venueKey: string,
+	say: ((string, number) -> ())?
+)
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "MenuKafePrompt"
 	prompt.ActionText = "Lihat Menu"
@@ -319,7 +477,10 @@ local function startVenue(key: string)
 		local facing = baristaPoint:GetAttribute("Facing")
 		local face = if typeof(facing) == "Vector3" then facing else Vector3.new(0, 0, 1)
 		local y = pos.Y + humanoid.HipHeight + root.Size.Y / 2
-		local base = CFrame.lookAt(Vector3.new(pos.X, y, pos.Z), Vector3.new(pos.X + face.X, y, pos.Z + face.Z))
+		local base = CFrame.lookAt(
+			Vector3.new(pos.X, y, pos.Z),
+			Vector3.new(pos.X + face.X, y, pos.Z + face.Z)
+		)
 		model:PivotTo(base)
 		root.Anchored = true
 		model.Parent = folder
@@ -371,10 +532,17 @@ local function startVenue(key: string)
 				local player, distance = nearestPlayer(root.Position)
 				if player and distance < 16 then
 					local character = player.Character
-					local theirRoot = if character then character:FindFirstChild("HumanoidRootPart") else nil
+					local theirRoot = if character
+						then character:FindFirstChild("HumanoidRootPart")
+						else nil
 					if theirRoot and theirRoot:IsA("BasePart") then
 						local here = model:GetPivot().Position
-						model:PivotTo(CFrame.lookAt(here, Vector3.new(theirRoot.Position.X, here.Y, theirRoot.Position.Z)))
+						model:PivotTo(
+							CFrame.lookAt(
+								here,
+								Vector3.new(theirRoot.Position.X, here.Y, theirRoot.Position.Z)
+							)
+						)
 					end
 					if not greeted or os.clock() - lastWave > 14 then
 						greeted = true
@@ -408,7 +576,9 @@ local function startVenue(key: string)
 	wHumanoid.WalkSpeed = 6
 	wHumanoid.JumpPower = 0
 	wHumanoid.JumpHeight = 0
-	wModel:PivotTo(CFrame.new(start.X, start.Y + wHumanoid.HipHeight + wRoot.Size.Y / 2 + 0.2, start.Z))
+	wModel:PivotTo(
+		CFrame.new(start.X, start.Y + wHumanoid.HipHeight + wRoot.Size.Y / 2 + 0.2, start.Z)
+	)
 	wModel.Parent = folder
 	pcall(function()
 		wRoot:SetNetworkOwner(nil)
@@ -420,7 +590,13 @@ local function startVenue(key: string)
 	local wWave = track(wAnimator, WAVE, Enum.AnimationPriority.Action2, false)
 	idle:Play(0)
 	local wSay = buildBubble(wHead, venue.accent)
-	waiters[key] = { root = wRoot, say = wSay, celebrate = function() wWave:Play(0.2) end }
+	waiters[key] = {
+		root = wRoot,
+		say = wSay,
+		celebrate = function()
+			wWave:Play(0.2)
+		end,
+	}
 	addPrompt(wRoot, looks.waiter.title .. " " .. venue.title, key, wSay)
 
 	local index = 1
@@ -443,10 +619,15 @@ local function startVenue(key: string)
 					walk:Stop(0.2)
 					idle:Play(0.2)
 					local character = player.Character
-					local theirRoot = if character then character:FindFirstChild("HumanoidRootPart") else nil
+					local theirRoot = if character
+						then character:FindFirstChild("HumanoidRootPart")
+						else nil
 					if theirRoot and theirRoot:IsA("BasePart") then
 						local here = wRoot.Position
-						wRoot.CFrame = CFrame.lookAt(here, Vector3.new(theirRoot.Position.X, here.Y, theirRoot.Position.Z))
+						wRoot.CFrame = CFrame.lookAt(
+							here,
+							Vector3.new(theirRoot.Position.X, here.Y, theirRoot.Position.Z)
+						)
 					end
 					wWave:Play(0.2)
 					lineIndex = lineIndex % #lines + 1
@@ -467,7 +648,13 @@ local function startVenue(key: string)
 			idle:Play(0.2)
 			if os.clock() - stuckSince > 14 then
 				-- tersangkut: pindahkan ke titik jalur
-				wModel:PivotTo(CFrame.new(goal.X, goal.Y + wHumanoid.HipHeight + wRoot.Size.Y / 2 + 0.2, goal.Z))
+				wModel:PivotTo(
+					CFrame.new(
+						goal.X,
+						goal.Y + wHumanoid.HipHeight + wRoot.Size.Y / 2 + 0.2,
+						goal.Z
+					)
+				)
 			end
 			task.wait(2 + math.random() * 2)
 		end
@@ -524,7 +711,11 @@ function CafeService.init()
 	folder.Name = CafeConfig.FOLDER
 	folder.Parent = Workspace
 	Net.event(CafeConfig.OPEN_EVENT)
-	Net.func(CafeConfig.ORDER_FUNC).OnServerInvoke = function(player: Player, venueKey: any, index: any): any
+	Net.func(CafeConfig.ORDER_FUNC).OnServerInvoke = function(
+		player: Player,
+		venueKey: any,
+		index: any
+	): any
 		local ok, value = pcall(order, player, venueKey, index)
 		if ok then
 			return value

@@ -61,36 +61,95 @@ local NAVY, TEAL, WHITE = rgb(24, 52, 78), rgb(30, 160, 170), rgb(250, 250, 248)
 
 local STAFF: { Staff } = {
 	{
-		name = "Bu Dewi", title = "Resepsionis", at = Vector3.new(0, -11.7, FLOOR), face = Vector2.new(0, 1),
-		anim = "catat", skin = rgb(215, 165, 125), vest = NAVY, pants = rgb(40, 44, 58), hair = rgb(30, 26, 26),
-		hairStyle = "sanggul", woman = true,
+		name = "Bu Dewi",
+		title = "Resepsionis",
+		at = Vector3.new(0, -11.7, FLOOR),
+		face = Vector2.new(0, 1),
+		anim = "catat",
+		skin = rgb(215, 165, 125),
+		vest = NAVY,
+		pants = rgb(40, 44, 58),
+		hair = rgb(30, 26, 26),
+		hairStyle = "sanggul",
+		woman = true,
 	},
 	{
-		name = "Pak Rudi", title = "Concierge", at = Vector3.new(-15, -5.4, FLOOR), face = Vector2.new(0, 1),
-		anim = "sapa", skin = rgb(190, 140, 100), vest = TEAL, pants = rgb(40, 44, 58), hair = rgb(24, 20, 20),
+		name = "Pak Rudi",
+		title = "Concierge",
+		at = Vector3.new(-15, -5.4, FLOOR),
+		face = Vector2.new(0, 1),
+		anim = "sapa",
+		skin = rgb(190, 140, 100),
+		vest = TEAL,
+		pants = rgb(40, 44, 58),
+		hair = rgb(24, 20, 20),
 		hairStyle = "rapi",
 	},
 	{
-		name = "Mas Doni", title = "Bellboy", at = Vector3.new(12, 13.5, FLOOR), face = Vector2.new(0, -1),
-		anim = "diam", skin = rgb(205, 155, 115), vest = rgb(150, 30, 36), pants = rgb(40, 44, 58),
-		hair = rgb(30, 26, 26), hairStyle = "rapi", hat = "bellboy", extra = "koper",
-		patrol = { Vector2.new(12, 13.5), Vector2.new(12, -6), Vector2.new(17.5, -13), Vector2.new(12, -6) },
+		name = "Mas Doni",
+		title = "Bellboy",
+		at = Vector3.new(12, 13.5, FLOOR),
+		face = Vector2.new(0, -1),
+		anim = "diam",
+		skin = rgb(205, 155, 115),
+		vest = rgb(150, 30, 36),
+		pants = rgb(40, 44, 58),
+		hair = rgb(30, 26, 26),
+		hairStyle = "rapi",
+		hat = "bellboy",
+		extra = "koper",
+		patrol = {
+			Vector2.new(12, 13.5),
+			Vector2.new(12, -6),
+			Vector2.new(17.5, -13),
+			Vector2.new(12, -6),
+		},
 	},
 	{
-		name = "Chef Bagas", title = "Koki", at = Vector3.new(-47, -14.6, FLOOR), face = Vector2.new(0, 1),
-		anim = "catat", skin = rgb(215, 170, 130), vest = WHITE, pants = rgb(50, 54, 66), hair = rgb(30, 26, 26),
-		hairStyle = "rapi", hat = "chef",
+		name = "Chef Bagas",
+		title = "Koki",
+		at = Vector3.new(-47, -14.6, FLOOR),
+		face = Vector2.new(0, 1),
+		anim = "catat",
+		skin = rgb(215, 170, 130),
+		vest = WHITE,
+		pants = rgb(50, 54, 66),
+		hair = rgb(30, 26, 26),
+		hairStyle = "rapi",
+		hat = "chef",
 	},
 	{
-		name = "Mbak Ani", title = "Pelayan", at = Vector3.new(-60, 3.4, FLOOR), face = Vector2.new(1, 0),
-		anim = "diam", skin = rgb(220, 170, 135), vest = NAVY, pants = rgb(40, 44, 58), hair = rgb(30, 26, 26),
-		hairStyle = "sanggul", woman = true, extra = "nampan",
-		patrol = { Vector2.new(-60, 3.4), Vector2.new(-30, 3.4), Vector2.new(-30, -8), Vector2.new(-60, -8) },
+		name = "Mbak Ani",
+		title = "Pelayan",
+		at = Vector3.new(-60, 3.4, FLOOR),
+		face = Vector2.new(1, 0),
+		anim = "diam",
+		skin = rgb(220, 170, 135),
+		vest = NAVY,
+		pants = rgb(40, 44, 58),
+		hair = rgb(30, 26, 26),
+		hairStyle = "sanggul",
+		woman = true,
+		extra = "nampan",
+		patrol = {
+			Vector2.new(-60, 3.4),
+			Vector2.new(-30, 3.4),
+			Vector2.new(-30, -8),
+			Vector2.new(-60, -8),
+		},
 	},
 	{
-		name = "Kak Lia", title = "Bartender", at = Vector3.new(46, -14.8, FLOOR), face = Vector2.new(0, 1),
-		anim = "sapa", skin = rgb(225, 175, 140), vest = TEAL, pants = rgb(40, 44, 58), hair = rgb(60, 36, 24),
-		hairStyle = "sanggul", woman = true,
+		name = "Kak Lia",
+		title = "Bartender",
+		at = Vector3.new(46, -14.8, FLOOR),
+		face = Vector2.new(0, 1),
+		anim = "sapa",
+		skin = rgb(225, 175, 140),
+		vest = TEAL,
+		pants = rgb(40, 44, 58),
+		hair = rgb(60, 36, 24),
+		hairStyle = "sanggul",
+		woman = true,
 	},
 }
 
@@ -98,14 +157,23 @@ local function world(x: number, y: number, z: number): Vector3
 	return (BASE * CFrame.new(x, z, -y)).Position
 end
 
-local function attach(model: Model, to: BasePart, size: Vector3, offset: CFrame, color: Color3, shape: Enum.PartType, material: Enum.Material): Part
+local function attach(
+	model: Model,
+	to: BasePart,
+	size: Vector3,
+	offset: CFrame,
+	color: Color3,
+	shape: Enum.PartType,
+	material: Enum.Material
+): Part
 	local part = Instance.new("Part")
 	part.Name = "Hiasan"
 	part.Shape = shape
 	part.Size = size
 	part.Color = color
 	part.Material = material
-	part.CanCollide, part.CanTouch, part.CanQuery, part.CastShadow, part.Massless = false, false, false, false, true
+	part.CanCollide, part.CanTouch, part.CanQuery, part.CastShadow, part.Massless =
+		false, false, false, false, true
 	part.CFrame = to.CFrame * offset
 	local weld = Instance.new("WeldConstraint")
 	weld.Part0 = to
@@ -115,7 +183,12 @@ local function attach(model: Model, to: BasePart, size: Vector3, offset: CFrame,
 	return part
 end
 
-local SP, METAL, BLOCK, BALL, CYL = Enum.Material.SmoothPlastic, Enum.Material.Metal, Enum.PartType.Block, Enum.PartType.Ball, Enum.PartType.Cylinder
+local SP, METAL, BLOCK, BALL, CYL =
+	Enum.Material.SmoothPlastic,
+	Enum.Material.Metal,
+	Enum.PartType.Block,
+	Enum.PartType.Ball,
+	Enum.PartType.Cylinder
 
 local function build(info: Staff): Model?
 	local description = Instance.new("HumanoidDescription")
@@ -131,7 +204,13 @@ local function build(info: Staff): Model?
 	local humanoid = model:FindFirstChildOfClass("Humanoid")
 	local head = model:FindFirstChild("Head")
 	local torso = model:FindFirstChild("UpperTorso")
-	if humanoid == nil or head == nil or torso == nil or not head:IsA("BasePart") or not torso:IsA("BasePart") then
+	if
+		humanoid == nil
+		or head == nil
+		or torso == nil
+		or not head:IsA("BasePart")
+		or not torso:IsA("BasePart")
+	then
 		model:Destroy()
 		return nil
 	end
@@ -141,7 +220,12 @@ local function build(info: Staff): Model?
 	humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming, false)
 	humanoid.BreakJointsOnDeath = false
 	for _, child in model:GetChildren() do
-		if child:IsA("LuaSourceContainer") or child:IsA("BodyColors") or child:IsA("Shirt") or child:IsA("Pants") then
+		if
+			child:IsA("LuaSourceContainer")
+			or child:IsA("BodyColors")
+			or child:IsA("Shirt")
+			or child:IsA("Pants")
+		then
 			child:Destroy()
 		end
 	end
@@ -161,47 +245,184 @@ local function build(info: Staff): Model?
 		end
 	end
 	-- rompi berwarna di dada + dasi kupu-kupu/dasi + lencana emas
-	attach(model, torso, Vector3.new(1.0, 1.35, 0.1), CFrame.new(0, 0.1, -0.52), info.vest, BLOCK, SP)
+	attach(
+		model,
+		torso,
+		Vector3.new(1.0, 1.35, 0.1),
+		CFrame.new(0, 0.1, -0.52),
+		info.vest,
+		BLOCK,
+		SP
+	)
 	attach(model, torso, Vector3.new(0.18, 0.9, 0.08), CFrame.new(0, 0.1, -0.58), WHITE, BLOCK, SP)
-	attach(model, torso, Vector3.new(0.3, 0.2, 0.1), CFrame.new(0, 0.6, -0.58), rgb(190, 50, 56), BLOCK, SP)
-	attach(model, torso, Vector3.new(0.3, 0.16, 0.06), CFrame.new(0.4, 0.3, -0.58), rgb(226, 172, 52), BLOCK, METAL)
+	attach(
+		model,
+		torso,
+		Vector3.new(0.3, 0.2, 0.1),
+		CFrame.new(0, 0.6, -0.58),
+		rgb(190, 50, 56),
+		BLOCK,
+		SP
+	)
+	attach(
+		model,
+		torso,
+		Vector3.new(0.3, 0.16, 0.06),
+		CFrame.new(0.4, 0.3, -0.58),
+		rgb(226, 172, 52),
+		BLOCK,
+		METAL
+	)
 	-- rambut
 	attach(model, head, Vector3.new(1.4, 1.2, 1.4), CFrame.new(0, 0.36, 0.08), info.hair, BALL, SP)
 	if info.hairStyle == "sanggul" then
-		attach(model, head, Vector3.new(0.7, 0.7, 0.7), CFrame.new(0, 0.72, 0.58), info.hair, BALL, SP)
+		attach(
+			model,
+			head,
+			Vector3.new(0.7, 0.7, 0.7),
+			CFrame.new(0, 0.72, 0.58),
+			info.hair,
+			BALL,
+			SP
+		)
 	else
-		attach(model, head, Vector3.new(1.3, 0.35, 0.6), CFrame.new(0, 0.62, -0.46), info.hair, BLOCK, SP)
+		attach(
+			model,
+			head,
+			Vector3.new(1.3, 0.35, 0.6),
+			CFrame.new(0, 0.62, -0.46),
+			info.hair,
+			BLOCK,
+			SP
+		)
 	end
 	-- topi
 	if info.hat == "bellboy" then
-		local cap = attach(model, head, Vector3.new(0.5, 1.15, 1.15), CFrame.new(0, 0.78, 0), rgb(150, 30, 36), CYL, SP)
+		local cap = attach(
+			model,
+			head,
+			Vector3.new(0.5, 1.15, 1.15),
+			CFrame.new(0, 0.78, 0),
+			rgb(150, 30, 36),
+			CYL,
+			SP
+		)
 		cap.CFrame = head.CFrame * CFrame.new(0, 0.78, 0) * CFrame.Angles(0, 0, math.rad(90))
-		attach(model, head, Vector3.new(1.0, 0.1, 0.12), CFrame.new(0, 0.55, -0.55), rgb(226, 172, 52), BLOCK, METAL)
+		attach(
+			model,
+			head,
+			Vector3.new(1.0, 0.1, 0.12),
+			CFrame.new(0, 0.55, -0.55),
+			rgb(226, 172, 52),
+			BLOCK,
+			METAL
+		)
 	elseif info.hat == "chef" then
-		local base = attach(model, head, Vector3.new(0.5, 1.2, 1.2), CFrame.new(0, 0.7, 0), WHITE, CYL, SP)
+		local base =
+			attach(model, head, Vector3.new(0.5, 1.2, 1.2), CFrame.new(0, 0.7, 0), WHITE, CYL, SP)
 		base.CFrame = head.CFrame * CFrame.new(0, 0.7, 0) * CFrame.Angles(0, 0, math.rad(90))
 		attach(model, head, Vector3.new(1.5, 0.9, 1.5), CFrame.new(0, 1.2, 0), WHITE, BALL, SP)
 	end
 	-- kereta koper (bellboy) di depan badan: rangka, dua koper, roda
 	if info.extra == "koper" then
 		local root = model:FindFirstChild("HumanoidRootPart") :: BasePart
-		local cart = attach(model, root, Vector3.new(2.4, 0.2, 3.0), CFrame.new(0, -2.2, -3.2), rgb(226, 172, 52), BLOCK, METAL)
-		attach(model, cart, Vector3.new(0.18, 3.4, 0.18), CFrame.new(-1.1, 1.7, 1.4), rgb(226, 172, 52), BLOCK, METAL)
-		attach(model, cart, Vector3.new(0.18, 3.4, 0.18), CFrame.new(1.1, 1.7, 1.4), rgb(226, 172, 52), BLOCK, METAL)
-		attach(model, cart, Vector3.new(2.4, 0.18, 0.18), CFrame.new(0, 3.4, 1.4), rgb(226, 172, 52), BLOCK, METAL)
-		attach(model, cart, Vector3.new(1.9, 1.3, 1.0), CFrame.new(-0.2, 0.75, -0.3), rgb(200, 60, 60), BLOCK, SP)
-		attach(model, cart, Vector3.new(1.5, 1.0, 0.9), CFrame.new(0.2, 2.0, -0.3), rgb(40, 110, 180), BLOCK, SP)
-		attach(model, cart, Vector3.new(1.3, 0.8, 0.8), CFrame.new(-0.3, 0.55, 0.9), rgb(60, 150, 100), BLOCK, SP)
+		local cart = attach(
+			model,
+			root,
+			Vector3.new(2.4, 0.2, 3.0),
+			CFrame.new(0, -2.2, -3.2),
+			rgb(226, 172, 52),
+			BLOCK,
+			METAL
+		)
+		attach(
+			model,
+			cart,
+			Vector3.new(0.18, 3.4, 0.18),
+			CFrame.new(-1.1, 1.7, 1.4),
+			rgb(226, 172, 52),
+			BLOCK,
+			METAL
+		)
+		attach(
+			model,
+			cart,
+			Vector3.new(0.18, 3.4, 0.18),
+			CFrame.new(1.1, 1.7, 1.4),
+			rgb(226, 172, 52),
+			BLOCK,
+			METAL
+		)
+		attach(
+			model,
+			cart,
+			Vector3.new(2.4, 0.18, 0.18),
+			CFrame.new(0, 3.4, 1.4),
+			rgb(226, 172, 52),
+			BLOCK,
+			METAL
+		)
+		attach(
+			model,
+			cart,
+			Vector3.new(1.9, 1.3, 1.0),
+			CFrame.new(-0.2, 0.75, -0.3),
+			rgb(200, 60, 60),
+			BLOCK,
+			SP
+		)
+		attach(
+			model,
+			cart,
+			Vector3.new(1.5, 1.0, 0.9),
+			CFrame.new(0.2, 2.0, -0.3),
+			rgb(40, 110, 180),
+			BLOCK,
+			SP
+		)
+		attach(
+			model,
+			cart,
+			Vector3.new(1.3, 0.8, 0.8),
+			CFrame.new(-0.3, 0.55, 0.9),
+			rgb(60, 150, 100),
+			BLOCK,
+			SP
+		)
 		for _, dx in { -1, 1 } do
 			for _, dz in { -1.2, 1.2 } do
-				local w = attach(model, cart, Vector3.new(0.3, 0.5, 0.5), CFrame.new(dx * 1.1, -0.3, dz), rgb(30, 30, 34), CYL, SP)
+				local w = attach(
+					model,
+					cart,
+					Vector3.new(0.3, 0.5, 0.5),
+					CFrame.new(dx * 1.1, -0.3, dz),
+					rgb(30, 30, 34),
+					CYL,
+					SP
+				)
 				w.CFrame = cart.CFrame * CFrame.new(dx * 1.1, -0.3, dz)
 			end
 		end
 	elseif info.extra == "nampan" then
-		local tray = attach(model, torso, Vector3.new(1.6, 0.1, 1.2), CFrame.new(0, -0.1, -1.4), rgb(196, 202, 208), BLOCK, METAL)
+		local tray = attach(
+			model,
+			torso,
+			Vector3.new(1.6, 0.1, 1.2),
+			CFrame.new(0, -0.1, -1.4),
+			rgb(196, 202, 208),
+			BLOCK,
+			METAL
+		)
 		attach(model, tray, Vector3.new(0.35, 0.7, 0.7), CFrame.new(-0.3, 0.2, 0), WHITE, CYL, SP)
-		attach(model, tray, Vector3.new(0.7, 0.4, 0.4), CFrame.new(0.4, 0.4, 0.1), rgb(250, 120, 60), CYL, SP)
+		attach(
+			model,
+			tray,
+			Vector3.new(0.7, 0.4, 0.4),
+			CFrame.new(0.4, 0.4, 0.1),
+			rgb(250, 120, 60),
+			CYL,
+			SP
+		)
 	end
 	-- papan nama
 	local board = Instance.new("BillboardGui")
@@ -210,7 +431,14 @@ local function build(info: Staff): Model?
 	board.MaxDistance = 28
 	board.AlwaysOnTop = false
 	board.Parent = head
-	local function line(text: string, y: number, h: number, size: number, color: Color3, font: Enum.Font)
+	local function line(
+		text: string,
+		y: number,
+		h: number,
+		size: number,
+		color: Color3,
+		font: Enum.Font
+	)
 		local l = Instance.new("TextLabel")
 		l.BackgroundTransparency = 1
 		l.Position = UDim2.fromScale(0, y)
@@ -263,7 +491,11 @@ local function patrol(model: Model, humanoid: Humanoid, points: { Vector2 })
 			walk:Play(0.2)
 			humanoid:MoveTo(goal)
 			local waited = 0
-			while model.Parent and (root.Position * Vector3.new(1, 0, 1) - goal * Vector3.new(1, 0, 1)).Magnitude > 2 and waited < 16 do
+			while
+				model.Parent
+				and (root.Position * Vector3.new(1, 0, 1) - goal * Vector3.new(1, 0, 1)).Magnitude > 2
+				and waited < 16
+			do
 				waited += task.wait(0.25)
 			end
 			walk:Stop(0.2)

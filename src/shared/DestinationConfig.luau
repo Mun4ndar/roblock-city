@@ -24,7 +24,12 @@ DestinationConfig.DEFAULT_ARRIVE = 35
 -- Urutan = urutan tab zona.
 DestinationConfig.ZONES = {
 	{ id = "kota", name = "Pusat Kota", icon = "🏙️", color = Color3.fromRGB(122, 92, 255) },
-	{ id = "perumahan", name = "Perumahan", icon = "🏘️", color = Color3.fromRGB(255, 140, 66) },
+	{
+		id = "perumahan",
+		name = "Perumahan",
+		icon = "🏘️",
+		color = Color3.fromRGB(255, 140, 66),
+	},
 	{ id = "pantai", name = "Pantai", icon = "🏖️", color = Color3.fromRGB(0, 184, 217) },
 	{ id = "desa", name = "Desa & Kebun", icon = "🌾", color = Color3.fromRGB(64, 180, 90) },
 	{ id = "bandara", name = "Bandara", icon = "✈️", color = Color3.fromRGB(60, 120, 230) },
@@ -32,7 +37,16 @@ DestinationConfig.ZONES = {
 
 local LIST: { Destination } = {}
 
-local function add(id: string, name: string, zone: string, icon: string, x: number, z: number, major: boolean?, arrive: number?)
+local function add(
+	id: string,
+	name: string,
+	zone: string,
+	icon: string,
+	x: number,
+	z: number,
+	major: boolean?,
+	arrive: number?
+)
 	table.insert(LIST, {
 		id = id,
 		name = name,

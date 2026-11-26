@@ -90,7 +90,15 @@ local function addLaughFace(head: BasePart)
 	gui.CanvasSize = Vector2.new(200, 200)
 	gui.LightInfluence = 0
 	local ink = rgb(35, 30, 32)
-	local function frame(x: number, y: number, w: number, h: number, color: Color3, radius: number, transparency: number?)
+	local function frame(
+		x: number,
+		y: number,
+		w: number,
+		h: number,
+		color: Color3,
+		radius: number,
+		transparency: number?
+	)
 		local f = Instance.new("Frame")
 		f.AnchorPoint = Vector2.new(0.5, 0.5)
 		f.Position = UDim2.fromOffset(x, y)
@@ -206,21 +214,43 @@ local function buildPerson(look: Look): (Model?, Humanoid?, BasePart?)
 			end
 		end
 	end
-	decorate(model, head, "Rambut", Vector3.new(1.42, 1.3, 1.42), look.hair, CFrame.new(0, 0.36, 0.08), true)
+	decorate(
+		model,
+		head,
+		"Rambut",
+		Vector3.new(1.42, 1.3, 1.42),
+		look.hair,
+		CFrame.new(0, 0.36, 0.08),
+		true
+	)
 	if look.laugh then
 		addLaughFace(head)
 	end
 	return model, humanoid, root
 end
 
-local function placeModel(model: Model, humanoid: Humanoid, root: BasePart, at: Vector3, facing: Vector3, ground: number)
+local function placeModel(
+	model: Model,
+	humanoid: Humanoid,
+	root: BasePart,
+	at: Vector3,
+	facing: Vector3,
+	ground: number
+)
 	local y = ground + humanoid.HipHeight + root.Size.Y / 2
-	model:PivotTo(CFrame.lookAt(Vector3.new(at.X, y, at.Z), Vector3.new(at.X + facing.X, y, at.Z + facing.Z)))
+	model:PivotTo(
+		CFrame.lookAt(Vector3.new(at.X, y, at.Z), Vector3.new(at.X + facing.X, y, at.Z + facing.Z))
+	)
 	root.Anchored = true
 	model.Parent = folder
 end
 
-local function loadTrack(animator: Animator, id: string, priority: Enum.AnimationPriority, looped: boolean): AnimationTrack
+local function loadTrack(
+	animator: Animator,
+	id: string,
+	priority: Enum.AnimationPriority,
+	looped: boolean
+): AnimationTrack
 	local animation = Instance.new("Animation")
 	animation.AnimationId = id
 	local track = animator:LoadAnimation(animation)
@@ -333,12 +363,27 @@ local function startVolley()
 		if side == 1 then
 			local head = model:FindFirstChild("Head") :: BasePart
 			-- Nadia: kuncir kecil di belakang kepala
-			decorate(model, head, "Kuncir", Vector3.new(0.5, 0.9, 0.5), PLAYERS_LOOK[2].hair, CFrame.new(0, 0.2, 0.75), true)
+			decorate(
+				model,
+				head,
+				"Kuncir",
+				Vector3.new(0.5, 0.9, 0.5),
+				PLAYERS_LOOK[2].hair,
+				CFrame.new(0, 0.2, 0.75),
+				true
+			)
 		end
 		model:ScaleTo(PLAYERS_LOOK[side + 1].scale)
 		local at = Config.hitPoint(side)
 		local ground = floorY(at.X, at.Z, c.Y + 10, c.Y)
-		placeModel(model, humanoid, root, Vector3.new(at.X, 0, at.Z), Vector3.new(0, 0, if side == 0 then 1 else -1), ground)
+		placeModel(
+			model,
+			humanoid,
+			root,
+			Vector3.new(at.X, 0, at.Z),
+			Vector3.new(0, 0, if side == 0 then 1 else -1),
+			ground
+		)
 		local animator = animatorOf(humanoid)
 		loadTrack(animator, IDLE, Enum.AnimationPriority.Idle, true):Play(0)
 		people[side + 1] = {
@@ -460,14 +505,65 @@ local function startWaitress()
 	local coral = rgb(255, 118, 108)
 	local cream = rgb(255, 244, 226)
 	-- celemek (apron) kafe: bagian dada, rok, dan dua tali bahu
-	decorate(model, upper, "CelemekAtas", Vector3.new(1.55, 1.15, 0.12), coral, CFrame.new(0, -0.2, -0.54))
-	decorate(model, lower, "CelemekBawah", Vector3.new(1.7, 1.0, 0.12), coral, CFrame.new(0, -0.5, -0.54))
-	decorate(model, upper, "KantongCelemek", Vector3.new(0.7, 0.35, 0.05), cream, CFrame.new(0, -0.3, -0.62))
-	decorate(model, upper, "TaliKiri", Vector3.new(0.18, 0.75, 0.1), coral, CFrame.new(-0.5, 0.45, -0.52))
-	decorate(model, upper, "TaliKanan", Vector3.new(0.18, 0.75, 0.1), coral, CFrame.new(0.5, 0.45, -0.52))
+	decorate(
+		model,
+		upper,
+		"CelemekAtas",
+		Vector3.new(1.55, 1.15, 0.12),
+		coral,
+		CFrame.new(0, -0.2, -0.54)
+	)
+	decorate(
+		model,
+		lower,
+		"CelemekBawah",
+		Vector3.new(1.7, 1.0, 0.12),
+		coral,
+		CFrame.new(0, -0.5, -0.54)
+	)
+	decorate(
+		model,
+		upper,
+		"KantongCelemek",
+		Vector3.new(0.7, 0.35, 0.05),
+		cream,
+		CFrame.new(0, -0.3, -0.62)
+	)
+	decorate(
+		model,
+		upper,
+		"TaliKiri",
+		Vector3.new(0.18, 0.75, 0.1),
+		coral,
+		CFrame.new(-0.5, 0.45, -0.52)
+	)
+	decorate(
+		model,
+		upper,
+		"TaliKanan",
+		Vector3.new(0.18, 0.75, 0.1),
+		coral,
+		CFrame.new(0.5, 0.45, -0.52)
+	)
 	-- sanggul rambut dengan ikat rambut
-	decorate(model, head, "Sanggul", Vector3.new(0.75, 0.75, 0.75), WAITRESS.hair, CFrame.new(0, 0.95, 0.2), true)
-	decorate(model, head, "IkatRambut", Vector3.new(0.4, 0.4, 0.4), coral, CFrame.new(0, 0.72, 0.5), true)
+	decorate(
+		model,
+		head,
+		"Sanggul",
+		Vector3.new(0.75, 0.75, 0.75),
+		WAITRESS.hair,
+		CFrame.new(0, 0.95, 0.2),
+		true
+	)
+	decorate(
+		model,
+		head,
+		"IkatRambut",
+		Vector3.new(0.4, 0.4, 0.4),
+		coral,
+		CFrame.new(0, 0.72, 0.5),
+		true
+	)
 	local p = Config.WAITRESS_POSITION
 	local ground = floorY(p.X, p.Z, p.Y + 3, p.Y)
 	placeModel(model, humanoid, root, Vector3.new(p.X, 0, p.Z), Config.WAITRESS_FACING, ground)
@@ -518,11 +614,16 @@ local function startWaitress()
 			local player, distance = nearestPlayer(root.Position)
 			if player and distance < 16 then
 				local character = player.Character
-				local theirRoot = if character then character:FindFirstChild("HumanoidRootPart") else nil
+				local theirRoot = if character
+					then character:FindFirstChild("HumanoidRootPart")
+					else nil
 				if theirRoot and theirRoot:IsA("BasePart") then
 					local here = model:GetPivot().Position
 					model:PivotTo(
-						CFrame.lookAt(here, Vector3.new(theirRoot.Position.X, here.Y, theirRoot.Position.Z))
+						CFrame.lookAt(
+							here,
+							Vector3.new(theirRoot.Position.X, here.Y, theirRoot.Position.Z)
+						)
 					)
 				end
 				if not greeted or os.clock() - lastWave > 14 then
@@ -566,7 +667,10 @@ local function order(player: Player, id: any): any
 	if humanoid == nil or root == nil or not root:IsA("BasePart") or humanoid.Health <= 0 then
 		return { ok = false, message = "Tunggu sebentar ya." }
 	end
-	if waitressRoot == nil or (root.Position - waitressRoot.Position).Magnitude > Config.ORDER_DISTANCE then
+	if
+		waitressRoot == nil
+		or (root.Position - waitressRoot.Position).Magnitude > Config.ORDER_DISTANCE
+	then
 		return { ok = false, message = "Dekati pelayan kafe dulu ya." }
 	end
 	if humanoid.SeatPart ~= nil then

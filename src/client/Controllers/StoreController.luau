@@ -193,7 +193,11 @@ local function renderCashier()
 	for index, item in StoreConfig.ITEMS do
 		local n = cart[item.id] or 0
 		if n > 0 then
-			local row = itemRow(index, item, `{n} x {Format.money(item.price)} = {Format.money(item.price * n)}`)
+			local row = itemRow(
+				index,
+				item,
+				`{n} x {Format.money(item.price)} = {Format.money(item.price * n)}`
+			)
 			smallButton(row, "−", -8, COLORS.locked, function()
 				callCart("remove", item.id)
 			end)
@@ -269,10 +273,18 @@ function StoreController.start()
 				local character = player.Character
 				local root = if character then character.PrimaryPart else nil
 				local near = false
-				local tag = if mode == "kasir" then StoreConfig.TAG_COUNTER else StoreConfig.TAG_SHELF
-				local reach = if mode == "kasir" then StoreConfig.BUY_DISTANCE + 6 else StoreConfig.SHELF_DISTANCE + 6
+				local tag = if mode == "kasir"
+					then StoreConfig.TAG_COUNTER
+					else StoreConfig.TAG_SHELF
+				local reach = if mode == "kasir"
+					then StoreConfig.BUY_DISTANCE + 6
+					else StoreConfig.SHELF_DISTANCE + 6
 				for _, inst in CollectionService:GetTagged(tag) do
-					if root and inst:IsA("BasePart") and (inst.Position - root.Position).Magnitude < reach then
+					if
+						root
+						and inst:IsA("BasePart")
+						and (inst.Position - root.Position).Magnitude < reach
+					then
 						near = true
 						break
 					end

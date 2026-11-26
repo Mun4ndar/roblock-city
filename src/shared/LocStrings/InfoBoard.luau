@@ -54,6 +54,7 @@ local patterns: { { string } } = {
 exact["PASAR MALAM"] = "NIGHT MARKET"
 exact["Jajanan, permainan, dan lampu-lampu cantik"] = "Street snacks, games and pretty lights"
 exact["Buka jam 17.30 – 02.00 (waktu dalam game)"] = "Open 5:30 PM – 2:00 AM (game time)"
-exact["Akhir pekan: Festival Kuliner, jajanan diskon!"] = "Weekends: Food Festival with discounted snacks!"
+exact["Akhir pekan: Festival Kuliner, jajanan diskon!"] =
+	"Weekends: Food Festival with discounted snacks!"
 
 return { exact = exact, patterns = patterns }

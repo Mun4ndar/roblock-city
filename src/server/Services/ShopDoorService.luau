@@ -15,7 +15,14 @@ local CLOSE_DELAY = 1.2
 local SWING = TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
 type Hinge = { part: BasePart, closed: CFrame, angle: number }
-type Door = { model: Model, hinges: { Hinge }, center: Vector3, radius: number, open: boolean, lastNear: number }
+type Door = {
+	model: Model,
+	hinges: { Hinge },
+	center: Vector3,
+	radius: number,
+	open: boolean,
+	lastNear: number,
+}
 
 local doors: { [Model]: Door } = {}
 
@@ -58,7 +65,11 @@ local function someoneNear(door: Door): boolean
 	for _, player in Players:GetPlayers() do
 		local character = player.Character
 		local root = if character then character:FindFirstChild("HumanoidRootPart") else nil
-		if root and root:IsA("BasePart") and (root.Position - door.center).Magnitude <= door.radius then
+		if
+			root
+			and root:IsA("BasePart")
+			and (root.Position - door.center).Magnitude <= door.radius
+		then
 			return true
 		end
 	end

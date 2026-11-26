@@ -45,7 +45,9 @@ local function makeBall(): Part
 		band.CanCollide = false
 		band.CanQuery = false
 		band.CanTouch = false
-		band.CFrame = ball.CFrame * CFrame.Angles(0, 0, 0) * CFrame.new(if index == 1 then -0.35 else 0.35, 0, 0)
+		band.CFrame = ball.CFrame
+			* CFrame.Angles(0, 0, 0)
+			* CFrame.new(if index == 1 then -0.35 else 0.35, 0, 0)
 		local weld = Instance.new("WeldConstraint")
 		weld.Part0 = ball
 		weld.Part1 = band
