@@ -15,12 +15,8 @@ local ServerStorage = game:GetService("ServerStorage")
 
 local rgb = Color3.fromRGB
 local LOUNGER_SCALE = 1.6
-local BOATS = {
-	{ pos = Vector3.new(2190, -2, -250), yaw = 20, color = rgb(230, 80, 70) },
-	{ pos = Vector3.new(2200, -2, -170), yaw = -15, color = rgb(70, 150, 220) },
-	{ pos = Vector3.new(2175, -2, 330), yaw = 160, color = rgb(250, 200, 70) },
-	{ pos = Vector3.new(2165, -2, 410), yaw = 200, color = rgb(90, 180, 110) },
-}
+-- Perahu nelayan kayu dihapus atas permintaan pemilik (2026-11-26): terlihat tenggelam dan kotak.
+local BOATS: { { pos: Vector3, yaw: number, color: Color3 } } = {}
 
 -- Model pilihan pemilik game dari Creator Store (gratis), disimpan di ServerStorage.AsetPengguna
 -- dengan nama "A<id aset>". Hanya yang sudah diperiksa (tanpa skrip, ringan) yang dipakai di sini.

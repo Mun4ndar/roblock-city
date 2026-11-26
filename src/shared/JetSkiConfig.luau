@@ -15,6 +15,9 @@ JetSkiConfig.SPAWN = CFrame.new(1712, -2, -450) * CFrame.Angles(0, -math.pi / 2,
 JetSkiConfig.SPAWN_SPACING = 12
 JetSkiConfig.SPAWN_SLOTS = 6
 JetSkiConfig.WATER_Y = -2
+JetSkiConfig.HULL_LIFT = 0.8 -- pusat lambung (kotak tabrakan setinggi 2) di atas permukaan air
+JetSkiConfig.LIFT_P = 30 -- pegas penahan tinggi (percepatan per stud selisih)
+JetSkiConfig.LIFT_D = 11 -- peredam (percepatan per stud/detik)
 
 JetSkiConfig.MAX_SPEED = 62 -- stud/detik
 JetSkiConfig.REVERSE_SPEED = 14
