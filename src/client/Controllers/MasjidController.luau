@@ -362,6 +362,13 @@ local function buildUi()
 	end)
 end
 
+local function isSeated(): boolean
+	local character = player.Character
+	local humanoid = if character then character:FindFirstChildOfClass("Humanoid") else nil
+	local seat = if humanoid then humanoid.SeatPart else nil
+	return seat ~= nil and string.sub(seat.Name, 1, 13) == "BantalTausiah"
+end
+
 local function refreshPanel()
 	local phase = Workspace:GetAttribute("MasjidFase")
 	local title = Workspace:GetAttribute("MasjidJudul")
@@ -375,7 +382,7 @@ local function refreshPanel()
 	if (phase == "Azan" or phase == "Iqamah") and not joined then
 		actionMode = "join"
 		actionButton.Text = "Ikut sholat berjamaah"
-	elseif (phase == "Tausiah" or phase == "Selesai") and not joined then
+	elseif (phase == "Tausiah" or phase == "Selesai") and not joined and not isSeated() then
 		actionMode = "sit"
 		actionButton.Text = "Duduk mendengarkan tausiah"
 	else
@@ -406,6 +413,8 @@ local function syncJoinPrompts()
 	for _, descendant in folder:GetDescendants() do
 		if descendant:IsA("ProximityPrompt") and descendant.Name == "IkutSholat" then
 			descendant.Enabled = (not joined) and (phase == "Azan" or phase == "Iqamah")
+		elseif descendant:IsA("ProximityPrompt") and descendant.Name == "DudukTausiah" then
+			descendant.Enabled = (not isSeated()) and (phase == "Tausiah" or phase == "Selesai")
 		end
 	end
 end
@@ -447,8 +456,23 @@ function MasjidController.start()
 	game:GetService("ProximityPromptService").PromptShown:Connect(function(prompt: ProximityPrompt)
 		if prompt.Name == "IkutSholat" and player:GetAttribute("MasjidSlot") ~= nil then
 			prompt.Enabled = false
+		elseif prompt.Name == "DudukTausiah" and isSeated() then
+			prompt.Enabled = false
 		end
 	end)
+	local function watchSeat(character: Model)
+		local humanoid = character:WaitForChild("Humanoid", 10)
+		if humanoid and humanoid:IsA("Humanoid") then
+			humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
+				refreshPanel()
+				syncJoinPrompts()
+			end)
+		end
+	end
+	if player.Character then
+		task.spawn(watchSeat, player.Character)
+	end
+	player.CharacterAdded:Connect(watchSeat)
 	refreshPanel()
 	task.spawn(function()
 		while true do
