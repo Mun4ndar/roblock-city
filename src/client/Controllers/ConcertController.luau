@@ -401,10 +401,18 @@ end
 
 -- ---------------------------------------------------------------- lantai joget
 local currentTrack: AnimationTrack? = nil
+local padPrompts: { ProximityPrompt } = {}
 local dancing = false
 local danceToken = 0
 
+local function setPadsEnabled(enabled: boolean)
+	for _, prompt in padPrompts do
+		prompt.Enabled = enabled
+	end
+end
+
 local function stopDance()
+	setPadsEnabled(true)
 	dancing = false
 	danceToken += 1
 	if currentTrack then
@@ -422,6 +430,7 @@ local function startDance()
 	end
 	stopDance()
 	dancing = true
+	setPadsEnabled(false) -- tombol Joget disembunyikan selama menari; muncul lagi saat berhenti
 	danceToken += 1
 	local token = danceToken
 	local conn: RBXScriptConnection
@@ -462,6 +471,8 @@ local function registerPad(pad: Instance)
 	end
 	local prompt = pad:WaitForChild("Joget", 10)
 	if prompt and prompt:IsA("ProximityPrompt") then
+		table.insert(padPrompts, prompt)
+		prompt.Enabled = not dancing
 		prompt.Triggered:Connect(function(who: Player)
 			if who == player then
 				if dancing then

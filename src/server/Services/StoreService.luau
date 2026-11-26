@@ -613,6 +613,20 @@ end
 
 -- ---------------------------------------------------------------- beli
 
+-- Tas (bag) hanya dianggap berisi barang kalau Tool-nya benar-benar ada di Backpack/tangan pemain;
+-- kalau Tool-nya sudah hilang, catatan di bag dibersihkan supaya barangnya bisa dipilih lagi.
+local function reconcile(player: Player)
+	local bag = getBag(player)
+	if bag == nil or player:FindFirstChildOfClass("Backpack") == nil or player.Character == nil then
+		return
+	end
+	for _, item in StoreConfig.ITEMS do
+		if countOf(bag, item.id) > 0 and findTool(player, item.id) == nil then
+			bag[item.id] = nil
+		end
+	end
+end
+
 local function nearTag(player: Player, tag: string, distance: number): boolean
 	local character = player.Character
 	local root = if character then character.PrimaryPart else nil
@@ -664,6 +678,7 @@ end
 
 -- Rak/kulkas: pemain memasukkan barang ke keranjang (belum bayar). Bayar di kasir.
 local function cartChange(player: Player, action: any, id: any): CartReply
+	reconcile(player)
 	local cart = cartOf(player)
 	if action == "clear" then
 		table.clear(cart)
@@ -722,6 +737,7 @@ end
 
 -- Kasir: bayar semua isi keranjang sekaligus (harga dihitung server).
 local function checkout(player: Player): CartReply
+	reconcile(player)
 	local cart = cartOf(player)
 	local now = os.clock()
 	local last = lastBuy[player]
@@ -840,6 +856,7 @@ end
 -- ---------------------------------------------------------------- kasir
 
 local function openPanel(player: Player, mode: string, items: { string }?, label: string?)
+	reconcile(player)
 	local bag = getBag(player)
 	openRemote:FireClient(player, {
 		mode = mode,
@@ -888,6 +905,36 @@ local function registerShelf(inst: Instance)
 	end
 	local label = inst:GetAttribute("Label")
 	local labelText = if type(label) == "string" then label else "Rak"
+	if inst:FindFirstChild("PenandaRak") == nil then
+		local firstItem = StoreConfig.get(ids[1])
+		local gui = Instance.new("BillboardGui")
+		gui.Name = "PenandaRak"
+		gui.Adornee = inst
+		gui.Size = UDim2.fromOffset(170, 64)
+		gui.StudsOffsetWorldSpace = Vector3.new(0, inst.Size.Y / 2 + 1.2, 0)
+		gui.MaxDistance = 45
+		gui.LightInfluence = 0
+		local icon = Instance.new("TextLabel")
+		icon.Size = UDim2.new(1, 0, 0.55, 0)
+		icon.BackgroundTransparency = 1
+		icon.Text = if firstItem then firstItem.icon else "🛒"
+		icon.TextScaled = true
+		icon.Parent = gui
+		local name = Instance.new("TextLabel")
+		name.Position = UDim2.fromScale(0, 0.55)
+		name.Size = UDim2.new(1, 0, 0.45, 0)
+		name.BackgroundColor3 = Color3.fromRGB(35, 110, 210)
+		name.BackgroundTransparency = 0.1
+		name.Font = Enum.Font.FredokaOne
+		name.Text = labelText
+		name.TextScaled = true
+		name.TextColor3 = Color3.new(1, 1, 1)
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 8)
+		corner.Parent = name
+		name.Parent = gui
+		gui.Parent = inst
+	end
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "RakPrompt"
 	prompt.ActionText = "Pilih Barang"

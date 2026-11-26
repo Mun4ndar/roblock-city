@@ -20,6 +20,10 @@ local EconomyService = require(script.Parent:WaitForChild("EconomyService"))
 
 local FoodService = {}
 
+local boughtEvent = Instance.new("BindableEvent")
+-- Terpicu (player, menuId, foodId) setiap jajan berhasil dibeli (penjual pasar malam berterima kasih).
+FoodService.Bought = boughtEvent.Event
+
 local TAG = "FoodStall"
 local BASE_SPEED = 16
 local CALL_COOLDOWN = 0.4
@@ -171,6 +175,7 @@ local function buy(player: Player, menuId: any, foodId: any): { ok: boolean, mes
 		return { ok = false, message = "Uangmu belum cukup." }
 	end
 	startBuff(player)
+	boughtEvent:Fire(player, menuId, foodId)
 	return {
 		ok = true,
 		message = `{food.icon} {food.name} enak! Kenyang semangat {IndonesiaConfig.BUFF_SECONDS} detik: lari lebih cepat.`,

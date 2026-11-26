@@ -124,6 +124,11 @@ InfoBoardConfig.ENTRIES = {
 		cell = 20,
 		featured = true,
 	},
+	{
+		dest = "masjid",
+		desc = "Adzan, sholat berjamaah, dan tausiah tiap waktu sholat.",
+		featured = true,
+	},
 } :: { Entry }
 
 return InfoBoardConfig

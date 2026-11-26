@@ -309,7 +309,9 @@ local function buildExterior(root, F0)
 			local lt =
 				e.box("LampuKanopi", x - 0.8, x + 0.8, 11.3, 11.4, z - 0.8, z + 0.8, C.warm, M.Neon)
 			CollectionService:AddTag(lt, "NightLight")
-			e.light(lt, 14, 0.3)
+			if z == -30 and (x == -15 or x == 15) then
+				e.light(lt, 12, 0.25)
+			end
 		end
 	end
 	-- penghias plaza: tiang batas, pot tanaman, bangku
@@ -373,7 +375,9 @@ local function buildLobby(root, F0)
 				C.warm,
 				M.SmoothPlastic
 			)
-			c.light(p, 22, 0.22)
+			if x == -18 or x == 18 then
+				c.light(p, 22, 0.2)
+			end
 		end
 	end
 	-- dinding selatan: panel kayu + garis emas
@@ -408,8 +412,8 @@ local function buildLobby(root, F0)
 				C.warm,
 				M.Neon
 			)
-			if i % 4 == 0 then
-				k.light(b, 26, 0.3)
+			if i == 0 then
+				k.light(b, 24, 0.25)
 			end
 			k.ball("KristalLampu", math.cos(a) * 2.2, 8.9, math.sin(a) * 2.2, 0.6, C.white, M.Glass).Transparency =
 				0.3
@@ -553,7 +557,6 @@ local function buildLobby(root, F0)
 		for _, x in { -8, 0, 8 } do
 			local lampBulb = b.ball("LampuBar", x, 8.2, 0, 1.1, C.warm, M.Neon)
 			b.cyl("KabelLampuBar", x, 8.5, 0, 0.1, 6.0, C.charcoalD, M.Metal)
-			b.light(lampBulb, 14, 0.25)
 		end
 		b.sign(
 			"PapanBar",

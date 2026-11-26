@@ -16,6 +16,10 @@ local VehicleConfig = require(Shared:WaitForChild("VehicleConfig"))
 
 local DayNightController = {}
 
+-- 0 = di luar, 1 = di dalam bangunan terang (diisi HotelController). Meredupkan Lighting saat di dalam,
+-- supaya ruangan tidak putih silau di HP (pencahayaan HP memantulkan Brightness penuh ke dalam ruangan).
+DayNightController.interior = 0
+
 local rgb = Color3.fromRGB
 
 -- Suasana malam penuh. Siang = nilai Lighting saat masuk.
@@ -168,8 +172,9 @@ local function lerp(a: number, b: number, t: number): number
 end
 
 local function applyLighting(f: number)
-	Lighting.Brightness = lerp(day.brightness, NIGHT.brightness, f)
-	Lighting.ExposureCompensation = lerp(day.exposure, NIGHT.exposure, f)
+	local inside = DayNightController.interior
+	Lighting.Brightness = lerp(day.brightness, NIGHT.brightness, f) * (1 - 0.7 * inside)
+	Lighting.ExposureCompensation = lerp(day.exposure, NIGHT.exposure, f) - 0.3 * inside
 	Lighting.Ambient = day.ambient:Lerp(NIGHT.ambient, f)
 	Lighting.OutdoorAmbient = day.outdoorAmbient:Lerp(NIGHT.outdoorAmbient, f)
 	if atmosphere then
@@ -189,6 +194,8 @@ end
 local CLOCK_STEP = 0.1
 local clockAccum = 0
 
+local lastInterior = 0
+
 local function update(frameDt: number)
 	clockAccum += frameDt
 	if clockAccum < CLOCK_STEP then
@@ -202,8 +209,9 @@ local function update(frameDt: number)
 	Lighting.ClockTime = clock
 
 	local f = DayNightConfig.nightFactor(clock)
-	if math.abs(f - lastFactor) > 0.004 then
+	if math.abs(f - lastFactor) > 0.004 or DayNightController.interior ~= lastInterior then
 		lastFactor = f
+		lastInterior = DayNightController.interior
 		applyLighting(f)
 	end
 	local shouldBeOn = f >= DayNightConfig.LIGHTS_ON_AT

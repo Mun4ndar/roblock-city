@@ -27,3 +27,5 @@ angkot      model 71705788816075   decal 83769804095033   gambar 80144494833052 
 
 Tekstur dengan padding (2026-11-25, perbaikan bintik putih; gambar baru di SurfaceAppearance): serasi 91484496672121, jelajah 78749345897530, kilat 129208817708012, patroli 101944020310450, lincah 86950962224284, ojek 94811848267675. Kancil masih versi lama (perlu unduh ulang model asli dari Meshy).
 kancil v4 (2026-11-25, diunduh ulang dari Meshy, bodi 12 ribu tris dengan decimate UV-delimit, roda 1,5 ribu): model 91209444065811, decal 86536224217116, gambar 122215422797934
+
+Roda bulat (2026-11-26): roda_kendaraan.fbx model 140566502973702 (ServerStorage.RodaMentah; RodaMobil/RodaMotor Ban+Velg), tekstur karet decal 101147032218344 (warna) dan 126225033780278 (kasar). Dipasang ke ReplicatedStorage.Assets.CarShells.<id>.Wheel sebagai MeshPart Tire (SurfaceAppearance) + Rim (Paint=rim). Generator: tools/blender/roda.py
