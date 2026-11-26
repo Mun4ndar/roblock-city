@@ -42,6 +42,20 @@ local wakeRemote: RemoteEvent
 local sleepers: { [Player]: Sleeper } = {}
 local bedUser: { [BasePart]: Player } = {}
 local lastWelcome: { [Player]: number } = {}
+local savedOcclusion: { [Player]: Enum.DevCameraOcclusionMode } = {}
+
+-- kotak bangunan hotel: di dalamnya kamera Zoom (tembok menahan kamera, tidak jadi transparan)
+local INSIDE_MIN = Vector3.new(219, -4, -81)
+local INSIDE_MAX = Vector3.new(321, 95, -23)
+
+local function isInsideHotel(position: Vector3): boolean
+	return position.X >= INSIDE_MIN.X
+		and position.X <= INSIDE_MAX.X
+		and position.Y >= INSIDE_MIN.Y
+		and position.Y <= INSIDE_MAX.Y
+		and position.Z >= INSIDE_MIN.Z
+		and position.Z <= INSIDE_MAX.Z
+end
 
 local LIFT_NEAR = 7 -- jarak mendatar ke tengah pintu yang membuka pintu lift
 local SLEEP_RANGE = 12
@@ -392,6 +406,7 @@ function HotelService.start()
 	Players.PlayerRemoving:Connect(function(player: Player)
 		wake(player, true)
 		lastWelcome[player] = nil
+		savedOcclusion[player] = nil
 	end)
 
 	local timer = 0
@@ -406,6 +421,15 @@ function HotelService.start()
 			local root = rootAndHuman(player)
 			if root then
 				table.insert(positions, root.Position)
+				local inside = isInsideHotel(root.Position)
+				local saved = savedOcclusion[player]
+				if inside and saved == nil then
+					savedOcclusion[player] = player.DevCameraOcclusionMode
+					player.DevCameraOcclusionMode = Enum.DevCameraOcclusionMode.Zoom
+				elseif not inside and saved ~= nil then
+					player.DevCameraOcclusionMode = saved
+					savedOcclusion[player] = nil
+				end
 			end
 		end
 		for _, lift in lifts do

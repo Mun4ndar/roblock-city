@@ -120,7 +120,6 @@ function F.floorLamp(c)
 	c.cyl("LampuTiang", 0, 0.2, 0, 0.18, 4.6, C.gold, M.Metal)
 	local shade = c.cyl("LampuKap", 0, 4.4, 0, 1.6, 1.5, C.cream, M.Neon)
 	shade.Transparency = 0.15
-	c.light(shade, 12, 0.3)
 end
 
 function F.chair(c, color) -- kursi meja kerja / makan

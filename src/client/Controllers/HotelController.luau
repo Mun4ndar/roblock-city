@@ -10,10 +10,12 @@
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
 local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local Net = require(Shared:WaitForChild("Net"))
 local HotelConfig = require(Shared:WaitForChild("HotelConfig"))
+local DayNightController = require(script.Parent:WaitForChild("DayNightController"))
 local UiKit = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("UiKit"))
 
 local HotelController = {}
@@ -201,6 +203,51 @@ local function updateSleep()
 	dim.Visible = player:GetAttribute("HotelTidur") == true
 end
 
+-- ------------------------------------------------------------------ di dalam hotel
+
+-- Kotak bangunan hotel (dunia). Di dalamnya cahaya diredupkan. (Mode kamera Zoom diatur HotelService
+-- di server, karena client tidak boleh mengubah DevCameraOcclusionMode.)
+local INSIDE_MIN = Vector3.new(219, -4, -81)
+local INSIDE_MAX = Vector3.new(321, 95, -23)
+
+local function isInside(): boolean
+	local character = player.Character
+	local root = if character then character:FindFirstChild("HumanoidRootPart") else nil
+	if root == nil or not root:IsA("BasePart") then
+		return false
+	end
+	local p = root.Position
+	return p.X >= INSIDE_MIN.X
+		and p.X <= INSIDE_MAX.X
+		and p.Y >= INSIDE_MIN.Y
+		and p.Y <= INSIDE_MAX.Y
+		and p.Z >= INSIDE_MIN.Z
+		and p.Z <= INSIDE_MAX.Z
+end
+
+local function watchInside()
+	local insideNow = false
+	local timer = 0
+	RunService.Heartbeat:Connect(function(dt: number)
+		timer += dt
+		if timer >= 0.2 then
+			timer = 0
+			local now = isInside()
+			if now ~= insideNow then
+				insideNow = now
+			end
+		end
+		local target = if insideNow then 1 else 0
+		local current = DayNightController.interior
+		if current ~= target then
+			DayNightController.interior = current + (target - current) * math.min(1, dt * 3)
+			if math.abs(DayNightController.interior - target) < 0.01 then
+				DayNightController.interior = target
+			end
+		end
+	end)
+end
+
 function HotelController.init() end
 
 function HotelController.start()
@@ -217,6 +264,7 @@ function HotelController.start()
 	CollectionService:GetInstanceAddedSignal("HotelLabel"):Connect(paintLabel)
 	repaintAll()
 	updateSleep()
+	watchInside()
 end
 
 return HotelController
