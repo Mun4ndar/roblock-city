@@ -10,6 +10,12 @@
 	Workspace.Map.Gunung (5 gunung, mesh sama dengan skala/putaran beda). Yang lama dipindah ke
 	ServerStorage.CadanganPeta (AirMancurLama, GunungLama). Jangan jalankan StyleFountains lagi:
 	skrip itu membuat air mancur lama kembali.
+
+	Pembaruan (dikerjakan langsung di Studio, bukan lewat skrip ini): semua gunung diturunkan 6 stud, Gunung5
+	digeser ke z -800, blok terrain Rock air terjun lama dihapus, air terjun lama dipindah ke
+	CadanganPeta.AirTerjunLama. Air terjun baru = Workspace.Map.Countryside.AirTerjunBaru: pita Part kaca
+	mengikuti jalur turun terjal dari (-990,107,-782) ke (-957,-2,-658) di lereng Gunung1, dengan semprotan,
+	kabut, buih, dan suara. Pohon cemara yang melayang/tertanam akibat gunung baru dipindah atau dihapus.
 ]]
 
 local ServerStorage = game:GetService("ServerStorage")
