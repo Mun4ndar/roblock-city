@@ -317,8 +317,15 @@ local function interior(): string
 	colliders.Parent = model
 	local function box(name: string, x0: number, x1: number, y0: number, y1: number, z0: number, z1: number)
 		local p = newPart(colliders, name, Vector3.new(x1 - x0, z1 - z0, y1 - y0), W((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2))
-		p.Transparency = 1
 		p.CastShadow = false
+		if name == "DindingBelakang" or name == "DindingKiri" or name == "DindingKanan" or name == "TiangDepan" or name == "TiangUjung" or name == "AmbangJendela" or name == "AmbangPintu" then
+			-- tabrakan dinding terlihat tapi tersembunyi di dalam mesh (kamera Zoom tertahan, dinding tidak tembus)
+			p.Size = p.Size - Vector3.new(0.06, 0.06, 0.06)
+			p.Color = rgb(244, 240, 232)
+			p.Material = SP
+		else
+			p.Transparency = 1
+		end
 	end
 	-- cangkang lobi: lantai, atap, dinding (dinding depan berbukaan, sama dengan tools/blender/resort.py)
 	box("Lantai", -69, 69, -19, 17.6, 0, F)
@@ -408,8 +415,8 @@ local function interior(): string
 	})
 	board(model, "PapanRestoran", Vector3.new(-43, -IY + 0.05, 8.9), Vector2.new(0, 1), 11, 1.5, "RESTORAN SAMUDRA", nil)
 	board(model, "PapanBar", Vector3.new(46, -IY + 0.05, 9.25), Vector2.new(0, 1), 11, 1.0, "BAR JUS & KOPI", nil)
-	board(model, "PapanResepsionis", Vector3.new(0, -9.45, 5.6), Vector2.new(0, 1), 5, 0.9, "RESEPSIONIS · CHECK-IN", nil)
-	board(model, "PapanConcierge", Vector3.new(-15, -4.0, 4.95), Vector2.new(0, 1), 3.4, 0.7, "CONCIERGE", nil)
+	board(model, "PapanResepsionis", Vector3.new(0, -7.9, 2.6), Vector2.new(0, 1), 5, 0.9, "RESEPSIONIS · CHECK-IN", nil)
+	board(model, "PapanConcierge", Vector3.new(-15, -2.7, 2.4), Vector2.new(0, 1), 3.4, 0.7, "CONCIERGE", nil)
 
 	-- titik interaksi: check-in, concierge, jajan restoran dan bar (FoodService membuat prompt-nya)
 	local function spot(name: string, x: number, y: number, z: number, tag: string, attrs: { [string]: any })

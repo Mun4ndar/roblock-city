@@ -33,7 +33,14 @@ local say: ((string, number) -> ())? = nil
 local wave: AnimationTrack? = nil
 local lastGreet = 0
 
-local function attach(model: Model, to: BasePart, size: Vector3, offset: CFrame, color: Color3, shape: Enum.PartType)
+local function attach(
+	model: Model,
+	to: BasePart,
+	size: Vector3,
+	offset: CFrame,
+	color: Color3,
+	shape: Enum.PartType
+)
 	local part = Instance.new("Part")
 	part.Name = "Hiasan"
 	part.Shape = shape
@@ -127,7 +134,12 @@ local function build(at: CFrame): Model?
 	humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
 	humanoid.BreakJointsOnDeath = false
 	for _, child in model:GetChildren() do
-		if child:IsA("LuaSourceContainer") or child:IsA("BodyColors") or child:IsA("Shirt") or child:IsA("Pants") then
+		if
+			child:IsA("LuaSourceContainer")
+			or child:IsA("BodyColors")
+			or child:IsA("Shirt")
+			or child:IsA("Pants")
+		then
 			child:Destroy()
 		end
 	end
@@ -153,13 +165,62 @@ local function build(at: CFrame): Model?
 		end
 	end
 	-- rompi biru + syal merah + lencana + topi pelaut + rambut dikuncir
-	attach(model, torso, Vector3.new(1.0, 1.35, 0.1), CFrame.new(0, 0.1, -0.52), rgb(28, 48, 96), Enum.PartType.Block)
-	attach(model, torso, Vector3.new(0.9, 0.22, 0.12), CFrame.new(0, 0.62, -0.55), rgb(200, 40, 48), Enum.PartType.Block)
-	attach(model, torso, Vector3.new(0.28, 0.16, 0.06), CFrame.new(0.4, 0.3, -0.58), rgb(226, 172, 52), Enum.PartType.Block)
-	attach(model, head, Vector3.new(1.4, 1.1, 1.4), CFrame.new(0, 0.38, 0.1), rgb(40, 28, 24), Enum.PartType.Ball)
-	attach(model, head, Vector3.new(0.7, 0.7, 0.7), CFrame.new(0, 0.55, 0.62), rgb(40, 28, 24), Enum.PartType.Ball)
-	attach(model, head, Vector3.new(1.3, 0.35, 1.3), CFrame.new(0, 0.78, -0.02), rgb(255, 255, 255), Enum.PartType.Block)
-	attach(model, head, Vector3.new(1.3, 0.12, 0.6), CFrame.new(0, 0.62, -0.7), rgb(28, 48, 96), Enum.PartType.Block)
+	attach(
+		model,
+		torso,
+		Vector3.new(1.0, 1.35, 0.1),
+		CFrame.new(0, 0.1, -0.52),
+		rgb(28, 48, 96),
+		Enum.PartType.Block
+	)
+	attach(
+		model,
+		torso,
+		Vector3.new(0.9, 0.22, 0.12),
+		CFrame.new(0, 0.62, -0.55),
+		rgb(200, 40, 48),
+		Enum.PartType.Block
+	)
+	attach(
+		model,
+		torso,
+		Vector3.new(0.28, 0.16, 0.06),
+		CFrame.new(0.4, 0.3, -0.58),
+		rgb(226, 172, 52),
+		Enum.PartType.Block
+	)
+	attach(
+		model,
+		head,
+		Vector3.new(1.4, 1.1, 1.4),
+		CFrame.new(0, 0.38, 0.1),
+		rgb(40, 28, 24),
+		Enum.PartType.Ball
+	)
+	attach(
+		model,
+		head,
+		Vector3.new(0.7, 0.7, 0.7),
+		CFrame.new(0, 0.55, 0.62),
+		rgb(40, 28, 24),
+		Enum.PartType.Ball
+	)
+	attach(
+		model,
+		head,
+		Vector3.new(1.3, 0.35, 1.3),
+		CFrame.new(0, 0.78, -0.02),
+		rgb(255, 255, 255),
+		Enum.PartType.Block
+	)
+	attach(
+		model,
+		head,
+		Vector3.new(1.3, 0.12, 0.6),
+		CFrame.new(0, 0.62, -0.7),
+		rgb(28, 48, 96),
+		Enum.PartType.Block
+	)
 	model:PivotTo(at)
 	rootPart.Anchored = true
 	model.Parent = Workspace

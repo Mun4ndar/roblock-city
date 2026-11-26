@@ -104,7 +104,9 @@ local function unboard(player: Player, toDock: boolean)
 		task.delay(0.3, function()
 			local r = root(player)
 			if r and player.Character then
-				player.Character:PivotTo(CFrame.lookAt(DOCK_SPOT, DOCK_SPOT + Vector3.new(0, 0, -1)))
+				player.Character:PivotTo(
+					CFrame.lookAt(DOCK_SPOT, DOCK_SPOT + Vector3.new(0, 0, -1))
+				)
 				r.AssemblyLinearVelocity = Vector3.zero
 			end
 		end)

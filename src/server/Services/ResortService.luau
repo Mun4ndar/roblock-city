@@ -427,9 +427,9 @@ local function build(info: Staff): Model?
 	-- papan nama
 	local board = Instance.new("BillboardGui")
 	board.Size = UDim2.fromOffset(150, 40)
-	board.StudsOffsetWorldSpace = Vector3.new(0, 2.0, 0)
-	board.MaxDistance = 28
-	board.AlwaysOnTop = false
+	board.StudsOffsetWorldSpace = Vector3.new(0, 2.6, 0)
+	board.MaxDistance = 24
+	board.AlwaysOnTop = true -- tetap terbaca di balik meja, papan, dan rak
 	board.Parent = head
 	local function line(
 		text: string,
@@ -579,14 +579,21 @@ local function registerCheckIn(inst: Instance)
 	end
 	addPrompt(inst, "Check-in", "Resepsionis Resort", function(player)
 		local now = os.clock()
-		local last = lastCheckIn[player]
-		if last and now - last < CHECKIN_COOLDOWN then
-			notify(player, "Kamu sudah check-in. Selamat menikmati Resort!")
-			return
-		end
 		local character = player.Character
 		local root = if character then character.PrimaryPart else nil
 		if root == nil or (root.Position - inst.Position).Magnitude > 20 then
+			return
+		end
+		-- kunci kamar: tamu boleh naik lift dan menginap (ResortHotelService)
+		local okHotel, Hotel = pcall(function()
+			return require(script.Parent:WaitForChild("ResortHotelService")) :: any
+		end)
+		if okHotel and Hotel and typeof(Hotel.grantGuest) == "function" then
+			Hotel.grantGuest(player)
+		end
+		local last = lastCheckIn[player]
+		if last and now - last < CHECKIN_COOLDOWN then
+			notify(player, "Kunci kamarmu diperbarui. Naik lift di belakang lobi ke kamar!")
 			return
 		end
 		lastCheckIn[player] = now
@@ -596,7 +603,10 @@ local function registerCheckIn(inst: Instance)
 		if ok and Economy and typeof(Economy.addMoney) == "function" then
 			Economy.addMoney(player, CHECKIN_BONUS, "resort")
 		end
-		notify(player, `Selamat datang di ROBLOCK Resort! Bonus tamu ${CHECKIN_BONUS}`)
+		notify(
+			player,
+			`Selamat datang di ROBLOCK Resort! Bonus tamu ${CHECKIN_BONUS}. Naik lift di belakang lobi ke kamar!`
+		)
 	end)
 end
 
