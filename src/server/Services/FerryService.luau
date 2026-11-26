@@ -75,6 +75,15 @@ local function seatFree(seat: Seat): boolean
 	return seat.Occupant == nil
 end
 
+-- penumpang tanpa massa selama duduk: berat tubuh tidak mengganggu gerak feri
+local function setMassless(character: Model, value: boolean)
+	for _, d in character:GetDescendants() do
+		if d:IsA("BasePart") then
+			d.Massless = value
+		end
+	end
+end
+
 local function unboard(player: Player, toDock: boolean)
 	local info = passengers[player]
 	if info == nil then
@@ -82,6 +91,9 @@ local function unboard(player: Player, toDock: boolean)
 	end
 	passengers[player] = nil
 	local _, human = root(player)
+	if player.Character then
+		setMassless(player.Character, false)
+	end
 	if human then
 		human.JumpHeight = info.jump
 		human.JumpPower = info.power
@@ -100,6 +112,7 @@ local function unboard(player: Player, toDock: boolean)
 end
 
 local function sitOn(seat: Seat, human: Humanoid, character: Model)
+	setMassless(character, true)
 	character:PivotTo(seat.CFrame * CFrame.new(0, 3, 0))
 	seat:Sit(human)
 end
@@ -195,8 +208,9 @@ function FerryService.start()
 			end
 		end
 	end
+	-- geladak belakang (rendah) terisi dulu, geladak atas belakangan
 	table.sort(seats, function(a: Seat, b: Seat)
-		return a.Name < b.Name or (a.Name == b.Name and a.Position.Z > b.Position.Z)
+		return a.Position.Y < b.Position.Y
 	end)
 	hull.CanCollide = false
 	hull.CustomPhysicalProperties = PhysicalProperties.new(0.5, 0.3, 0, 1, 1)
@@ -255,6 +269,7 @@ function FerryService.start()
 	local cruiseStart = 0
 	local function depart()
 		state = "cruising"
+		ship:SetAttribute("State", state)
 		prompt.Enabled = false
 		for _, w in wakes do
 			w.Enabled = true
@@ -280,7 +295,7 @@ function FerryService.start()
 		end
 		if state == "docked" then
 			state = "boarding"
-			ship:SetAttribute("BoardingEndsAt", Workspace:GetServerTimeNow() + BOARD_SECONDS)
+			ship:SetAttribute("State", state)
 			task.delay(BOARD_SECONDS, depart)
 		end
 		EconomyService.notify(player, "Selamat naik feri! Duduk manis, kita segera berangkat.")
@@ -323,6 +338,12 @@ function FerryService.start()
 				position = Vector3.new(start.X, 0, start.Z)
 			end
 		end
+		-- fisika feri harus tetap milik server (duduk di kursi bisa memindahkan kepemilikan ke pemain)
+		if hull:GetNetworkOwner() ~= nil then
+			pcall(function()
+				hull:SetNetworkOwner(nil)
+			end)
+		end
 		-- haluan model = LookVector (-Z)
 		local pos = Vector3.new(position.X, WATER_Y + lift, position.Z)
 		local target = CFrame.lookAt(pos, pos + Vector3.new(heading.X, 0, heading.Y))
@@ -344,7 +365,6 @@ function FerryService.start()
 			end
 		end
 	end)
-	ship:SetAttribute("State", state)
 end
 
 return FerryService
