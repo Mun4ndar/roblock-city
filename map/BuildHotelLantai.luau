@@ -41,100 +41,19 @@ local function buildRoom(parent, frame, RW, no, doorsFolder)
 	c.box("PlafonKamar", a, RW / 2, 9.7, 10, 0, RD, C.cream, M.SmoothPlastic)
 	-- dinding koridor dengan lubang pintu
 	c.box("DindingKoridorKiri", a - 0.4, d - DOOR_W / 2, 0, 10, -0.8, 0, C.cream, M.SmoothPlastic)
-	c.box(
-		"DindingKoridorKanan",
-		d + DOOR_W / 2,
-		RW / 2 + 0.4,
-		0,
-		10,
-		-0.8,
-		0,
-		C.cream,
-		M.SmoothPlastic
-	)
-	c.box(
-		"DindingKoridorAtas",
-		d - DOOR_W / 2,
-		d + DOOR_W / 2,
-		DOOR_H,
-		10,
-		-0.8,
-		0,
-		C.cream,
-		M.SmoothPlastic
-	)
-	c.box(
-		"KusenPintuKiri",
-		d - DOOR_W / 2 - 0.25,
-		d - DOOR_W / 2,
-		0,
-		DOOR_H,
-		-1.0,
-		0.1,
-		C.gold,
-		M.Metal
-	)
-	c.box(
-		"KusenPintuKanan",
-		d + DOOR_W / 2,
-		d + DOOR_W / 2 + 0.25,
-		0,
-		DOOR_H,
-		-1.0,
-		0.1,
-		C.gold,
-		M.Metal
-	)
-	c.box(
-		"KusenPintuAtas",
-		d - DOOR_W / 2 - 0.25,
-		d + DOOR_W / 2 + 0.25,
-		DOOR_H,
-		DOOR_H + 0.3,
-		-1.0,
-		0.1,
-		C.gold,
-		M.Metal
-	)
+	c.box("DindingKoridorKanan", d + DOOR_W / 2, RW / 2 + 0.4, 0, 10, -0.8, 0, C.cream, M.SmoothPlastic)
+	c.box("DindingKoridorAtas", d - DOOR_W / 2, d + DOOR_W / 2, DOOR_H, 10, -0.8, 0, C.cream, M.SmoothPlastic)
+	c.box("KusenPintuKiri", d - DOOR_W / 2 - 0.25, d - DOOR_W / 2, 0, DOOR_H, -1.0, 0.1, C.gold, M.Metal)
+	c.box("KusenPintuKanan", d + DOOR_W / 2, d + DOOR_W / 2 + 0.25, 0, DOOR_H, -1.0, 0.1, C.gold, M.Metal)
+	c.box("KusenPintuAtas", d - DOOR_W / 2 - 0.25, d + DOOR_W / 2 + 0.25, DOOR_H, DOOR_H + 0.3, -1.0, 0.1, C.gold, M.Metal)
 	c.box("AmbangPintu", d - DOOR_W / 2, d + DOOR_W / 2, 0, 0.14, -0.8, 0, C.steelD, M.Metal)
-	Kit.ctx(c.parent, frame).door(
-		"PintuKamar" .. no,
-		d - DOOR_W / 2,
-		-0.4,
-		0,
-		DOOR_H,
-		1,
-		0,
-		DOOR_W,
-		0,
-		1,
-		{ frost = true, radius = 4.6, parent = doorsFolder }
-	)
+	Kit.ctx(c.parent, frame).door("PintuKamar" .. no, d - DOOR_W / 2, -0.4, 0, DOOR_H, 1, 0, DOOR_W, 0, 1,
+		{ frost = true, radius = 4.6, parent = doorsFolder })
 	-- pelat nomor kamar (sisi koridor)
-	c.sign(
-		"NomorKamar",
-		d + DOOR_W / 2 + 0.5,
-		d + DOOR_W / 2 + 3.1,
-		4.8,
-		5.9,
-		-1.05,
-		-0.8,
-		Enum.NormalId.Front,
-		label,
-		{ bg = C.charcoalD, color = C.gold, pps = 50, tag = "HotelLabel" }
-	)
+	c.sign("NomorKamar", d + DOOR_W / 2 + 0.5, d + DOOR_W / 2 + 3.1, 4.8, 5.9, -1.05, -0.8, Enum.NormalId.Front, label,
+		{ bg = C.charcoalD, color = C.gold, pps = 50, tag = "HotelLabel" })
 	-- lampu dinding sisi koridor
-	local sc = c.box(
-		"LampuLorong",
-		d - DOOR_W / 2 - 2.0,
-		d - DOOR_W / 2 - 1.2,
-		5.6,
-		7.0,
-		-1.1,
-		-0.8,
-		C.warm,
-		M.Neon
-	)
+	local sc = c.box("LampuLorong", d - DOOR_W / 2 - 2.0, d - DOOR_W / 2 - 1.2, 5.6, 7.0, -1.1, -0.8, C.warm, M.Neon)
 	-- kamar mandi
 	do
 		local bx = a + 8
@@ -147,19 +66,8 @@ local function buildRoom(parent, frame, RW, no, doorsFolder)
 		c.box("UbinDinding2", a, bx, 0.2, 7.6, 0.0, 0.12, rgb(228, 234, 238), M.Marble)
 		c.box("UbinDinding3", a, bx, 0.2, 7.6, 9.68, 9.8, rgb(228, 234, 238), M.Marble)
 		c.box("UbinGarisEmas", a, bx, 4.4, 4.55, 0.0, 0.14, C.gold, M.Metal)
-		Kit.ctx(c.parent, frame).door(
-			"PintuMandi" .. no,
-			bx + 0.2,
-			3.6,
-			0,
-			DOOR_H,
-			0,
-			1,
-			3.4,
-			-1,
-			0,
-			{ frost = true, radius = 3.4, parent = doorsFolder }
-		)
+		Kit.ctx(c.parent, frame).door("PintuMandi" .. no, bx + 0.2, 3.6, 0, DOOR_H, 0, 1, 3.4, -1, 0,
+			{ frost = true, radius = 3.4, parent = doorsFolder })
 		-- toilet di dinding koridor
 		local t = at(c, a + 2.4, 0.2, 0.1)
 		t.box("ToiletTangki", -0.9, 0.9, 1.4, 3.4, 0.0, 1.0, C.white, M.SmoothPlastic)
@@ -181,10 +89,8 @@ local function buildRoom(parent, frame, RW, no, doorsFolder)
 		s.light(lamp, 12, 0.35)
 		-- shower di pojok barat belakang
 		c.box("ShowerBak", a + 0.1, a + 3.8, 0.2, 0.5, 6.0, 9.7, C.stone, M.Granite)
-		local g1 =
-			c.box("ShowerKacaTimur", a + 3.8, a + 3.95, 0.5, 8.0, 5.9, 9.7, C.glass, M.Glass, 0.55)
-		local g2 =
-			c.box("ShowerKacaDepan", a + 0.1, a + 2.4, 0.5, 8.0, 5.85, 6.0, C.glass, M.Glass, 0.55)
+		local g1 = c.box("ShowerKacaTimur", a + 3.8, a + 3.95, 0.5, 8.0, 5.9, 9.7, C.glass, M.Glass, 0.55)
+		local g2 = c.box("ShowerKacaDepan", a + 0.1, a + 2.4, 0.5, 8.0, 5.85, 6.0, C.glass, M.Glass, 0.55)
 		c.box("ShowerKusen", a + 3.8, a + 3.95, 8.0, 8.15, 5.9, 9.7, C.steel, M.Metal)
 		c.box("ShowerLengan", a + 0.1, a + 1.8, 7.4, 7.55, 8.3, 8.45, C.steel, M.Metal)
 		c.cyl("ShowerKepala", a + 1.8, 7.2, 8.4, 1.4, 0.25, C.steel, M.Metal)
@@ -201,79 +107,19 @@ local function buildRoom(parent, frame, RW, no, doorsFolder)
 		local u0 = d + DOOR_W / 2 + 0.4
 		c.box("LemariBadan", u0, u0 + w, 0.2, 8.2, 0.0, 2.0, C.walnut, M.Wood)
 		c.box("LemariPintu1", u0 + 0.1, u0 + w / 2 - 0.05, 0.4, 8.0, 2.0, 2.1, C.walnutL, M.Wood)
-		c.box(
-			"LemariPintu2",
-			u0 + w / 2 + 0.05,
-			u0 + w - 0.1,
-			0.4,
-			8.0,
-			2.0,
-			2.1,
-			C.walnutL,
-			M.Wood
-		)
-		c.box(
-			"LemariGagang1",
-			u0 + w / 2 - 0.4,
-			u0 + w / 2 - 0.3,
-			3.5,
-			4.8,
-			2.1,
-			2.25,
-			C.gold,
-			M.Metal
-		)
-		c.box(
-			"LemariGagang2",
-			u0 + w / 2 + 0.3,
-			u0 + w / 2 + 0.4,
-			3.5,
-			4.8,
-			2.1,
-			2.25,
-			C.gold,
-			M.Metal
-		)
+		c.box("LemariPintu2", u0 + w / 2 + 0.05, u0 + w - 0.1, 0.4, 8.0, 2.0, 2.1, C.walnutL, M.Wood)
+		c.box("LemariGagang1", u0 + w / 2 - 0.4, u0 + w / 2 - 0.3, 3.5, 4.8, 2.1, 2.25, C.gold, M.Metal)
+		c.box("LemariGagang2", u0 + w / 2 + 0.3, u0 + w / 2 + 0.4, 3.5, 4.8, 2.1, 2.25, C.gold, M.Metal)
 	end
 	-- tempat tidur: kepala di dinding timur (u = RW/2)
 	local vb = 13.6
 	local ue = RW / 2
 	do
 		c.box("KarpetKamar", ue - 13, ue - 2, 0.12, 0.17, vb - 4.8, vb + 4.8, C.teal, M.Fabric)
-		c.box(
-			"KarpetKamarTepi",
-			ue - 12.4,
-			ue - 2.6,
-			0.17,
-			0.2,
-			vb - 4.2,
-			vb + 4.2,
-			C.creamD,
-			M.Fabric
-		)
+		c.box("KarpetKamarTepi", ue - 12.4, ue - 2.6, 0.17, 0.2, vb - 4.2, vb + 4.2, C.creamD, M.Fabric)
 		c.box("KepalaRanjang", ue - 0.9, ue, 0.4, 5.6, vb - 3.7, vb + 3.7, C.charcoal, M.Fabric)
-		c.box(
-			"KepalaRanjangEmas",
-			ue - 1.0,
-			ue - 0.9,
-			0.4,
-			5.8,
-			vb - 3.8,
-			vb - 3.6,
-			C.gold,
-			M.Metal
-		)
-		c.box(
-			"KepalaRanjangEmas2",
-			ue - 1.0,
-			ue - 0.9,
-			0.4,
-			5.8,
-			vb + 3.6,
-			vb + 3.8,
-			C.gold,
-			M.Metal
-		)
+		c.box("KepalaRanjangEmas", ue - 1.0, ue - 0.9, 0.4, 5.8, vb - 3.8, vb - 3.6, C.gold, M.Metal)
+		c.box("KepalaRanjangEmas2", ue - 1.0, ue - 0.9, 0.4, 5.8, vb + 3.6, vb + 3.8, C.gold, M.Metal)
 		c.box("RangkaRanjang", ue - 10.0, ue - 0.9, 0.4, 1.5, vb - 3.4, vb + 3.4, C.walnut, M.Wood)
 		c.box("Kasur", ue - 9.8, ue - 0.9, 1.5, 2.5, vb - 3.2, vb + 3.2, C.linen, M.Fabric)
 		c.box("Selimut", ue - 9.9, ue - 6.3, 2.5, 2.9, vb - 3.3, vb + 3.3, C.burgundy, M.Fabric)
@@ -281,31 +127,11 @@ local function buildRoom(parent, frame, RW, no, doorsFolder)
 		c.box("Bantal1", ue - 3.0, ue - 1.1, 2.5, 3.4, vb - 3.0, vb - 0.5, C.white, M.Fabric)
 		c.box("Bantal2", ue - 3.0, ue - 1.1, 2.5, 3.4, vb + 0.5, vb + 3.0, C.white, M.Fabric)
 		c.box("BantalHias", ue - 4.6, ue - 3.4, 2.5, 3.3, vb - 0.7, vb + 0.7, C.teal, M.Fabric)
-		c.box(
-			"BangkuKaki",
-			ue - 11.4,
-			ue - 10.2,
-			0.5,
-			1.9,
-			vb - 2.6,
-			vb + 2.6,
-			C.charcoal,
-			M.Fabric
-		)
+		c.box("BangkuKaki", ue - 11.4, ue - 10.2, 0.5, 1.9, vb - 2.6, vb + 2.6, C.charcoal, M.Fabric)
 		-- meja samping + lampu tidur (dua sisi)
 		for _, sv in { vb - 3.4 - 1.0 - 0.2, vb + 3.4 + 1.0 + 0.2 } do
 			c.box("MejaTidur", ue - 2.6, ue - 0.9, 0, 2.2, sv - 1.0, sv + 1.0, C.walnutL, M.Wood)
-			c.box(
-				"MejaTidurLaci",
-				ue - 2.65,
-				ue - 2.6,
-				0.6,
-				1.8,
-				sv - 0.8,
-				sv + 0.8,
-				C.walnut,
-				M.Wood
-			)
+			c.box("MejaTidurLaci", ue - 2.65, ue - 2.6, 0.6, 1.8, sv - 0.8, sv + 0.8, C.walnut, M.Wood)
 			c.cyl("LampuTidurDasar", ue - 1.7, 2.2, sv, 0.9, 0.2, C.gold, M.Metal)
 			c.cyl("LampuTidurTiang", ue - 1.7, 2.4, sv, 0.15, 1.0, C.gold, M.Metal)
 			local sh = c.cyl("LampuTidurKap", ue - 1.7, 3.2, sv, 1.5, 1.0, C.cream, M.Neon)
@@ -313,13 +139,7 @@ local function buildRoom(parent, frame, RW, no, doorsFolder)
 			c.light(sh, 14, 0.4)
 		end
 		-- lukisan di atas kepala ranjang
-		Furn.painting(
-			at(c, ue - 0.2, 5.5, vb, -math.pi / 2),
-			6,
-			3,
-			{ rgb(30, 90, 110), rgb(230, 200, 140), rgb(120, 50, 70) },
-			"LukisanKamar"
-		)
+		Furn.painting(at(c, ue - 0.2, 5.5, vb, -math.pi / 2), 6, 3, { rgb(30, 90, 110), rgb(230, 200, 140), rgb(120, 50, 70) }, "LukisanKamar")
 		-- titik tidur (lihat HotelService)
 		local pos = Vector3.new(ue - 4.9, 2.6, vb)
 		local bed = Instance.new("Part")
@@ -330,8 +150,7 @@ local function buildRoom(parent, frame, RW, no, doorsFolder)
 		bed.Transparency = 1
 		bed.Size = Vector3.new(5.6, 0.2, 7.6) -- X = lebar kasur, Z = panjang (arah kepala)
 		-- sumbu Z lokal = arah kepala (+u), Y = atas
-		bed.CFrame = frame
-			* CFrame.fromMatrix(pos, Vector3.new(0, 0, -1), Vector3.yAxis, Vector3.xAxis)
+		bed.CFrame = frame * CFrame.fromMatrix(pos, Vector3.new(0, 0, -1), Vector3.yAxis, Vector3.xAxis)
 		bed.Parent = folder
 		bed:SetAttribute("Nomor", no)
 		CollectionService:AddTag(bed, "HotelBed")
@@ -359,8 +178,7 @@ local function buildRoom(parent, frame, RW, no, doorsFolder)
 			c.box("MejaKerjaKaki", su - 0.15, su + 0.15, 0.12, 2.9, 19.4, 21.2, C.gold, M.Metal)
 		end
 		c.box("LaptopAlas", du - 1.0, du + 1.0, 3.15, 3.25, 19.8, 20.8, C.steel, M.Metal)
-		local lscr =
-			c.box("LaptopLayar", du - 1.0, du + 1.0, 3.25, 4.5, 20.7, 20.8, rgb(40, 52, 80), M.Neon)
+		local lscr = c.box("LaptopLayar", du - 1.0, du + 1.0, 3.25, 4.5, 20.7, 20.8, rgb(40, 52, 80), M.Neon)
 		lscr.CanCollide = false
 		Furn.chair(at(c, du, 0.12, 17.6, math.pi))
 		Furn.armchair(at(c, ue - 3.8, 0.12, 20.0, -math.pi / 2 - 0.3), C.teal)
@@ -376,29 +194,17 @@ local function buildRoom(parent, frame, RW, no, doorsFolder)
 		end
 		c.box("BatangTirai", a, RW / 2, 9.2, 9.35, RD - 1.0, RD - 0.85, C.gold, M.Metal)
 		c.box("TiraiKiri", a + 0.2, a + 3.4, 0.2, 9.1, RD - 1.0, RD - 0.7, C.creamD, M.Fabric, 0.3)
-		c.box(
-			"TiraiKanan",
-			RW / 2 - 3.4,
-			RW / 2 - 0.2,
-			0.2,
-			9.1,
-			RD - 1.0,
-			RD - 0.7,
-			C.creamD,
-			M.Fabric,
-			0.3
-		)
+		c.box("TiraiKanan", RW / 2 - 3.4, RW / 2 - 0.2, 0.2, 9.1, RD - 1.0, RD - 0.7, C.creamD, M.Fabric, 0.3)
 	end
 	-- lampu langit-langit
 	do
-		local l1 = c.box("LampuLangit1", -1.4, 1.4, 9.6, 9.7, 8.0, 10.6, C.warm, M.Neon)
+		local l1 = c.box("LampuLangit1", -1.4, 1.4, 9.6, 9.7, 8.0, 10.6, C.warm, M.SmoothPlastic)
 		c.light(l1, 18, 0.8)
-		local l2 = c.box("LampuLangit2", d - 1, d + 1, 9.6, 9.7, 3.0, 5.0, C.warm, M.Neon)
+		local l2 = c.box("LampuLangit2", d - 1, d + 1, 9.6, 9.7, 3.0, 5.0, C.warm, M.SmoothPlastic)
 		c.light(l2, 10, 0.5)
-		local l3 =
-			c.box("LampuLangit3", ue - 5.5, ue - 3.5, 9.6, 9.7, vb - 1, vb + 1, C.warm, M.Neon)
+		local l3 = c.box("LampuLangit3", ue - 5.5, ue - 3.5, 9.6, 9.7, vb - 1, vb + 1, C.warm, M.SmoothPlastic)
 		c.light(l3, 16, 0.6)
-		local l4 = c.box("LampuLangit4", -3, -1, 9.6, 9.7, 17, 19, C.warm, M.Neon)
+		local l4 = c.box("LampuLangit4", -3, -1, 9.6, 9.7, 17, 19, C.warm, M.SmoothPlastic)
 		c.light(l4, 14, 0.5)
 	end
 	return folder
@@ -424,7 +230,7 @@ return function()
 	c.box("PlafonKoridor", -46.8, 46.8, 9.7, 10, -3.5, 3.5, C.cream, M.SmoothPlastic)
 	c.box("PlintKoridorU", -46.8, 46.8, 0, 0.5, -3.5, -3.4, C.charcoal, M.Wood)
 	for x = -40, 40, 8 do
-		local s = c.box("LampuKoridor", x - 1, x + 1, 9.6, 9.7, -0.6, 0.6, C.warm, M.Neon)
+		local s = c.box("LampuKoridor", x - 1, x + 1, 9.6, 9.7, -0.6, 0.6, C.warm, M.SmoothPlastic)
 		c.light(s, 14, 0.5)
 	end
 	-- sekat kamar (dunia): utara x -24,0,24; selatan x -26 dan dinding inti +-6.2
@@ -441,13 +247,7 @@ return function()
 	local south = { { -46.8, -26.4 }, { -25.6, -6.4 }, { 6.4, 25.6 }, { 26.4, 46.8 } }
 	for i, b in north do
 		local cx = (b[1] + b[2]) / 2
-		buildRoom(
-			rooms,
-			F2 * CFrame.new(cx, 0, -4.3) * CFrame.Angles(0, math.pi, 0),
-			b[2] - b[1],
-			i,
-			doors
-		)
+		buildRoom(rooms, F2 * CFrame.new(cx, 0, -4.3) * CFrame.Angles(0, math.pi, 0), b[2] - b[1], i, doors)
 	end
 	for i, b in south do
 		local cx = (b[1] + b[2]) / 2
@@ -456,43 +256,12 @@ return function()
 	-- lift lantai
 	Kit.lift(c, "lantai", Kit.ROOM_H, lantai)
 	-- papan lantai dan petunjuk
-	c.sign(
-		"PapanLantai",
-		-4,
-		4,
-		4.8,
-		7.0,
-		-3.5,
-		-3.3,
-		Enum.NormalId.Back,
-		"LANTAI {N}",
-		{
-			bg = C.charcoalD,
-			color = C.gold,
-			pps = 50,
-			font = Enum.Font.GothamBlack,
-			tag = "HotelLabel",
-		}
-	)
-	for _, p in
-		{
-			{ -14, "← {N}01 · {N}02 · {N}05 · {N}06" },
-			{ 14, "{N}03 · {N}04 · {N}07 · {N}08 →" },
-		}
-	do
+	c.sign("PapanLantai", -4, 4, 4.8, 7.0, -3.5, -3.3, Enum.NormalId.Back, "LANTAI {N}",
+		{ bg = C.charcoalD, color = C.gold, pps = 50, font = Enum.Font.GothamBlack, tag = "HotelLabel" })
+	for _, p in { { -14, "← {N}01 · {N}02 · {N}05 · {N}06" }, { 14, "{N}03 · {N}04 · {N}07 · {N}08 →" } } do
 		for _, f in { { Enum.NormalId.Front, -0.2, 0.0 }, { Enum.NormalId.Back, 0.0, 0.2 } } do
-			c.sign(
-				"PetunjukKamar",
-				p[1] - 5,
-				p[1] + 5,
-				7.4,
-				8.9,
-				f[2] - 0.1,
-				f[3] + 0.0,
-				f[1],
-				p[2],
-				{ bg = C.charcoalD, color = C.gold, pps = 32, tag = "HotelLabel" }
-			)
+			c.sign("PetunjukKamar", p[1] - 5, p[1] + 5, 7.4, 8.9, f[2] - 0.1, f[3] + 0.0, f[1], p[2],
+				{ bg = C.charcoalD, color = C.gold, pps = 32, tag = "HotelLabel" })
 		end
 		c.cyl("TaliPetunjukKiri", p[1] - 4, 8.9, -0.1, 0.1, 0.8, C.gold, M.Metal)
 		c.cyl("TaliPetunjukKanan", p[1] + 4, 8.9, -0.1, 0.1, 0.8, C.gold, M.Metal)
@@ -500,23 +269,12 @@ return function()
 	-- ujung koridor: bangku menghadap jendela, tanaman, tanda keluar
 	for _, side in { -1, 1 } do
 		local x = 44.2 * side
-		local b =
-			Kit.ctx(lantai, F2 * CFrame.new(x, 0, 0) * CFrame.Angles(0, side * math.pi / 2, 0))
+		local b = Kit.ctx(lantai, F2 * CFrame.new(x, 0, 0) * CFrame.Angles(0, side * math.pi / 2, 0))
 		b.box("BangkuUjungDasar", -2.6, 2.6, 0.12, 1.5, -0.9, 0.9, C.charcoal, M.Fabric)
 		Furn.seatBox(b, "BangkuUjung", -2.6, 2.6, 1.5, 1.9, -0.9, 0.9, C.sofa, M.Fabric)
 		b.box("SandaranUjung", -2.6, 2.6, 1.9, 3.6, -0.9, -0.5, C.sofa, M.Fabric)
-		local ex = c.sign(
-			"TandaKeluar",
-			side * 45.6 - 0.1,
-			side * 45.6 + 0.1,
-			8.2,
-			9.2,
-			-1.5,
-			1.5,
-			if side > 0 then Enum.NormalId.Left else Enum.NormalId.Right,
-			"KELUAR",
-			{ bg = rgb(30, 130, 70), color = C.white, pps = 40 }
-		)
+		local ex = c.sign("TandaKeluar", side * 45.6 - 0.1, side * 45.6 + 0.1, 8.2, 9.2, -1.5, 1.5, if side > 0 then Enum.NormalId.Left else Enum.NormalId.Right, "KELUAR",
+			{ bg = rgb(30, 130, 70), color = C.white, pps = 40 })
 		ex.Material = M.Neon
 		Furn.plant(Kit.ctx(lantai, F2 * CFrame.new(side * 43.6, 0.12, -2.4)), 0.8)
 	end
