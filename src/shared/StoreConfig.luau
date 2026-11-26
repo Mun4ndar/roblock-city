@@ -26,6 +26,9 @@ local StoreConfig = {}
 StoreConfig.ATTR_COUNTER = "StoreCounter" -- tag CollectionService pada meja kasir / penjaga toko
 StoreConfig.TAG_COUNTER = "StoreCounter"
 StoreConfig.BUY_DISTANCE = 22
+StoreConfig.TAG_SHELF = "StoreShelf" -- tag rak/kulkas; atribut Items = id barang dipisah koma, Label = nama rak
+StoreConfig.SHELF_DISTANCE = 16
+StoreConfig.CART_FUNC = "StoreCart" -- RemoteFunction client -> server (aksi, itemId): "add" | "remove" | "clear"
 StoreConfig.OPEN_EVENT = "StoreOpen" -- RemoteEvent server -> client
 StoreConfig.BUY_FUNC = "StoreBuy" -- RemoteFunction client -> server (itemId) -> { ok, message }
 StoreConfig.USE_SECONDS = 2.6 -- lama animasi makan/minum
