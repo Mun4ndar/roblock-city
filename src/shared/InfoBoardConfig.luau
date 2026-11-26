@@ -32,6 +32,7 @@ InfoBoardConfig.HINT_RADIUS = 140
 
 InfoBoardConfig.ENTRIES = {
 	{ dest = "balaiKota", desc = "Masuk ke lobi mewah dan ruang walikota.", cell = 0, enter = true },
+	{ dest = "hotel", desc = "Hotel modern: lobi, lift, dan kamar untuk tidur.", cell = 26, enter = true },
 	{ dest = "rumahSakit", desc = "Jadi dokter: periksa pasien lalu beri obat.", cell = 1, enter = true, featured = true },
 	{ dest = "sekolah", desc = "6 kelas, ruang guru, dan kepala sekolah.", cell = 24, enter = true, featured = true },
 	{ dest = "tokoCostume", desc = "Kostum premium: sayap, naga, dan jubah.", cell = 2, enter = true, featured = true },

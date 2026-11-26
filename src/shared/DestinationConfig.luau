@@ -24,12 +24,7 @@ DestinationConfig.DEFAULT_ARRIVE = 35
 -- Urutan = urutan tab zona.
 DestinationConfig.ZONES = {
 	{ id = "kota", name = "Pusat Kota", icon = "🏙️", color = Color3.fromRGB(122, 92, 255) },
-	{
-		id = "perumahan",
-		name = "Perumahan",
-		icon = "🏘️",
-		color = Color3.fromRGB(255, 140, 66),
-	},
+	{ id = "perumahan", name = "Perumahan", icon = "🏘️", color = Color3.fromRGB(255, 140, 66) },
 	{ id = "pantai", name = "Pantai", icon = "🏖️", color = Color3.fromRGB(0, 184, 217) },
 	{ id = "desa", name = "Desa & Kebun", icon = "🌾", color = Color3.fromRGB(64, 180, 90) },
 	{ id = "bandara", name = "Bandara", icon = "✈️", color = Color3.fromRGB(60, 120, 230) },
@@ -37,16 +32,7 @@ DestinationConfig.ZONES = {
 
 local LIST: { Destination } = {}
 
-local function add(
-	id: string,
-	name: string,
-	zone: string,
-	icon: string,
-	x: number,
-	z: number,
-	major: boolean?,
-	arrive: number?
-)
+local function add(id: string, name: string, zone: string, icon: string, x: number, z: number, major: boolean?, arrive: number?)
 	table.insert(LIST, {
 		id = id,
 		name = name,
@@ -84,6 +70,7 @@ add("aptUjung", "Apartemen Ujung", "kota", "🏢", 703, -996, false, 45)
 
 -- ---------------------------------------------------------------- Perumahan (kota kecil)
 add("balaiKota", "Balai Kota", "perumahan", "🏛️", 160, 108, true, 45)
+add("hotel", "Hotel Bintang Kota", "perumahan", "🏨", 270, -52, true, 50)
 add("rumahSakit", "Rumah Sakit", "perumahan", "🏥", 40, 200, true, 45)
 add("damkar", "Pemadam Kebakaran", "perumahan", "🚒", 146, 236, true)
 add("ambulans", "Garasi Ambulans", "perumahan", "🚑", 78, 160, false)
@@ -105,7 +92,7 @@ add("tamanBermain", "Taman Bermain", "perumahan", "🎠", 440, 104, true, 50)
 add("tamanKota", "Taman Kota", "perumahan", "🌳", 716, 55, true, 60)
 add("pasarMalam", "Pasar Malam (buka sore)", "perumahan", "🏮", 668, 122, true, 45)
 add("panggungKonser", "Panggung Konser (malam)", "perumahan", "🎤", 812, 55, true, 45)
-add("arenaLomba","Arena Lomba 17-an (Agustus)", "perumahan", "🇮🇩", 802, 100, false, 45)
+add("arenaLomba", "Arena Lomba 17-an (Agustus)", "perumahan", "🇮🇩", 802, 100, false, 45)
 add("pameranDamkar", "Pameran Alat Pemadam", "perumahan", "🧯", 138, 293, false, 45)
 add("tamanBunga", "Taman Bunga", "perumahan", "🌸", -375, 277, false, 45)
 add("tamanBermainBarat", "Taman Bermain Barat", "perumahan", "🛝", -160, 330, false, 45)

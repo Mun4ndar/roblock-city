@@ -43,6 +43,7 @@ local ORDER = {
 	"ConcertController",
 	"BeachLifeController",
 	"CafeController",
+	"HotelController",
 	"UiStyleController",
 }
 

@@ -42,6 +42,7 @@ local exact: { [string]: string } = {
 	["6 kelas, ruang guru, dan kepala sekolah."] = "6 classrooms, the staff room and the principal's office.",
 	["Toko serba ada: masuk dan belanja."] = "General store: walk in and shop.",
 	["Kafe bebek: pesan kopi dan kue di dalam."] = "Duck cafe: order coffee and cake inside.",
+	["Hotel modern: lobi, lift, dan kamar untuk tidur."] = "Modern hotel: a lobby, a lift and rooms to sleep in.",
 	["Kafe kota: barista, menu, dan kursi nyaman."] = "City cafe: baristas, a menu and comfy seats.",
 }
 
