@@ -12,6 +12,7 @@ local Net = require(Shared:WaitForChild("Net"))
 local Format = require(Shared:WaitForChild("Format"))
 local RetentionConfig = require(Shared:WaitForChild("RetentionConfig"))
 local FashionConfig = require(Shared:WaitForChild("FashionConfig"))
+local OnboardingConfig = require(Shared:WaitForChild("OnboardingConfig"))
 
 local HudController = require(script.Parent:WaitForChild("HudController"))
 local PhoneController = require(script.Parent:WaitForChild("PhoneController"))
@@ -491,7 +492,24 @@ function RetentionController.start()
 			waited += 0.5
 		end
 		task.wait(3)
-		if player:GetAttribute(RetentionConfig.ATTR) ~= nil and not getView().claimedToday then
+		-- Pemain baru: tunggu sampai langkah 1 Misi Pemula selesai supaya tidak langsung disambut menu.
+		local held = false
+		while true do
+			local onboarding = OnboardingConfig.read(player)
+			if onboarding == nil or onboarding.done or onboarding.step >= 1 then
+				break
+			end
+			held = true
+			task.wait(1)
+		end
+		if held then
+			task.wait(6)
+		end
+		if
+			player:GetAttribute(RetentionConfig.ATTR) ~= nil
+			and not getView().claimedToday
+			and not panel.Visible
+		then
 			RetentionController.open("Login")
 		end
 	end)

@@ -115,6 +115,21 @@ FashionConfig.OUTFITS = {
 			rgb(120, 235, 255)
 		),
 	},
+	-- Hadiah gratis Misi Pemula (OnboardingConfig.FINAL_OUTFIT). Bertanda event supaya tidak dijual di toko.
+	{
+		id = "jaket_warga_baru",
+		name = "Jaket Warga Baru",
+		icon = "🧥",
+		price = 0,
+		event = "pemula",
+		look = look(
+			"cap",
+			rgb(40, 170, 160),
+			rgb(40, 170, 160),
+			rgb(255, 255, 255),
+			rgb(255, 184, 0)
+		),
+	},
 	-- Setelan terbatas event (dibeli di panel Hadiah HP saat event berlangsung; lihat RetentionConfig).
 	{
 		id = "baju_merdeka",

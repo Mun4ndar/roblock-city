@@ -38,6 +38,7 @@ Net.Names = table.freeze({
 	FarmPlant = "FarmPlant", -- RemoteFunction: (plotIndex: number, cropId: string) -> { ok, message }
 	FarmHarvest = "FarmHarvest", -- RemoteFunction: (plotIndex: number) -> { ok, message }
 	RetentionAction = "RetentionAction", -- RemoteFunction: ("streak"|"mission"|"buy", id) -> { ok, message }
+	OnboardingAction = "OnboardingAction", -- RemoteFunction: ("teleport", idTempat) -> { ok, message }
 	FarmSell = "FarmSell", -- RemoteFunction: () -> { ok, message } (jual semua hasil panen)
 	HotelLiftMenu = "HotelLiftMenu", -- RemoteEvent: server -> client, (lampuSekarang: number) buka pemilih lantai lift
 	HotelLiftGo = "HotelLiftGo", -- RemoteEvent: client -> server, (lantai: number 1..8; 1 = lobi)

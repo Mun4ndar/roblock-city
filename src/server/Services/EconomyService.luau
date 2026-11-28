@@ -21,6 +21,10 @@ local EconomyService = {}
 
 local MONEY_ATTRIBUTE = "Money"
 
+local spentEvent = Instance.new("BindableEvent")
+-- Terpicu (player, jumlah, reason) setiap pemain membelanjakan uang (dipakai Misi Pemula).
+EconomyService.Spent = spentEvent.Event
+
 local lastRemoteCall: { [Player]: number } = {}
 local notifyRemote: RemoteEvent
 
@@ -85,6 +89,7 @@ function EconomyService.trySpend(player: Player, amount: number, reason: string)
 	end
 	data.money -= amount
 	publish(player, data.money)
+	spentEvent:Fire(player, amount, reason)
 	return true
 end
 

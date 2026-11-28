@@ -30,6 +30,16 @@ export type PlayerData = {
 	business: BusinessData,
 	-- Hadiah login, misi harian/mingguan, dan event (lihat RetentionService).
 	retention: RetentionData?,
+	-- Misi Pemula dan bonus main (lihat OnboardingService).
+	onboarding: OnboardingData?,
+}
+
+export type OnboardingData = {
+	step: number, -- jumlah langkah Misi Pemula yang sudah selesai (0..3)
+	rewarded: boolean, -- setelan gratis sudah diberikan
+	playSeconds: number, -- waktu main yang dihitung untuk bonus main
+	bonusDay: number, -- nomor hari (WIB) hitungan playSeconds
+	bonusClaimed: boolean,
 }
 
 export type RetentionData = {
