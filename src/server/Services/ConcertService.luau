@@ -21,35 +21,14 @@ local rgb = Color3.fromRGB
 
 local folder: Folder
 local performersFolder: Folder
-local music: Sound
 local active = false
-local playlist: { number } = {}
-local trackIndex = 0
 local nextFirework = 0
 local building = false
 
 -- ---------------------------------------------------------------- musik
-local function buildPlaylist()
-	local ids: { number } = {}
-	for _, track in Config.PLAYLIST do
-		table.insert(ids, track.id)
-	end
-	local rng = Random.new()
-	for i = #ids, 2, -1 do
-		local j = rng:NextInteger(1, i)
-		ids[i], ids[j] = ids[j], ids[i]
-	end
-	playlist = ids
-end
-
-local function nextTrack()
-	if #playlist == 0 then
-		return
-	end
-	trackIndex = (trackIndex % #playlist) + 1
-	music.SoundId = "rbxassetid://" .. tostring(playlist[trackIndex])
-	music:Play()
-	Workspace:SetAttribute(Config.ATTR_TRACK, ((Workspace:GetAttribute(Config.ATTR_TRACK) or 0) :: number) + 1)
+-- Lagu dimainkan di tiap client (ConcertController); server hanya memberi benih urutan acak.
+local function newSeed()
+	Workspace:SetAttribute(Config.ATTR_SEED, Random.new():NextInteger(1, 1000000))
 end
 
 -- ---------------------------------------------------------------- penampil NPC
@@ -244,13 +223,12 @@ local function startShow()
 	active = true
 	Workspace:SetAttribute(Config.ATTR_ACTIVE, true)
 	nextFirework = os.clock() + 4
-	nextTrack()
+	newSeed()
 end
 
 local function stopShow()
 	active = false
 	Workspace:SetAttribute(Config.ATTR_ACTIVE, false)
-	music:Stop()
 	clearPerformers()
 end
 
@@ -271,21 +249,6 @@ function ConcertService.init()
 	anchor.Position = Config.world(Config.MUSIC_SPOT.X, Config.MUSIC_SPOT.Y, Config.MUSIC_SPOT.Z)
 	anchor.Parent = folder
 
-	music = Instance.new("Sound")
-	music.Name = "MusikKonser"
-	music.Volume = Config.VOLUME
-	music.RollOffMode = Enum.RollOffMode.Linear
-	music.RollOffMinDistance = Config.HEAR_MIN
-	music.RollOffMaxDistance = Config.HEAR_MAX
-	music.Looped = false
-	music.Parent = anchor
-	music.Ended:Connect(function()
-		if active then
-			nextTrack()
-		end
-	end)
-
-	buildPlaylist()
 	Workspace:SetAttribute(Config.ATTR_ACTIVE, false)
 	Workspace:SetAttribute(Config.ATTR_FIREWORK, 0)
 	Workspace:SetAttribute(Config.ATTR_TRACK, 0)

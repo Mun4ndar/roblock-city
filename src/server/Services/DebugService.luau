@@ -5,6 +5,7 @@
 --   Debug:Invoke("money", player, jumlah)   -- tambah (+) atau kurangi (-) uang
 --   Debug:Invoke("event", "natal")          -- paksa event ("" = kembali ke tanggal asli)
 --   Debug:Invoke("clock", jam)             -- setel jam dunia (0-24)
+--   Debug:Invoke("pemula", player, detik)   -- ulangi Misi Pemula dari awal; detik = waktu main (opsional)
 --   Debug:Invoke("costume", player, "naga_api") -- pakai costume tanpa membeli (uji tampilan)
 --   Debug:Invoke("clear", player, "business") -- kosongkan satu bagian data (terisi ulang saat masuk lagi)
 
@@ -16,6 +17,7 @@ local EconomyService = require(script.Parent:WaitForChild("EconomyService"))
 local TimeService = require(script.Parent:WaitForChild("TimeService"))
 local ShopService = require(script.Parent:WaitForChild("ShopService"))
 local RetentionService = require(script.Parent:WaitForChild("RetentionService"))
+local OnboardingService = require(script.Parent:WaitForChild("OnboardingService"))
 local UniformService = require(script.Parent:WaitForChild("UniformService"))
 
 local DebugService = {}
@@ -101,6 +103,8 @@ local function handle(command: any, a: any, b: any, c: any): any
 			data.gadgets.owned[b] = nil
 		end
 		return true
+	elseif command == "pemula" and typeof(a) == "Instance" and a:IsA("Player") then
+		return OnboardingService.debugReset(a, if type(b) == "number" then b else nil)
 	elseif command == "event" and type(a) == "string" then
 		RetentionService.forceEvent(a)
 		return true

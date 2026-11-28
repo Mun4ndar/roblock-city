@@ -280,6 +280,14 @@ local exact: { [string]: string } = {
 	["Mobil impianmu, siap meluncur."] = "Your dream car, ready to roll.",
 	["MULAI DARI"] = "STARTING FROM",
 	["Skuter Mio Karbu"] = "Mio Karbu Scooter",
+	["SHOWROOM"] = "SHOWROOM",
+	["PALING NGEBUT"] = "THE FASTEST",
+	["PALING HEMAT"] = "BEST VALUE",
+	["Ngebut dengan gaya!"] = "Go fast in style!",
+	["Irit, lincah, siap jalan!"] = "Thrifty, nimble, ready to go!",
+	["PILIHAN KENDARAAN"] = "VEHICLE LINEUP",
+	["Masuk dan pilih sendiri!"] = "Come in and pick yours!",
+	["MASUK"] = "ENTER",
 
 	-- ===== Pasar malam & lomba =====
 	["Bakso Pak Slamet"] = "Pak Slamet's Meatball Soup",

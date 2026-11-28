@@ -2,8 +2,9 @@
 -- BeachLifeController: sisi pemain untuk pantai yang hidup.
 --   * bola voli: digambar lokal dari waktu server (Config.ballAt) saat kamera dekat lapangan, bergerak
 --     mulus antara dua pemain voli NPC tanpa lalu lintas jaringan.
---   * menu Kafe Pantai: dibuka saat pemain menekan "Lihat Menu" pada pelayan. Pesanan dikirim ke server
---     (CafeOrder); server yang memotong uang dan memutar animasi makan/minum.
+--   * menu penjual pantai (Kafe Pantai, Kios Es Krim): dibuka saat pemain menekan "Lihat Menu" pada
+--     penjaganya; server mengirim id penjual dan menu dibangun dari Config.VENDORS. Pesanan dikirim ke
+--     server (CafeOrder: id barang + id penjual); server yang memotong uang dan memutar animasi makan/minum.
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -99,22 +100,21 @@ local function startBall()
 	end)
 end
 
--- ---------------------------------------------------------------- menu kafe
+-- ---------------------------------------------------------------- menu penjual
 
-local gui: ScreenGui? = nil
-local statusLabel: TextLabel? = nil
+type Menu = { screen: ScreenGui, status: TextLabel }
+
+local menus: { [string]: Menu } = {} -- satu jendela per penjual, dibuat saat pertama dibuka
 local pending = false
 
-local function setStatus(text: string, good: boolean)
-	if statusLabel then
-		statusLabel.Text = text
-		statusLabel.TextColor3 = if good then rgb(30, 140, 70) else rgb(200, 70, 60)
-	end
+local function setStatus(menu: Menu, text: string, good: boolean)
+	menu.status.Text = text
+	menu.status.TextColor3 = if good then rgb(30, 140, 70) else rgb(200, 70, 60)
 end
 
 local function closeMenu()
-	if gui then
-		gui.Enabled = false
+	for _, menu in menus do
+		menu.screen.Enabled = false
 	end
 end
 
@@ -124,9 +124,9 @@ local function addCorner(parent: Instance, radius: number)
 	corner.Parent = parent
 end
 
-local function buildMenu(): ScreenGui
+local function buildMenu(vendor: Config.Vendor): Menu
 	local screen = Instance.new("ScreenGui")
-	screen.Name = "KafeMenu"
+	screen.Name = if vendor.id == "cafe" then "KafeMenu" else "KafeMenu_" .. vendor.id
 	screen.ResetOnSpawn = false
 	screen.IgnoreGuiInset = true
 	screen.DisplayOrder = 30
@@ -167,7 +167,7 @@ local function buildMenu(): ScreenGui
 	title.TextScaled = true
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.TextColor3 = rgb(230, 110, 40)
-	title.Text = "🍹 Menu Kafe Pantai"
+	title.Text = vendor.title
 	title.Parent = panel
 
 	local close = Instance.new("TextButton")
@@ -192,7 +192,7 @@ local function buildMenu(): ScreenGui
 	status.TextColor3 = rgb(90, 90, 90)
 	status.Text = "Pilih menu lalu tekan Pesan."
 	status.Parent = panel
-	statusLabel = status
+	local menu: Menu = { screen = screen, status = status }
 
 	local list = Instance.new("ScrollingFrame")
 	list.Size = UDim2.new(1, -32, 1, -112)
@@ -207,7 +207,7 @@ local function buildMenu(): ScreenGui
 	layout.Padding = UDim.new(0, 8)
 	layout.Parent = list
 
-	for _, id in Config.MENU do
+	for _, id in vendor.menu do
 		local item = StoreConfig.get(id)
 		if item == nil then
 			continue
@@ -257,6 +257,7 @@ local function buildMenu(): ScreenGui
 		buy.Font = Enum.Font.FredokaOne
 		buy.TextScaled = true
 		buy.TextColor3 = rgb(255, 255, 255)
+		buy.Name = "Pesan_" .. id
 		buy.Text = `Pesan ${Config.price(id)}`
 		addCorner(buy, 14)
 		buy.Parent = card
@@ -265,34 +266,36 @@ local function buildMenu(): ScreenGui
 				return
 			end
 			pending = true
-			setStatus("Memesan...", true)
+			setStatus(menu, "Memesan...", true)
 			local ok, result = pcall(function(): any
-				return Net.func(Config.ORDER_FUNC):InvokeServer(id)
+				return Net.func(Config.ORDER_FUNC):InvokeServer(id, vendor.id)
 			end)
 			pending = false
 			if ok and type(result) == "table" then
-				setStatus(tostring(result.message), result.ok == true)
+				setStatus(menu, tostring(result.message), result.ok == true)
 				if result.ok == true then
 					task.delay(0.7, closeMenu) -- tutup supaya animasi makan/minum terlihat
 				end
 			else
-				setStatus("Gagal memesan, coba lagi.", false)
+				setStatus(menu, "Gagal memesan, coba lagi.", false)
 			end
 		end)
 	end
 
 	screen.Parent = player:WaitForChild("PlayerGui")
-	return screen
+	return menu
 end
 
-local function openMenu()
-	if gui == nil then
-		gui = buildMenu()
+local function openMenu(vendorId: any)
+	local vendor = Config.vendor(vendorId) or Config.VENDORS.cafe
+	local menu = menus[vendor.id]
+	if menu == nil then
+		menu = buildMenu(vendor)
+		menus[vendor.id] = menu
 	end
-	setStatus("Pilih menu lalu tekan Pesan.", true)
-	if gui then
-		gui.Enabled = true
-	end
+	closeMenu()
+	setStatus(menu, "Pilih menu lalu tekan Pesan.", true)
+	menu.screen.Enabled = true
 end
 
 function BeachLifeController.init() end

@@ -1,6 +1,7 @@
 --!strict
 -- BeachLifeConfig: angka untuk dua pemain voli pantai (lapangan di Map.Beach.Hiasan.LapanganVoli) dan
--- pelayan Kafe Pantai (bar bambu di Map.Beach.KafePantai). Dipakai server (BeachLifeService) dan client
+-- penjual pantai: pelayan Kafe Pantai (bar bambu di Map.Beach.KafePantai) dan penjaga Kios Es Krim
+-- (Map.Beach.Pantai.KiosEsKrim). Dipakai server (BeachLifeService) dan client
 -- (BeachLifeController). Bola voli hanya digambar di client; posisinya dihitung dari waktu server (ballAt),
 -- jadi semua pemain melihat bola yang sama tanpa lalu lintas jaringan.
 
@@ -19,25 +20,65 @@ Config.BALL_SIZE = 1.7
 Config.PLAYER_SCALE = 1.35
 Config.RENDER_RANGE = 230 -- bola hanya digambar bila kamera dekat lapangan
 
--- Pelayan Kafe Pantai
-Config.WAITRESS_POSITION = Vector3.new(1622, 0.1, -300)
-Config.WAITRESS_FACING = Vector3.new(0, 0, -1)
-Config.OPEN_EVENT = "CafeMenuOpen" -- RemoteEvent server -> client
-Config.ORDER_FUNC = "CafeOrder" -- RemoteFunction client -> server (itemId) -> { ok, message }
+-- Penjual di pantai (pelayan Kafe Pantai dan penjaga Kios Es Krim). Satu sistem menu untuk semua penjual:
+-- server mengirim OPEN_EVENT(vendorId), client menampilkan MENU penjual itu, lalu memesan lewat
+-- ORDER_FUNC(itemId, vendorId). Menambah penjual = menambah satu entri di VENDORS.
+Config.OPEN_EVENT = "CafeMenuOpen" -- RemoteEvent server -> client (vendorId)
+Config.ORDER_FUNC = "CafeOrder" -- RemoteFunction client -> server (itemId, vendorId) -> { ok, message }
 Config.ORDER_DISTANCE = 26
-Config.MARKUP = 1.5 -- harga kafe = harga toko x MARKUP
+Config.MARKUP = 1.5 -- harga penjual pantai = harga toko x MARKUP
 
--- Menu kafe: id barang dari StoreConfig (animasi makan/minum sama dengan toko).
-Config.MENU = table.freeze({
-	"es_teh",
-	"kopi_susu",
-	"air_mineral",
-	"susu_kotak",
-	"es_krim",
-	"roti",
-	"onigiri",
-	"cilok",
-})
+export type Vendor = {
+	id: string,
+	title: string, -- judul jendela menu
+	npcName: string, -- nama Model penjaga di Workspace.PantaiHidup
+	objectText: string, -- nama penjaga pada ProximityPrompt
+	position: Vector3, -- tempat penjaga berdiri (y = perkiraan lantai)
+	facing: Vector3, -- arah hadap penjaga (ke pelanggan)
+	menu: { string }, -- id barang dari StoreConfig (animasi makan/minum sama dengan toko)
+}
+
+Config.VENDORS = table.freeze({
+	cafe = table.freeze({
+		id = "cafe",
+		title = "🍹 Menu Kafe Pantai",
+		npcName = "PelayanKafe",
+		objectText = "Pelayan Kafe",
+		position = Vector3.new(1622, 0.1, -300),
+		facing = Vector3.new(0, 0, -1),
+		menu = table.freeze({
+			"es_teh",
+			"kopi_susu",
+			"air_mineral",
+			"susu_kotak",
+			"es_krim",
+			"roti",
+			"onigiri",
+			"cilok",
+		}),
+	}),
+	eskrim = table.freeze({
+		id = "eskrim",
+		title = "🍦 Kios Es Krim",
+		npcName = "PenjagaEsKrim",
+		objectText = "Penjaga Kios Es Krim",
+		position = Vector3.new(1419, 0.6, -300),
+		facing = Vector3.new(-1, 0, 0),
+		menu = table.freeze({
+			"es_krim",
+			"permen",
+			"air_mineral",
+			"susu_kotak",
+		}),
+	}),
+}) :: { [string]: Vendor }
+
+function Config.vendor(id: any): Vendor?
+	if type(id) ~= "string" then
+		return nil
+	end
+	return Config.VENDORS[id]
+end
 
 function Config.price(id: string): number
 	local item = StoreConfig.get(id)
