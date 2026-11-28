@@ -51,14 +51,22 @@ function FashionService.owns(player: Player, id: string): boolean
 	return data ~= nil and getFashion(data).owned[id] == true
 end
 
-function FashionService.grant(player: Player, id: string): boolean
+-- wear = true: langsung dipakai kalau pemain belum memakai setelan lain (hadiah Misi Pemula).
+function FashionService.grant(player: Player, id: string, wear: boolean?): boolean
 	local data = DataService.getData(player)
 	if data == nil or FashionConfig.get(id) == nil then
 		return false
 	end
 	local fashion = getFashion(data)
 	fashion.owned[id] = true
+	local wearNow = wear == true and fashion.active == ""
+	if wearNow then
+		fashion.active = id
+	end
 	publish(player, fashion)
+	if wearNow then
+		UniformService.refresh(player)
+	end
 	return true
 end
 
